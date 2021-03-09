@@ -1,0 +1,3 @@
+http-server@admin:
+    addr: ":8081"
+pprof:
