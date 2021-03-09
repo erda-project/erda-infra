@@ -11,9 +11,9 @@ import (
 	"os"
 
 	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/httpserver"
 	_ "github.com/erda-project/erda-infra/providers/pprof"
-	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
 type define struct{}
@@ -82,7 +82,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	})
 
 	// 请求参数为 结构体
-	routes.POST("/hello/struct/ptr", func(resp http.ResponseWriter, req *http.Request,
+	routes.POST("/hello/struct/ptr/:name", func(resp http.ResponseWriter, req *http.Request,
 		body *struct {
 			Name    string `param:"name"`
 			Message string `json:"message" form:"message" query:"message" validate:"required"`
