@@ -1,0 +1,4 @@
+hello:
+i18n:
+    files:
+        - "hello.yaml"
