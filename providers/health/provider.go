@@ -4,7 +4,7 @@
 package health
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"sort"
 
@@ -21,10 +21,13 @@ type Interface interface {
 }
 
 type config struct {
-	Path        []string `file:"path" default:"/health" desc:"http path"`
-	Status      int      `file:"status" default:"200" desc:"http response status"`
-	Body        string   `file:"body" default:"{\"success\":true,\"data\":\"ok\"}" desc:"http response body"`
-	ContentType string   `file:"content_type" default:"application/json" desc:"http response Content-Type"`
+	Path           []string `file:"path" default:"/health" desc:"http path"`
+	HealthStatus   int      `file:"health_status" default:"200" desc:"http response status if health"`
+	UnhealthStatus int      `file:"unhealth_status" default:"503" desc:"http response status if unhealth"`
+	HealthBody     string   `file:"health_body" desc:"http response body if health"`
+	UnhealthBody   string   `file:"unhealth_body" desc:"http response body if unhealth"`
+	ContentType    string   `file:"content_type" default:"application/json" desc:"http response Content-Type"`
+	AbortOnError   bool     `file:"abort_on_error"`
 }
 
 type define struct{}
@@ -42,10 +45,11 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type provider struct {
-	C        *config
-	names    []string
-	checkers map[string][]Checker
-	body     []byte
+	C            *config
+	names        []string
+	checkers     map[string][]Checker
+	healthBody   []byte
+	unhealthBody []byte
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
@@ -53,22 +57,46 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	for _, path := range p.C.Path {
 		routes.GET(path, p.handler)
 	}
-	p.body = []byte(p.C.Body)
+	p.healthBody = []byte(p.C.HealthBody)
+	p.unhealthBody = []byte(p.C.UnhealthBody)
 	return nil
 }
 
 func (p *provider) handler(resp http.ResponseWriter, req *http.Request) error {
+	status := make(map[string]interface{})
+	health := true
 	for _, key := range p.names {
+		var errors []interface{}
 		for _, checker := range p.checkers[key] {
 			err := checker()
 			if err != nil {
-				return fmt.Errorf("%s is unhealthy: %s", key, err)
+				errors = append(errors, err.Error())
+				health = false
+				if p.C.AbortOnError {
+					break
+				}
 			}
 		}
+		status[key] = errors
 	}
 	resp.Header().Set("Content-Type", p.C.ContentType)
-	resp.WriteHeader(p.C.Status)
-	resp.Write(p.body)
+	var body []byte
+	if health {
+		resp.WriteHeader(p.C.HealthStatus)
+		body = p.healthBody
+	} else {
+		resp.WriteHeader(p.C.UnhealthStatus)
+		body = p.unhealthBody
+	}
+	if len(body) > 0 {
+		resp.Write(body)
+	} else {
+		byts, _ := json.Marshal(map[string]interface{}{
+			"health":   health,
+			"checkers": status,
+		})
+		resp.Write(byts)
+	}
 	return nil
 }
 
