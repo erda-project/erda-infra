@@ -19,12 +19,14 @@ import (
 
 // Translator .
 type Translator interface {
+	Get(lang LanguageCodes, key, def string) string
 	Text(lang LanguageCodes, key string) string
 	Sprintf(lang LanguageCodes, key string, args ...interface{}) string
 }
 
 // I18n .
 type I18n interface {
+	Get(namespace string, lang LanguageCodes, key, def string) string
 	Text(namespace string, lang LanguageCodes, key string) string
 	Sprintf(namespace string, lang LanguageCodes, key string, args ...interface{}) string
 	Translator(namespace string) Translator
@@ -182,6 +184,10 @@ func (p *provider) Sprintf(namespace string, lang LanguageCodes, key string, arg
 	return p.Translator(namespace).Sprintf(lang, key, args...)
 }
 
+func (p *provider) Get(namespace string, lang LanguageCodes, key, def string) string {
+	return p.Translator(namespace).Get(lang, key, def)
+}
+
 func (p *provider) Translator(namespace string) Translator {
 	return &translator{
 		common: p.common,
@@ -204,6 +210,14 @@ func (t *translator) Text(lang LanguageCodes, key string) string {
 
 func (t *translator) Sprintf(lang LanguageCodes, key string, args ...interface{}) string {
 	return fmt.Sprintf(t.escape(lang, key), args...)
+}
+
+func (t *translator) Get(lang LanguageCodes, key, def string) string {
+	text := t.getText(lang, key)
+	if len(text) > 0 {
+		return text
+	}
+	return def
 }
 
 func (t *translator) getText(langs LanguageCodes, key string) string {
