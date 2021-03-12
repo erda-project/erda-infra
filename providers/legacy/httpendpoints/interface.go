@@ -19,7 +19,7 @@ type Endpoint struct {
 
 // Interface .
 type Interface interface {
-	RegisterEndpoint(endpoints []Endpoint)
+	RegisterEndpoints(endpoints []Endpoint)
 	Router() *mux.Router
 }
 

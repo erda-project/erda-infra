@@ -45,7 +45,7 @@ type provider struct {
 func (p *provider) Init(ctx servicehub.Context) error {
 	// register some apis
 	server := ctx.Service("http-endpoints").(httpendpoints.Interface)
-	server.RegisterEndpoint([]httpendpoints.Endpoint{
+	server.RegisterEndpoints([]httpendpoints.Endpoint{
 		httpendpoints.Endpoint{
 			Path:    "/hello",
 			Method:  http.MethodGet,

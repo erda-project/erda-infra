@@ -28,8 +28,8 @@ const (
 	TraceID = "dice-trace-id"
 )
 
-// RegisterEndpoint match URL path to corresponding handler
-func (p *provider) RegisterEndpoint(endpoints []Endpoint) {
+// RegisterEndpoints match URL path to corresponding handler
+func (p *provider) RegisterEndpoints(endpoints []Endpoint) {
 	for _, ep := range endpoints {
 		if ep.WriterHandler != nil {
 			p.router.Path(ep.Path).Methods(ep.Method).HandlerFunc(p.internalWriterHandler(ep.WriterHandler))
