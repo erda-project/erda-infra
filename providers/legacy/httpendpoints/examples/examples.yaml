@@ -1,0 +1,7 @@
+http-endpoints:
+    addr: ":8080"
+
+example:
+i18n:
+    common:
+        - httpendpoints.yml
