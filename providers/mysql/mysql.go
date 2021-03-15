@@ -5,6 +5,7 @@ package mysql
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/erda-project/erda-infra/base/logs"
@@ -13,10 +14,15 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// MySQL .
-type MySQL interface {
+// Interface .
+type Interface interface {
 	DB() *gorm.DB
 }
+
+var (
+	interfaceType = reflect.TypeOf((*Interface)(nil)).Elem()
+	gormType      = reflect.TypeOf((*gorm.DB)(nil))
+)
 
 type config struct {
 	MySQLURL          string        `file:"url" env:"MYSQL_URL"`
@@ -40,7 +46,12 @@ func (c *config) url() string {
 
 type define struct{}
 
-func (d *define) Service() []string   { return []string{"mysql"} }
+func (d *define) Service() []string { return []string{"mysql", "mysql-client"} }
+func (d *define) Types() []reflect.Type {
+	return []reflect.Type{
+		interfaceType, gormType,
+	}
+}
 func (d *define) Summary() string     { return "mysql" }
 func (d *define) Description() string { return d.Summary() }
 func (d *define) Config() interface{} { return &config{} }
@@ -73,6 +84,13 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func (p *provider) DB() *gorm.DB { return p.db }
+
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
+	if ctx.Service() == "mysql-client" || ctx.Type() == gormType {
+		return p.db
+	}
+	return p
+}
 
 func init() {
 	servicehub.RegisterProvider("mysql", &define{})

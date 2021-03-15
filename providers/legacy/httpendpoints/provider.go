@@ -2,6 +2,7 @@ package httpendpoints
 
 import (
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/erda-project/erda-infra/base/logs"
@@ -12,7 +13,10 @@ import (
 
 type define struct{}
 
-func (d *define) Service() []string      { return []string{"http-endpoints"} }
+func (d *define) Service() []string { return []string{"http-endpoints"} }
+func (d *define) Types() []reflect.Type {
+	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
+}
 func (d *define) Dependencies() []string { return []string{"i18n"} }
 func (d *define) Description() string    { return "http endpoints" }
 func (d *define) Config() interface{} {

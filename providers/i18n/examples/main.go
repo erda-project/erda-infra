@@ -24,6 +24,7 @@ func (d *define) Creator() servicehub.Creator {
 
 type provider struct {
 	L logs.Logger
+	T i18n.Translator `translator:"hello"`
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
@@ -33,6 +34,9 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	}
 	i := ctx.Service("i18n").(i18n.I18n)
 	text := i.Text("hello", langs, "name")
+	p.L.Info(text)
+
+	text = p.T.Text(langs, "name")
 	p.L.Info(text)
 	return nil
 }

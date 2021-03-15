@@ -5,6 +5,7 @@ package httpserver
 
 import (
 	"net/http"
+	"reflect"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -20,26 +21,27 @@ type config struct {
 	AllowCORS   bool   `file:"allow_cors" default:"false" desc:"allow cors"`
 }
 
-type providerDefine struct{}
+type define struct{}
 
-func (d *providerDefine) Service() []string {
-	return []string{"http-server", "api-server"}
+func (d *define) Service() []string {
+	return []string{"http-server", "http-routes", "http-router"}
 }
-
-func (d *providerDefine) Summary() string {
-	return "http server"
+func (d *define) Types() []reflect.Type {
+	return []reflect.Type{reflect.TypeOf((*Router)(nil)).Elem()}
 }
-
-func (d *providerDefine) Description() string {
-	return d.Summary()
-}
-
-func (d *providerDefine) Creator() servicehub.Creator {
-	return newProvider
-}
-
-func (d *providerDefine) Config() interface{} {
-	return &config{}
+func (d *define) Summary() string     { return "http server" }
+func (d *define) Description() string { return d.Summary() }
+func (d *define) Config() interface{} { return &config{} }
+func (d *define) Creator() servicehub.Creator {
+	return func() servicehub.Provider {
+		p := &provider{
+			router: &router{
+				routeMap: make(map[routeKey]*route),
+			},
+		}
+		p.router.p = p
+		return p
+	}
 }
 
 type provider struct {
@@ -47,16 +49,6 @@ type provider struct {
 	Logger logs.Logger
 	server *echo.Echo
 	router *router
-}
-
-func newProvider() servicehub.Provider {
-	p := &provider{
-		router: &router{
-			routeMap: make(map[routeKey]*route),
-		},
-	}
-	p.router.p = p
-	return p
 }
 
 // Init .
@@ -116,16 +108,16 @@ func (p *provider) Close() error {
 }
 
 // Provide .
-func (p *provider) Provide(name string, args ...interface{}) interface{} {
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	interceptors := getInterceptors(args)
 	return Router(&router{
 		p:            p,
 		routeMap:     p.router.routeMap,
-		group:        name,
+		group:        ctx.Caller(),
 		interceptors: interceptors,
 	})
 }
 
 func init() {
-	servicehub.RegisterProvider("http-server", &providerDefine{})
+	servicehub.RegisterProvider("http-server", &define{})
 }

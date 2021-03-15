@@ -8,14 +8,14 @@ import (
 	"net/http/pprof"
 
 	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/providers/httpserver"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/httpserver"
 )
 
 type define struct{}
 
 func (d *define) Service() []string      { return []string{"pprof"} }
-func (d *define) Dependencies() []string { return []string{"http-server@admin"} }
+func (d *define) Dependencies() []string { return []string{"http-server"} }
 func (d *define) Summary() string        { return "start pprof http server" }
 func (d *define) Description() string    { return d.Summary() }
 func (d *define) Creator() servicehub.Creator {
@@ -26,11 +26,6 @@ func (d *define) Creator() servicehub.Creator {
 type provider struct {
 	Logger logs.Logger
 	server *http.Server
-}
-
-// New .
-func newProvider() servicehub.Provider {
-	return &provider{}
 }
 
 // Init .
