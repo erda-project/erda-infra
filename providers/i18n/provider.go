@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -32,6 +33,11 @@ type I18n interface {
 	Translator(namespace string) Translator
 }
 
+var (
+	i18nType       = reflect.TypeOf((*I18n)(nil)).Elem()
+	translatorType = reflect.TypeOf((*Translator)(nil)).Elem()
+)
+
 // NopTranslator .
 type NopTranslator struct{}
 
@@ -45,7 +51,10 @@ func (t *NopTranslator) Sprintf(lang LanguageCodes, key string, args ...interfac
 
 type define struct{}
 
-func (d *define) Service() []string   { return []string{"i18n"} }
+func (d *define) Service() []string { return []string{"i18n"} }
+func (d *define) Types() []reflect.Type {
+	return []reflect.Type{i18nType, translatorType}
+}
 func (d *define) Description() string { return "i18n" }
 func (d *define) Config() interface{} { return &config{} }
 func (d *define) Creator() servicehub.Creator {
@@ -193,6 +202,17 @@ func (p *provider) Translator(namespace string) Translator {
 		common: p.common,
 		dic:    p.dic[namespace],
 	}
+}
+
+func (p *provider) Provide(ctx servicehub.DependencyContext, options ...interface{}) interface{} {
+	trans, ok := ctx.Tags().Lookup("translator")
+	if ok {
+		return p.Translator(trans)
+	}
+	if ctx.Type() == translatorType {
+		return p.Translator("")
+	}
+	return p
 }
 
 type translator struct {

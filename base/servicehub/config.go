@@ -118,10 +118,11 @@ func (h *Hub) doLoadProviders(config map[string]interface{}, filter string) erro
 }
 
 func (h *Hub) addProvider(key string, cfg interface{}) error {
-	name := key
+	name, label := key, ""
 	idx := strings.Index(key, "@")
 	if idx > 0 {
 		name = key[0:idx]
+		label = key[idx+1:]
 	}
 	if cfg != nil {
 		if v, ok := cfg.(map[string]interface{}); ok {
@@ -145,6 +146,6 @@ func (h *Hub) addProvider(key string, cfg interface{}) error {
 		return fmt.Errorf("provider %s not exist", name)
 	}
 	provider := define.Creator()()
-	h.providersMap[name] = append(h.providersMap[name], &providerContext{h, key, name, cfg, provider, define})
+	h.providersMap[name] = append(h.providersMap[name], &providerContext{h, key, label, name, cfg, provider, define})
 	return nil
 }

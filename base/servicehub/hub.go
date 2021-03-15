@@ -4,6 +4,7 @@
 package servicehub
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -28,13 +29,15 @@ import (
 
 // Hub .
 type Hub struct {
-	logger       logs.Logger
-	providersMap map[string][]*providerContext
-	providers    []*providerContext
-	servicesMap  map[string][]*providerContext
-	lock         sync.RWMutex
+	logger        logs.Logger
+	providersMap  map[string][]*providerContext
+	providers     []*providerContext
+	servicesMap   map[string][]*providerContext
+	servicesTypes map[reflect.Type][]*providerContext
+	lock          sync.RWMutex
 
 	started bool
+	cancel  func()
 	wg      sync.WaitGroup
 
 	listeners []Listener
@@ -132,16 +135,27 @@ func (h *Hub) Init(config map[string]interface{}, flags *pflag.FlagSet, args []s
 
 func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (graph.Graph, error) {
 	services := map[string][]*providerContext{}
+	types := map[reflect.Type][]*providerContext{}
 	for _, p := range providersMap {
-		service := p[0].define.Service()
+		d := p[0].define
+		service := d.Service()
 		for _, s := range service {
 			if exist, ok := services[s]; ok {
 				return nil, fmt.Errorf("service %s conflict between %s and %s", s, exist[0].name, p[0].name)
 			}
 			services[s] = p
 		}
+		if ts, ok := d.(ServiceTypes); ok {
+			for _, t := range ts.Types() {
+				if exist, ok := types[t]; ok {
+					return nil, fmt.Errorf("service type %s conflict between %s and %s", t, exist[0].name, p[0].name)
+				}
+				types[t] = p
+			}
+		}
 	}
 	h.servicesMap = services
+	h.servicesTypes = types
 	var depGraph graph.Graph
 	for name, p := range providersMap {
 		depends := p[0].Dependencies()
@@ -149,16 +163,15 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 	loop:
 		for _, service := range depends {
 			name := service
-			var key string
+			var label string
 			idx := strings.Index(service, "@")
 			if idx > 0 {
-				key = service
-				name = service[0:idx]
+				name, label = service[0:idx], service[idx+1:]
 			}
 			if deps, ok := services[name]; ok {
-				if len(key) > 0 {
+				if len(label) > 0 {
 					for _, dep := range deps {
-						if dep.key == key {
+						if dep.label == label {
 							providers[dep.name] = dep
 							continue loop
 						}
@@ -199,6 +212,8 @@ func (h *Hub) StartWithSignal() error {
 // Start .
 func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.lock.Lock()
+	ctx, cancel := context.WithCancel(context.Background())
+	h.cancel = cancel
 	ch := make(chan error, len(h.providers))
 	var num int
 	for _, item := range h.providers {
@@ -212,7 +227,25 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				h.logger.Debugf("provider %s starting ...", key)
 				err := provider.Start()
 				if err != nil {
-					h.logger.Errorf("fail to exit provider %s: %s", key, err)
+					h.logger.Errorf("fail to start provider %s: %s", key, err)
+				} else {
+					h.logger.Infof("provider %s closed", key)
+				}
+				h.wg.Done()
+				ch <- err
+			}(item.key, item.name, runner)
+		}
+		if runner, ok := item.provider.(ProviderRunnerWithContext); ok {
+			num++
+			h.wg.Add(1)
+			go func(key, name string, provider ProviderRunnerWithContext) {
+				if key != name {
+					key = fmt.Sprintf("%s (%s)", key, name)
+				}
+				h.logger.Debugf("provider %s running ...", key)
+				err := provider.Run(ctx)
+				if err != nil {
+					h.logger.Errorf("fail to run provider %s: %s", key, err)
 				} else {
 					h.logger.Infof("provider %s exit", key)
 				}
@@ -276,6 +309,7 @@ func (h *Hub) Close() error {
 			}
 		}
 	}
+	h.cancel()
 	h.wg.Wait()
 	h.started = false
 	h.lock.Unlock()
@@ -285,6 +319,7 @@ func (h *Hub) Close() error {
 type providerContext struct {
 	hub      *Hub
 	key      string
+	label    string
 	name     string
 	cfg      interface{}
 	provider Provider
@@ -339,6 +374,9 @@ func (c *providerContext) Init() (err error) {
 		if typ.Kind() == reflect.Struct {
 			fields := typ.NumField()
 			for i := 0; i < fields; i++ {
+				if !value.Field(i).CanSet() {
+					continue
+				}
 				field := typ.Field(i)
 				if field.Type == loggerType {
 					logger := c.Logger()
@@ -347,6 +385,53 @@ func (c *providerContext) Init() (err error) {
 				if cfgValue != nil && field.Type == cfgType {
 					value.Field(i).Set(*cfgValue)
 				}
+				service := field.Tag.Get("service")
+				if len(service) <= 0 {
+					service = field.Tag.Get("autowired")
+				}
+				if service == "-" {
+					continue
+				}
+				dc := newDependencyContext(
+					service,
+					c.name,
+					field.Type,
+					field.Tag,
+				)
+				var instance interface{}
+				if len(service) > 0 {
+					instance = c.hub.getService(dc)
+					if instance == nil {
+						return fmt.Errorf("not found service %q", service)
+					}
+				} else {
+					var pc *providerContext
+					providers := c.hub.servicesTypes[field.Type]
+					for _, item := range providers {
+						if item.key == item.name {
+							pc = item
+							break
+						}
+					}
+					if pc == nil && len(providers) > 0 {
+						pc = providers[0]
+					}
+					if pc != nil {
+						provider := pc.provider
+						if prod, ok := provider.(DependencyProvider); ok {
+							instance = prod.Provide(dc)
+						} else {
+							instance = provider
+						}
+					}
+				}
+				if instance == nil {
+					continue
+				}
+				if !reflect.TypeOf(instance).AssignableTo(field.Type) {
+					return fmt.Errorf("service %q not implement %s", service, field.Type)
+				}
+				value.Field(i).Set(reflect.ValueOf(instance))
 			}
 		}
 	}
@@ -401,30 +486,66 @@ func (c *providerContext) Config() interface{} {
 	return c.cfg
 }
 
-// Provider .
+// Service .
 func (c *providerContext) Service(name string, options ...interface{}) interface{} {
-	return c.hub.getService(c.name, name, options...)
+	return c.hub.getService(newDependencyContext(
+		name,
+		c.name,
+		nil,
+		reflect.StructTag(""),
+	), options...)
+}
+
+// dependencyContext .
+type dependencyContext struct {
+	typ     reflect.Type
+	tags    reflect.StructTag
+	service string
+	key     string
+	label   string
+	caller  string
+}
+
+func (dc *dependencyContext) Type() reflect.Type      { return dc.typ }
+func (dc *dependencyContext) Tags() reflect.StructTag { return dc.tags }
+func (dc *dependencyContext) Service() string         { return dc.service }
+func (dc *dependencyContext) Key() string             { return dc.key }
+func (dc *dependencyContext) Label() string           { return dc.label }
+func (dc *dependencyContext) Caller() string          { return dc.caller }
+
+func newDependencyContext(service, caller string, typ reflect.Type, tags reflect.StructTag) *dependencyContext {
+	dc := &dependencyContext{
+		typ:     typ,
+		tags:    tags,
+		key:     service,
+		service: service,
+		caller:  caller,
+	}
+	idx := strings.Index(service, "@")
+	if idx > 0 {
+		dc.service = service[0:idx]
+		dc.label = service[idx+1:]
+	}
+	return dc
 }
 
 // Service .
 func (h *Hub) Service(name string, options ...interface{}) interface{} {
-	return h.getService("", name, options...)
+	return h.getService(newDependencyContext(
+		name,
+		"",
+		nil,
+		reflect.StructTag(""),
+	), options...)
 }
 
-// Service .
-func (h *Hub) getService(operator, name string, options ...interface{}) interface{} {
-	var key string
-	idx := strings.Index(name, "@")
-	if idx > 0 {
-		key = name
-		name = name[0:idx]
-	}
-	if providers, ok := h.servicesMap[name]; ok {
+func (h *Hub) getService(dc DependencyContext, options ...interface{}) interface{} {
+	if providers, ok := h.servicesMap[dc.Service()]; ok {
 		if len(providers) > 0 {
 			var pc *providerContext
-			if len(key) > 0 {
+			if len(dc.Label()) > 0 {
 				for _, item := range providers {
-					if item.key == key {
+					if item.label == dc.Label() {
 						pc = item
 						break
 					}
@@ -445,7 +566,7 @@ func (h *Hub) getService(operator, name string, options ...interface{}) interfac
 			}
 			provider := pc.provider
 			if prod, ok := provider.(DependencyProvider); ok {
-				return prod.Provide(operator, options...)
+				return prod.Provide(dc, options...)
 			}
 			return provider
 		}

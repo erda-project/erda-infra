@@ -6,4 +6,5 @@ import (
 	_ "github.com/erda-project/erda-infra/providers/i18n"       //
 	_ "github.com/erda-project/erda-infra/providers/mysql"      //
 	_ "github.com/erda-project/erda-infra/providers/pprof"      //
+	_ "github.com/erda-project/erda-infra/providers/redis"      //
 )

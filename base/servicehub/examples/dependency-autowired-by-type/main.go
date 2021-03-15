@@ -4,11 +4,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"time"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/base/servicehub/examples/dependency-autowired-by-type/dependency"
 )
 
 // define Represents the definition of provider and provides some information
@@ -18,7 +19,7 @@ type define struct{}
 func (d *define) Service() []string { return []string{"hello"} }
 
 // Declare which services the provider depends on
-func (d *define) Dependencies() []string { return []string{} }
+func (d *define) Dependencies() []string { return []string{"example-dependency"} }
 
 // Describe information about this provider
 func (d *define) Description() string { return "hello for example" }
@@ -34,47 +35,22 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type config struct {
-	Message   string    `file:"message" flag:"msg" default:"hi" desc:"message to show"`
-	SubConfig subConfig `file:"sub"`
-}
-
-type subConfig struct {
-	Name string `file:"name" flag:"hello_name" default:"recallsong" desc:"name to show"`
+	Name string `file:"name" default:"recallsong"`
 }
 
 type provider struct {
-	C       *config
-	L       logs.Logger
-	closeCh chan struct{}
+	C *config
+	L logs.Logger
+	D dependency.Interface
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.L.Info("message: ", p.C.Message)
-	p.closeCh = make(chan struct{})
-	return nil
-}
-
-func (p *provider) Start() error {
-	p.L.Info("now hello provider is running...")
-	tick := time.Tick(10 * time.Second)
-	for {
-		select {
-		case <-tick:
-			p.L.Info("do something...")
-		case <-p.closeCh:
-			return nil
-		}
-	}
-}
-
-func (p *provider) Close() error {
-	p.L.Info("now hello provider is closing...")
-	close(p.closeCh)
+	fmt.Println(p.D.Hello(p.C.Name))
 	return nil
 }
 
 func init() {
-	servicehub.RegisterProvider("hello", &define{})
+	servicehub.RegisterProvider("hello-provider", &define{})
 }
 
 func main() {

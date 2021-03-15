@@ -4,8 +4,10 @@
 package servicehub
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"reflect"
 
 	"github.com/erda-project/erda-infra/base/logs"
 )
@@ -17,6 +19,11 @@ type Creator func() Provider
 type ProviderDefine interface {
 	Service() []string
 	Creator() Creator
+}
+
+// ServiceTypes .
+type ServiceTypes interface {
+	Types() []reflect.Type
 }
 
 // ProviderUsageSummary .
@@ -68,12 +75,27 @@ type ProviderRunner interface {
 	Close() error
 }
 
+// ProviderRunnerWithContext .
+type ProviderRunnerWithContext interface {
+	Run(context.Context) error
+}
+
 // ProviderInitializer .
 type ProviderInitializer interface {
 	Init(ctx Context) error
 }
 
+// DependencyContext .
+type DependencyContext interface {
+	Type() reflect.Type
+	Tags() reflect.StructTag
+	Service() string
+	Key() string
+	Label() string
+	Caller() string
+}
+
 // DependencyProvider .
 type DependencyProvider interface {
-	Provide(name string, options ...interface{}) interface{}
+	Provide(ctx DependencyContext, options ...interface{}) interface{}
 }

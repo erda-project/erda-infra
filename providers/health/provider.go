@@ -6,6 +6,7 @@ package health
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 	"sort"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -32,7 +33,10 @@ type config struct {
 
 type define struct{}
 
-func (d *define) Service() []string      { return []string{"health", "health-check"} }
+func (d *define) Service() []string { return []string{"health", "health-checker"} }
+func (d *define) Types() []reflect.Type {
+	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
+}
 func (d *define) Dependencies() []string { return []string{"http-server"} }
 func (d *define) Description() string    { return "http health check" }
 func (d *define) Config() interface{}    { return &config{} }
@@ -101,9 +105,9 @@ func (p *provider) handler(resp http.ResponseWriter, req *http.Request) error {
 }
 
 // Provide .
-func (p *provider) Provide(name string, args ...interface{}) interface{} {
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	return &service{
-		name: name,
+		name: ctx.Caller(),
 		p:    p,
 	}
 }
