@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/mysql"
-	"github.com/jinzhu/gorm"
+	"github.com/erda-project/erda-infra/providers/elasticsearch"
+	"github.com/olivere/elastic"
 )
 
 // define Represents the definition of provider and provides some information
@@ -21,7 +21,7 @@ type define struct{}
 func (d *define) Service() []string { return []string{"example"} }
 
 // Declare which services the provider depends on
-func (d *define) Dependencies() []string { return []string{"mysql"} }
+func (d *define) Dependencies() []string { return []string{"elasticsearch"} }
 
 // Describe information about this provider
 func (d *define) Description() string { return "example" }
@@ -39,26 +39,22 @@ func (d *define) Creator() servicehub.Creator {
 type config struct{}
 
 type provider struct {
-	C     *config         // auto inject this field
-	L     logs.Logger     // auto inject this field
-	DB    *gorm.DB        // autowired
-	MySQL mysql.Interface // autowired
+	C      *config
+	ES     elasticsearch.Interface // autowired
+	Client *elastic.Client         // autowired
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	fmt.Println(p.DB)
-	fmt.Println(p.MySQL)
-	// do something
-	return nil
-}
-
-func (p *provider) Run(ctx context.Context) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		}
+	context, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	resp, err := p.Client.CatIndices().Do(context)
+	if err != nil {
+		return err
 	}
+	for _, item := range resp {
+		fmt.Println(item.Index)
+	}
+	return nil
 }
 
 func init() {
@@ -69,3 +65,10 @@ func main() {
 	hub := servicehub.New()
 	hub.Run("examples", "", os.Args...)
 }
+
+// OUTPUT:
+// NFO[2021-03-18 16:14:17.725] provider elasticsearch initialized
+// spot-elasticsearch_http-full_cluster-1615939200000
+// spot-elasticsearch_transport-full_cluster-1615766400000
+// INFO[2021-03-18 16:14:19.802] provider example (depends [elasticsearch]) initialized
+// INFO[2021-03-18 16:14:19.802] signals to quit:[hangup interrupt terminated quit]

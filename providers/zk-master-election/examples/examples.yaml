@@ -1,0 +1,8 @@
+zookeeper:
+    addrs: "localhost1:2181,localhost2:2181"
+
+zk-master-election:
+    root_path: "/example"
+    master_node: "master-node-key"
+
+example:

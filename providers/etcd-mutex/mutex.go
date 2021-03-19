@@ -1,0 +1,169 @@
+// Author: recallsong
+// Email: songruiguo@qq.com
+
+package mutex
+
+import (
+	"context"
+	"path/filepath"
+	"reflect"
+	"sync"
+	"time"
+
+	"github.com/coreos/etcd/clientv3/concurrency"
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/etcd"
+)
+
+// Mutex .
+type Mutex interface {
+	Lock(ctx context.Context) error
+	Unlock(ctx context.Context) error
+	Close() error
+}
+
+// Interface .
+type Interface interface {
+	NewWithTTL(ctx context.Context, key string, ttl time.Duration) (Mutex, error)
+	New(ctx context.Context, key string) (Mutex, error)
+}
+
+var mutexType = reflect.TypeOf((*Mutex)(nil)).Elem()
+
+type define struct{}
+
+func (d *define) Service() []string      { return []string{"etcd-mutex"} }
+func (d *define) Dependencies() []string { return []string{"etcd"} }
+func (d *define) Types() []reflect.Type {
+	return []reflect.Type{
+		reflect.TypeOf((*Interface)(nil)).Elem(),
+		mutexType,
+	}
+}
+func (d *define) Description() string { return "distributed lock implemented by etcd" }
+func (d *define) Config() interface{} { return &config{} }
+func (d *define) Creator() servicehub.Creator {
+	return func() servicehub.Provider {
+		return &provider{
+			instances:   make(map[string]Mutex),
+			inProcMutex: &inProcMutex{},
+		}
+	}
+}
+
+type config struct {
+	RootPath   string `file:"root_path"`
+	DefaultKey string `file:"default_key"`
+}
+
+type provider struct {
+	C           *config
+	L           logs.Logger
+	etcd        etcd.Interface
+	instances   map[string]Mutex
+	inProcMutex *inProcMutex
+}
+
+// Init .
+func (p *provider) Init(ctx servicehub.Context) error {
+	p.etcd = ctx.Service("etcd").(etcd.Interface)
+	p.C.RootPath = filepath.Clean("/" + p.C.RootPath)
+	return nil
+}
+
+// NewWithTTL .
+func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration) (Mutex, error) {
+	opts := []concurrency.SessionOption{concurrency.WithContext(ctx)}
+	seconds := int(ttl.Seconds())
+	if seconds > 0 {
+		opts = append(opts, concurrency.WithTTL(seconds))
+	}
+	session, err := concurrency.NewSession(p.etcd.Client(), opts...)
+	if err != nil {
+		return nil, err
+	}
+	key = filepath.Clean(filepath.Join(p.C.RootPath, key))
+	mutex := concurrency.NewMutex(session, key)
+	return &etcdMutex{
+		log: p.L,
+		key: key,
+		s:   session,
+		mu:  mutex,
+	}, nil
+}
+
+func (p *provider) New(ctx context.Context, key string) (Mutex, error) {
+	return p.NewWithTTL(ctx, key, time.Duration(0))
+}
+
+// Provide .
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
+	if ctx.Type() == mutexType {
+		key := ctx.Tags().Get("mutex-key")
+		if len(key) < 0 {
+			key = p.C.DefaultKey
+		}
+		if len(key) < 0 {
+			return p.inProcMutex
+		}
+		m, err := p.New(context.Background(), key)
+		if err != nil {
+			p.L.Errorf("fail to create mutex for key: %q", key)
+		}
+		return m
+	}
+	return p
+}
+
+type etcdMutex struct {
+	log  logs.Logger
+	key  string
+	s    *concurrency.Session
+	mu   *concurrency.Mutex
+	lock sync.Mutex
+}
+
+func (m *etcdMutex) Lock(ctx context.Context) error {
+	m.lock.Lock()
+	err := m.mu.Lock(ctx)
+	if err == nil {
+		m.log.Debugf("locked key %q", m.key)
+	} else {
+		m.log.Errorf("fail to lock key %q", m.key)
+	}
+	return err
+}
+
+func (m *etcdMutex) Unlock(ctx context.Context) error {
+	m.lock.Unlock()
+	err := m.mu.Unlock(ctx)
+	if err == nil {
+		m.log.Debugf("unlocked key %q", m.key)
+	} else {
+		m.log.Errorf("fail to unlock key %q", m.key)
+	}
+	return err
+}
+
+func (m *etcdMutex) Close() error { return m.s.Close() }
+
+type inProcMutex struct {
+	lock sync.Mutex
+}
+
+func (m *inProcMutex) Lock(ctx context.Context) error {
+	m.lock.Lock()
+	return nil
+}
+
+func (m *inProcMutex) Unlock(ctx context.Context) error {
+	m.lock.Unlock()
+	return nil
+}
+
+func (m *inProcMutex) Close() error { return nil }
+
+func init() {
+	servicehub.RegisterProvider("etcd-mutex", &define{})
+}

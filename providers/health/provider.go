@@ -4,6 +4,7 @@
 package health
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"reflect"
@@ -14,7 +15,7 @@ import (
 )
 
 // Checker .
-type Checker func() error
+type Checker func(context.Context) error
 
 // Interface .
 type Interface interface {
@@ -72,7 +73,7 @@ func (p *provider) handler(resp http.ResponseWriter, req *http.Request) error {
 	for _, key := range p.names {
 		var errors []interface{}
 		for _, checker := range p.checkers[key] {
-			err := checker()
+			err := checker(context.Background())
 			if err != nil {
 				errors = append(errors, err.Error())
 				health = false

@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -34,7 +35,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	return nil
 }
 
-func (p *provider) HealthCheck() error {
+func (p *provider) HealthCheck(context.Context) error {
 	return fmt.Errorf("error message")
 }
 
