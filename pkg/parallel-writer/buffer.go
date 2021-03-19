@@ -35,7 +35,8 @@ func (b *Buffer) Write(data interface{}) error {
 	return nil
 }
 
-// WriteN 返回 data 已写入 buffer 的数量，如果Flush出现错误，该错误也会被返回
+// WriteN returns the number of buffers written to the data.
+// if a Flush error occurs, the error will be returned
 func (b *Buffer) WriteN(data ...interface{}) (int, error) {
 	alen := len(b.buf)
 	blen := len(data)
