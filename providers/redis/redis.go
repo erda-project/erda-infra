@@ -64,8 +64,8 @@ func (d *define) Creator() servicehub.Creator {
 
 // provider .
 type provider struct {
-	C       *config
-	L       logs.Logger
+	Cfg     *config
+	Log     logs.Logger
 	client  *redis.Client
 	clients map[int]*redis.Client
 	lock    sync.Mutex
@@ -73,10 +73,10 @@ type provider struct {
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	if p.C.DB <= 0 {
+	if p.Cfg.DB <= 0 {
 		return nil
 	}
-	c, err := p.Open(p.C.DB)
+	c, err := p.Open(p.Cfg.DB)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (p *provider) DB() *redis.Client {
 	if p.client != nil {
 		return p.client
 	}
-	c, _ := p.Open(p.C.DB)
+	c, _ := p.Open(p.Cfg.DB)
 	return c
 }
 
@@ -99,51 +99,51 @@ func (p *provider) Open(db int) (*redis.Client, error) {
 		return c, nil
 	}
 	var c *redis.Client
-	if p.C.MasterName != "" && p.C.SentinelsAddr != "" {
-		addrs := strings.Split(p.C.SentinelsAddr, ",")
+	if p.Cfg.MasterName != "" && p.Cfg.SentinelsAddr != "" {
+		addrs := strings.Split(p.Cfg.SentinelsAddr, ",")
 		c = redis.NewFailoverClient(&redis.FailoverOptions{
-			MasterName:         p.C.MasterName,
+			MasterName:         p.Cfg.MasterName,
 			SentinelAddrs:      addrs,
-			Password:           p.C.Password,
+			Password:           p.Cfg.Password,
 			DB:                 db,
-			MaxRetries:         p.C.MaxRetries,
-			DialTimeout:        p.C.DialTimeout,
-			ReadTimeout:        p.C.ReadTimeout,
-			WriteTimeout:       p.C.WriteTimeout,
-			PoolSize:           p.C.PoolSize,
-			PoolTimeout:        p.C.PoolTimeout,
-			IdleTimeout:        p.C.IdleTimeout,
-			IdleCheckFrequency: p.C.IdleCheckFrequency,
+			MaxRetries:         p.Cfg.MaxRetries,
+			DialTimeout:        p.Cfg.DialTimeout,
+			ReadTimeout:        p.Cfg.ReadTimeout,
+			WriteTimeout:       p.Cfg.WriteTimeout,
+			PoolSize:           p.Cfg.PoolSize,
+			PoolTimeout:        p.Cfg.PoolTimeout,
+			IdleTimeout:        p.Cfg.IdleTimeout,
+			IdleCheckFrequency: p.Cfg.IdleCheckFrequency,
 		})
-	} else if p.C.Addr != "" {
+	} else if p.Cfg.Addr != "" {
 		c = redis.NewClient(&redis.Options{
-			Addr:               p.C.Addr,
-			Password:           p.C.Password,
+			Addr:               p.Cfg.Addr,
+			Password:           p.Cfg.Password,
 			DB:                 db,
-			MaxRetries:         p.C.MaxRetries,
-			DialTimeout:        p.C.DialTimeout,
-			ReadTimeout:        p.C.ReadTimeout,
-			WriteTimeout:       p.C.WriteTimeout,
-			PoolSize:           p.C.PoolSize,
-			PoolTimeout:        p.C.PoolTimeout,
-			IdleTimeout:        p.C.IdleTimeout,
-			IdleCheckFrequency: p.C.IdleCheckFrequency,
+			MaxRetries:         p.Cfg.MaxRetries,
+			DialTimeout:        p.Cfg.DialTimeout,
+			ReadTimeout:        p.Cfg.ReadTimeout,
+			WriteTimeout:       p.Cfg.WriteTimeout,
+			PoolSize:           p.Cfg.PoolSize,
+			PoolTimeout:        p.Cfg.PoolTimeout,
+			IdleTimeout:        p.Cfg.IdleTimeout,
+			IdleCheckFrequency: p.Cfg.IdleCheckFrequency,
 		})
 	} else {
 		err := fmt.Errorf("redis config error: no addr or sentinel")
-		p.L.Error(err)
+		p.Log.Error(err)
 		return nil, err
 	}
 
 	if pong, err := c.Ping().Result(); err != nil {
-		p.L.Errorf("redis ping error: %s", err)
+		p.Log.Errorf("redis ping error: %s", err)
 		return nil, err
 	} else if pong != "PONG" {
 		err := fmt.Errorf("redis ping result '%s' is not PONG", pong)
-		p.L.Error(err)
+		p.Log.Error(err)
 		return nil, err
 	} else {
-		p.L.Infof("open redis db %d and ping ok", db)
+		p.Log.Infof("open redis db %d and ping ok", db)
 	}
 
 	p.clients[db] = c

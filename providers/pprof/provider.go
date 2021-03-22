@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/httpserver"
 )
@@ -24,7 +23,6 @@ func (d *define) Creator() servicehub.Creator {
 
 // provider .
 type provider struct {
-	Logger logs.Logger
 	server *http.Server
 }
 

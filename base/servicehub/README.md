@@ -9,10 +9,8 @@ The *servicehub.Hub* manages all providers registered by function *servicehub.Re
 ## Example
 The configuration file *examples.yaml*
 ```yaml
-hello:
+hello-provider:
     message: "hello world"
-    sub:
-        name: "recallsong"
 ```
 
 The code file *main.go*
@@ -20,6 +18,7 @@ The code file *main.go*
 package main
 
 import (
+	"context"
 	"os"
 	"time"
 
@@ -32,9 +31,6 @@ type define struct{}
 
 // Declare what services the provider provides
 func (d *define) Service() []string { return []string{"hello"} }
-
-// Declare which services the provider depends on
-func (d *define) Dependencies() []string { return []string{} }
 
 // Describe information about this provider
 func (d *define) Description() string { return "hello for example" }
@@ -50,47 +46,35 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type config struct {
-	Message   string    `file:"message" flag:"msg" default:"hi" desc:"message to show"`
-	SubConfig subConfig `file:"sub"`
-}
-
-type subConfig struct {
-	Name string `file:"name" flag:"hello_name" default:"recallsong" desc:"name to show"`
+	Message string `file:"message" flag:"msg" default:"hi" desc:"message to show" env:"HELLO_MESSAGE"`
 }
 
 type provider struct {
-	C       *config
-	L       logs.Logger
-	closeCh chan struct{}
+	C *config
+	L logs.Logger
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.L.Info("message: ", p.C.Message)
-	p.closeCh = make(chan struct{})
 	return nil
 }
 
-func (p *provider) Start() error {
-	p.L.Info("now hello provider is running...")
-	tick := time.Tick(10 * time.Second)
+func (p *provider) Run(ctx context.Context) error {
+	p.L.Info("hello provider is running...")
+	tick := time.NewTicker(3 * time.Second)
+	defer tick.Stop()
 	for {
 		select {
-		case <-tick:
+		case <-tick.C:
 			p.L.Info("do something...")
-		case <-p.closeCh:
+		case <-ctx.Done():
 			return nil
 		}
 	}
 }
 
-func (p *provider) Close() error {
-	p.L.Info("now hello provider is closing...")
-	close(p.closeCh)
-	return nil
-}
-
 func init() {
-	servicehub.RegisterProvider("hello", &define{})
+	servicehub.RegisterProvider("hello-provider", &define{})
 }
 
 func main() {
@@ -98,21 +82,23 @@ func main() {
 	hub.Run("examples", "", os.Args...)
 }
 ```
-[Example details](./examples/main.go)
 
 Output:
 ```sh
-➜  examples git:(master) ✗ go run main.go
-INFO[2021-03-08 19:04:09.493] message: hello world                          module=hello
-INFO[2021-03-08 19:04:09.493] provider hello initialized                   
-INFO[2021-03-08 19:04:09.493] signals to quit:[hangup interrupt terminated quit] 
-INFO[2021-03-08 19:04:09.493] now hello provider is running...              module=hello
-INFO[2021-03-08 19:04:19.496] do something...                               module=hello
-INFO[2021-03-08 19:04:29.497] do something...                               module=hello
+➜ go run main.go
+INFO[2021-03-18 14:18:26.313] message: hello world                          module=hello-provider
+INFO[2021-03-18 14:18:26.313] provider hello-provider initialized          
+INFO[2021-03-18 14:18:26.313] signals to quit:[hangup interrupt terminated quit] 
+INFO[2021-03-18 14:18:26.314] hello provider is running...                  module=hello-provider
+INFO[2021-03-18 14:18:29.315] do something...                               module=hello-provider
+INFO[2021-03-18 14:18:32.317] do something...                               module=hello-provider
 ^C
-INFO[2021-03-08 19:04:32.984] now hello provider is closing...              module=hello
-INFO[2021-03-08 19:04:32.984] provider hello exit     
+INFO[2021-03-18 14:18:34.468] provider hello-provider exit   
 ```
+
+[Example details](./examples/run/main.go)
+
+[More Examples](./examples/)
 
 ## Reading Config
 Support the following ways to read config, the priority from low to high is:

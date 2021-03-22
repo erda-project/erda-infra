@@ -33,8 +33,8 @@ type config struct {
 }
 
 type provider struct {
-	C *config
-	L logs.Logger
+	Cfg *config
+	Log logs.Logger
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
@@ -51,7 +51,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	// 请求参数为 http.ResponseWriter, *http.Request
 	routes.GET("/hello",
 		func(resp http.ResponseWriter, req *http.Request) {
-			resp.Write([]byte(p.C.Message))
+			resp.Write([]byte(p.Cfg.Message))
 		},
 		httpserver.WithDescription("this is hello provider"),
 		httpserver.WithInterceptor(
@@ -134,12 +134,12 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func (p *provider) Start() error {
-	p.L.Info("now hello provider is running...")
+	p.Log.Info("now hello provider is running...")
 	return nil
 }
 
 func (p *provider) Close() error {
-	p.L.Info("now hello provider is closing...")
+	p.Log.Info("now hello provider is closing...")
 	return nil
 }
 

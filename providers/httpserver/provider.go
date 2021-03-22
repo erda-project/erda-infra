@@ -46,7 +46,7 @@ func (d *define) Creator() servicehub.Creator {
 
 type provider struct {
 	Cfg    *config
-	Logger logs.Logger
+	Log    logs.Logger
 	server *echo.Echo
 	router *router
 }
@@ -66,7 +66,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			ctx = &context{Context: ctx}
 			err := fn(ctx)
 			if err != nil {
-				p.Logger.Error(err)
+				p.Log.Error(err)
 				return err
 			}
 			return nil
@@ -83,11 +83,11 @@ func (p *provider) Start() error {
 	if p.Cfg.PrintRoutes {
 		for _, route := range p.router.routes {
 			if !route.hide {
-				p.Logger.Infof("%s --> %s", p.Cfg.Addr, route.String())
+				p.Log.Infof("%s --> %s", p.Cfg.Addr, route.String())
 			}
 		}
 	}
-	p.Logger.Infof("starting http server at %s", p.Cfg.Addr)
+	p.Log.Infof("starting http server at %s", p.Cfg.Addr)
 	err := p.server.Start(p.Cfg.Addr)
 	if err != nil && err != http.ErrServerClosed {
 		return err
