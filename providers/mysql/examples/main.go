@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/mysql"
 	"github.com/jinzhu/gorm"
@@ -26,9 +25,6 @@ func (d *define) Dependencies() []string { return []string{"mysql"} }
 // Describe information about this provider
 func (d *define) Description() string { return "example" }
 
-// Return an instance representing the configuration
-func (d *define) Config() interface{} { return &config{} }
-
 // Return a provider creator
 func (d *define) Creator() servicehub.Creator {
 	return func() servicehub.Provider {
@@ -36,11 +32,7 @@ func (d *define) Creator() servicehub.Creator {
 	}
 }
 
-type config struct{}
-
 type provider struct {
-	C     *config         // auto inject this field
-	L     logs.Logger     // auto inject this field
 	DB    *gorm.DB        // autowired
 	MySQL mysql.Interface // autowired
 }

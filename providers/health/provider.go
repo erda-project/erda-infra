@@ -50,7 +50,7 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type provider struct {
-	C            *config
+	Cfg          *config
 	names        []string
 	checkers     map[string][]Checker
 	healthBody   []byte
@@ -59,11 +59,11 @@ type provider struct {
 
 func (p *provider) Init(ctx servicehub.Context) error {
 	routes := ctx.Service("http-server").(httpserver.Router)
-	for _, path := range p.C.Path {
+	for _, path := range p.Cfg.Path {
 		routes.GET(path, p.handler)
 	}
-	p.healthBody = []byte(p.C.HealthBody)
-	p.unhealthBody = []byte(p.C.UnhealthBody)
+	p.healthBody = []byte(p.Cfg.HealthBody)
+	p.unhealthBody = []byte(p.Cfg.UnhealthBody)
 	return nil
 }
 
@@ -77,20 +77,20 @@ func (p *provider) handler(resp http.ResponseWriter, req *http.Request) error {
 			if err != nil {
 				errors = append(errors, err.Error())
 				health = false
-				if p.C.AbortOnError {
+				if p.Cfg.AbortOnError {
 					break
 				}
 			}
 		}
 		status[key] = errors
 	}
-	resp.Header().Set("Content-Type", p.C.ContentType)
+	resp.Header().Set("Content-Type", p.Cfg.ContentType)
 	var body []byte
 	if health {
-		resp.WriteHeader(p.C.HealthStatus)
+		resp.WriteHeader(p.Cfg.HealthStatus)
 		body = p.healthBody
 	} else {
-		resp.WriteHeader(p.C.UnhealthStatus)
+		resp.WriteHeader(p.Cfg.UnhealthStatus)
 		body = p.unhealthBody
 	}
 	if len(body) > 0 {

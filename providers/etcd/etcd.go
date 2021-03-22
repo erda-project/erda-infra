@@ -54,8 +54,8 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type provider struct {
-	C         *config
-	L         logs.Logger
+	Cfg       *config
+	Log       logs.Logger
 	client    *clientv3.Client
 	tlsConfig *tls.Config
 }
@@ -75,8 +75,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 
 func (p *provider) Connect() (*clientv3.Client, error) {
 	config := clientv3.Config{
-		Endpoints:   strings.Split(p.C.Endpoints, ","),
-		DialTimeout: p.C.Timeout,
+		Endpoints:   strings.Split(p.Cfg.Endpoints, ","),
+		DialTimeout: p.Cfg.Timeout,
 		TLS:         p.tlsConfig,
 	}
 	return clientv3.New(config)
@@ -84,14 +84,14 @@ func (p *provider) Connect() (*clientv3.Client, error) {
 
 func (p *provider) Client() *clientv3.Client { return p.client }
 
-func (p *provider) Timeout() time.Duration { return p.C.Timeout }
+func (p *provider) Timeout() time.Duration { return p.Cfg.Timeout }
 
 func (p *provider) initTLSConfig() error {
-	if len(p.C.TLS.CertFile) > 0 || len(p.C.TLS.CertKeyFile) > 0 {
-		cfg, err := readTLSConfig(p.C.TLS.CertFile, p.C.TLS.CertKeyFile, p.C.TLS.CaFile)
+	if len(p.Cfg.TLS.CertFile) > 0 || len(p.Cfg.TLS.CertKeyFile) > 0 {
+		cfg, err := readTLSConfig(p.Cfg.TLS.CertFile, p.Cfg.TLS.CertKeyFile, p.Cfg.TLS.CaFile)
 		if err != nil {
 			if os.IsNotExist(err) {
-				p.L.Warnf("fail to load tls files: %s", err)
+				p.Log.Warnf("fail to load tls files: %s", err)
 				return nil
 			}
 			return err

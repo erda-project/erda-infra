@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	pkube "github.com/erda-project/erda-infra/providers/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,7 +26,6 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type provider struct {
-	L      logs.Logger
 	Kube   pkube.Interface
 	Client *kubernetes.Clientset
 }

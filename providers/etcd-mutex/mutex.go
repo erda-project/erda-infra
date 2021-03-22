@@ -58,8 +58,8 @@ type config struct {
 }
 
 type provider struct {
-	C           *config
-	L           logs.Logger
+	Cfg         *config
+	Log         logs.Logger
 	etcd        etcd.Interface
 	instances   map[string]Mutex
 	inProcMutex *inProcMutex
@@ -68,7 +68,7 @@ type provider struct {
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.etcd = ctx.Service("etcd").(etcd.Interface)
-	p.C.RootPath = filepath.Clean("/" + p.C.RootPath)
+	p.Cfg.RootPath = filepath.Clean("/" + p.Cfg.RootPath)
 	return nil
 }
 
@@ -83,10 +83,10 @@ func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration
 	if err != nil {
 		return nil, err
 	}
-	key = filepath.Clean(filepath.Join(p.C.RootPath, key))
+	key = filepath.Clean(filepath.Join(p.Cfg.RootPath, key))
 	mutex := concurrency.NewMutex(session, key)
 	return &etcdMutex{
-		log: p.L,
+		log: p.Log,
 		key: key,
 		s:   session,
 		mu:  mutex,
@@ -102,14 +102,14 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 	if ctx.Type() == mutexType {
 		key := ctx.Tags().Get("mutex-key")
 		if len(key) < 0 {
-			key = p.C.DefaultKey
+			key = p.Cfg.DefaultKey
 		}
 		if len(key) < 0 {
 			return p.inProcMutex
 		}
 		m, err := p.New(context.Background(), key)
 		if err != nil {
-			p.L.Errorf("fail to create mutex for key: %q", key)
+			p.Log.Errorf("fail to create mutex for key: %q", key)
 		}
 		return m
 	}

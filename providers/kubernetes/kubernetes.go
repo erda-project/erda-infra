@@ -47,22 +47,22 @@ type config struct {
 
 // provider .
 type provider struct {
-	C      *config
+	Cfg    *config
 	client *kubernetes.Clientset
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	if len(p.C.ConfigPath) <= 0 {
+	if len(p.Cfg.ConfigPath) <= 0 {
 		if home := homeDir(); home != "" {
-			p.C.ConfigPath = filepath.Join(home, ".kube", "config")
+			p.Cfg.ConfigPath = filepath.Join(home, ".kube", "config")
 		}
 	}
-	if len(p.C.ConfigPath) <= 0 && len(p.C.MasterURL) <= 0 {
+	if len(p.Cfg.ConfigPath) <= 0 && len(p.Cfg.MasterURL) <= 0 {
 		return fmt.Errorf("kube config path or master url must not be empty")
 	}
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags(p.C.MasterURL, p.C.ConfigPath)
+	config, err := clientcmd.BuildConfigFromFlags(p.Cfg.MasterURL, p.Cfg.ConfigPath)
 	if err != nil {
 		return fmt.Errorf("fail to build kube config: %s", err)
 	}

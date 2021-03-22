@@ -63,19 +63,19 @@ func (d *define) Creator() servicehub.Creator {
 
 // provider .
 type provider struct {
-	C      *config
-	L      logs.Logger
+	Cfg    *config
+	Log    logs.Logger
 	client *elastic.Client
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	options := []elastic.ClientOptionFunc{
-		elastic.SetURL(strings.Split(p.C.URLs, ",")...),
+		elastic.SetURL(strings.Split(p.Cfg.URLs, ",")...),
 		elastic.SetSniff(false),
 	}
-	if p.C.Security && (p.C.Username != "" || p.C.Password != "") {
-		options = append(options, elastic.SetBasicAuth(p.C.Username, p.C.Password))
+	if p.Cfg.Security && (p.Cfg.Username != "" || p.Cfg.Password != "") {
+		options = append(options, elastic.SetBasicAuth(p.Cfg.Username, p.Cfg.Password))
 	}
 	client, err := elastic.NewClient(options...)
 	if err != nil {
@@ -92,7 +92,7 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 	}
 	return &service{
 		p:   p,
-		log: p.L.Sub(ctx.Caller()),
+		log: p.Log.Sub(ctx.Caller()),
 	}
 }
 
@@ -104,7 +104,7 @@ type service struct {
 func (s *service) Client() *elastic.Client { return s.p.client }
 func (s *service) URL() string {
 	// TODO parse user
-	return strings.Split(s.p.C.URLs, ",")[0]
+	return strings.Split(s.p.Cfg.URLs, ",")[0]
 }
 
 func (s *service) NewBatchWriter(c *WriterConfig) writer.Writer {

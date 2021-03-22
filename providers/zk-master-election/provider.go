@@ -60,8 +60,8 @@ type config struct {
 }
 
 type provider struct {
-	C       *config
-	L       logs.Logger
+	Cfg     *config
+	Log     logs.Logger
 	zk      zookeeper.Interface
 	closeCh chan struct{}
 
@@ -74,9 +74,9 @@ type provider struct {
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.zk = ctx.Service("zookeeper").(zookeeper.Interface)
-	p.C.RootPath = filepath.Clean("/" + p.C.RootPath)
-	p.C.MasterNode = filepath.Clean(p.C.MasterNode)
-	p.C.masterPath = filepath.Join(p.C.RootPath, p.C.MasterNode)
+	p.Cfg.RootPath = filepath.Clean("/" + p.Cfg.RootPath)
+	p.Cfg.MasterNode = filepath.Clean(p.Cfg.MasterNode)
+	p.Cfg.masterPath = filepath.Join(p.Cfg.RootPath, p.Cfg.MasterNode)
 	return nil
 }
 
@@ -84,10 +84,12 @@ func (p *provider) run() error {
 	for {
 		conn, ch, err := p.zk.Connect()
 		if err != nil {
-			p.L.Errorf("fail to connect zookeeper: %s", err)
+			p.Log.Errorf("fail to connect zookeeper: %s", err)
 			select {
 			case <-p.closeCh:
-				conn.Close()
+				if conn != nil {
+					conn.Close()
+				}
 				return err
 			default:
 				time.Sleep(3 * time.Second)
@@ -107,7 +109,7 @@ func (p *provider) run() error {
 				switch event.State {
 				case zk.StateConnected:
 					atomic.StoreInt32(&p.isConnected, 1)
-					p.L.Info("connected to zookeeper successfully")
+					p.Log.Info("connected to zookeeper successfully")
 					err := p.election(conn)
 					if err != nil {
 						break
@@ -120,12 +122,12 @@ func (p *provider) run() error {
 				case zk.StateExpired, zk.StateAuthFailed, zk.StateDisconnected:
 					break
 				default:
-					p.L.Errorf("unknown event: %v", event)
+					p.Log.Errorf("unknown event: %v", event)
 					continue
 				}
 			case <-timer:
 				if !p.IsConnected() {
-					p.L.Errorf("connect to zookeeper timeout")
+					p.Log.Errorf("connect to zookeeper timeout")
 					break
 				}
 				continue
@@ -137,7 +139,7 @@ func (p *provider) run() error {
 			atomic.StoreInt32(&p.isConnected, 0)
 			wg.Wait()
 			conn.Close()
-			p.L.Info("disconnected zookeeper")
+			p.Log.Info("disconnected zookeeper")
 			if exit {
 				return nil
 			}
@@ -168,7 +170,7 @@ func (p *provider) makePath(conn *zk.Conn, path string) error {
 		if path != createdPath {
 			return fmt.Errorf("create different path %q != %q", createdPath, path)
 		}
-		p.L.Infof("created path %q", path)
+		p.Log.Infof("created path %q", path)
 	}
 	return nil
 }
@@ -182,29 +184,29 @@ func (c *stateEvent) IsConnected() bool { return c.isConnected }
 func (c *stateEvent) IsMaster() bool    { return c.isMaster }
 
 func (p *provider) election(conn *zk.Conn) error {
-	err := p.makePath(conn, p.C.RootPath)
+	err := p.makePath(conn, p.Cfg.RootPath)
 	if err != nil {
 		return err
 	}
-	createdPath, err := conn.Create(p.C.masterPath, nil, zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
+	createdPath, err := conn.Create(p.Cfg.masterPath, nil, zk.FlagEphemeral, zk.WorldACL(zk.PermAll))
 	if err != nil {
 		if !strings.Contains(err.Error(), "exists") {
-			err = fmt.Errorf("fail to create path %q: %s", p.C.masterPath, err)
-			p.L.Error(err)
+			err = fmt.Errorf("fail to create path %q: %s", p.Cfg.masterPath, err)
+			p.Log.Error(err)
 			return err
 		}
-	} else if createdPath != p.C.masterPath {
-		err = fmt.Errorf("create different path %q != %q", createdPath, p.C.masterPath)
-		p.L.Error(err)
+	} else if createdPath != p.Cfg.masterPath {
+		err = fmt.Errorf("create different path %q != %q", createdPath, p.Cfg.masterPath)
+		p.Log.Error(err)
 		return err
 	}
 	isMaster := err == nil
 	if isMaster {
 		atomic.StoreInt32(&p.isMaster, 0)
-		p.L.Infof("election finish, i am slave")
+		p.Log.Infof("election finish, i am slave")
 	} else {
 		atomic.StoreInt32(&p.isMaster, 1)
-		p.L.Infof("election success, i am master")
+		p.Log.Infof("election success, i am master")
 	}
 	ctx := &stateEvent{
 		isMaster:    isMaster,
@@ -222,9 +224,9 @@ func (p *provider) watchMasterNode(ctx context.Context, wg *sync.WaitGroup, conn
 	defer wg.Done()
 loop:
 	for {
-		_, _, ch, err := conn.ChildrenW(p.C.masterPath)
+		_, _, ch, err := conn.ChildrenW(p.Cfg.masterPath)
 		if err != nil {
-			p.L.Errorf("fail to watch path %q: %s", p.C.masterPath, err)
+			p.Log.Errorf("fail to watch path %q: %s", p.Cfg.masterPath, err)
 			select {
 			case <-ctx.Done():
 			default:
@@ -232,8 +234,8 @@ loop:
 			}
 			continue
 		}
-		p.L.Infof("start watch path %q", p.C.masterPath)
-		defer p.L.Infof("exit waith path %q", p.C.masterPath)
+		p.Log.Infof("start watch path %q", p.Cfg.masterPath)
+		defer p.Log.Infof("exit waith path %q", p.Cfg.masterPath)
 		for {
 			select {
 			case event, ok := <-ch:

@@ -38,14 +38,14 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type provider struct {
-	C *config
+	Cfg *config
 }
 
 func (p *provider) Connect(options ...func(*zk.Conn)) (*zk.Conn, <-chan zk.Event, error) {
-	return zk.Connect(strings.Split(p.C.Addrs, ","), p.C.SessionTimeout)
+	return zk.Connect(strings.Split(p.Cfg.Addrs, ","), p.Cfg.SessionTimeout)
 }
 
-func (p *provider) SessionTimeout() time.Duration { return p.C.SessionTimeout }
+func (p *provider) SessionTimeout() time.Duration { return p.Cfg.SessionTimeout }
 
 func init() {
 	servicehub.RegisterProvider("zookeeper", &define{})

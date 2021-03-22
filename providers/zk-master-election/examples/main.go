@@ -24,9 +24,6 @@ func (d *define) Dependencies() []string { return []string{"zk-master-election"}
 // Describe information about this provider
 func (d *define) Description() string { return "example" }
 
-// Return an instance representing the configuration
-func (d *define) Config() interface{} { return &config{} }
-
 // Return a provider creator
 func (d *define) Creator() servicehub.Creator {
 	return func() servicehub.Provider {
@@ -34,10 +31,7 @@ func (d *define) Creator() servicehub.Creator {
 	}
 }
 
-type config struct{}
-
 type provider struct {
-	C        *config
 	Election election.Interface // autowired
 }
 

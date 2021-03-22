@@ -12,6 +12,6 @@ import (
 	_ "github.com/erda-project/erda-infra/providers/mysql"                //
 	_ "github.com/erda-project/erda-infra/providers/pprof"                //
 	_ "github.com/erda-project/erda-infra/providers/redis"                //
-	_ "github.com/erda-project/erda-infra/providers/zk-master-election"   //
-	_ "github.com/erda-project/erda-infra/providers/zookeeper"            //
+	// _ "github.com/erda-project/erda-infra/providers/zk-master-election"   //
+	// _ "github.com/erda-project/erda-infra/providers/zookeeper"            //
 )

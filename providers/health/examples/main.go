@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/health"
 	_ "github.com/erda-project/erda-infra/providers/httpserver"
@@ -26,7 +25,6 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type provider struct {
-	L logs.Logger
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
