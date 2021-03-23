@@ -4,8 +4,10 @@
 package servicehub
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"runtime"
@@ -138,8 +140,13 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 	types := map[reflect.Type][]*providerContext{}
 	for _, p := range providersMap {
 		d := p[0].define
-		service := d.Service()
-		for _, s := range service {
+		var list []string
+		if ps, ok := d.(ProviderServices); ok {
+			list = ps.Services()
+		} else if ps, ok := d.(ProviderService); ok {
+			list = ps.Service()
+		}
+		for _, s := range list {
 			if exist, ok := services[s]; ok {
 				return nil, fmt.Errorf("service %s conflict between %s and %s", s, exist[0].name, p[0].name)
 			}
@@ -258,7 +265,8 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.lock.Unlock()
 	runtime.Gosched()
 
-	for _, ch := range closer {
+	closeCh, closed := make(chan os.Signal), false
+	for _, ch := range append(closer, closeCh) {
 		go func(ch <-chan os.Signal) {
 			select {
 			case <-ch:
@@ -287,6 +295,10 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 		case err := <-ch:
 			if err != nil {
 				errs = append(errs, err)
+				if !closed {
+					close(closeCh)
+					closed = true
+				}
 			}
 		}
 	}
@@ -574,15 +586,20 @@ func (h *Hub) getService(dc DependencyContext, options ...interface{}) interface
 	return nil
 }
 
-// Run .
-func (h *Hub) Run(name, cfgfile string, args ...string) {
-	h.RunWithDefault(name, cfgfile, nil, args...)
+// RunOptions .
+type RunOptions struct {
+	Name       string
+	ConfigFile string
+	Content    interface{}
+	Format     string
+	Args       []string
 }
 
-// RunWithDefault .
-func (h *Hub) RunWithDefault(name, cfgfile string, defcfg map[string]interface{}, args ...string) {
+// RunWithOptions .
+func (h *Hub) RunWithOptions(opts *RunOptions) {
+	name := opts.Name
 	if len(name) <= 0 {
-		name = getAppName(args...)
+		name = getAppName(opts.Args...)
 	}
 	config.LoadEnvFile()
 
@@ -593,24 +610,46 @@ func (h *Hub) RunWithDefault(name, cfgfile string, defcfg map[string]interface{}
 		}
 	}()
 
-	if len(cfgfile) <= 0 && len(defcfg) <= 0 {
-		cfgfile = name + ".yaml"
+	format := "yaml"
+	if len(opts.Format) > 0 {
+		format = opts.Format
 	}
-	cfg, err := h.loadConfigWithArgs(cfgfile, args...)
-	if err != nil {
-		return
-	}
-	if defcfg != nil {
-		for k, v := range defcfg {
-			if _, ok := cfg[k]; !ok {
-				cfg[k] = v
+	cfgmap := make(map[string]interface{})
+	if opts.Content != nil {
+		var reader io.Reader
+		switch val := opts.Content.(type) {
+		case map[string]interface{}:
+			cfgmap = val
+		case string:
+			reader = strings.NewReader(val)
+		case []byte:
+			reader = bytes.NewReader(val)
+		default:
+			err = fmt.Errorf("invalid config content type")
+			h.logger.Error(err)
+			return
+		}
+		if reader != nil {
+			err = config.UnmarshalToMap(reader, format, cfgmap)
+			if err != nil {
+				h.logger.Errorf("fail to parse %s config: %s", format, err)
+				return
 			}
 		}
 	}
 
+	cfgfile := opts.ConfigFile
+	if len(cfgmap) <= 0 && len(opts.ConfigFile) <= 0 {
+		cfgfile = name + "." + format
+	}
+	cfgmap, err = h.loadConfigWithArgs(cfgfile, cfgmap, opts.Args...)
+	if err != nil {
+		return
+	}
+
 	flags := pflag.NewFlagSet(name, pflag.ExitOnError)
 	flags.StringP("config", "c", cfgfile, "config file to load providers")
-	err = h.Init(cfg, flags, args)
+	err = h.Init(cfgmap, flags, opts.Args)
 	if err != nil {
 		return
 	}
@@ -619,6 +658,22 @@ func (h *Hub) RunWithDefault(name, cfgfile string, defcfg map[string]interface{}
 	if err != nil {
 		return
 	}
+}
+
+// Run .
+func (h *Hub) Run(name, cfgfile string, args ...string) {
+	h.RunWithOptions(&RunOptions{
+		Name:       name,
+		ConfigFile: cfgfile,
+		Args:       args,
+	})
+}
+
+// Run .
+func Run(opts *RunOptions) *Hub {
+	hub := New()
+	hub.RunWithOptions(opts)
+	return hub
 }
 
 func getAppName(args ...string) string {

@@ -12,8 +12,7 @@ import (
 	"github.com/recallsong/go-utils/config"
 )
 
-func (h *Hub) loadConfigWithArgs(file string, args ...string) (map[string]interface{}, error) {
-	cfg := make(map[string]interface{})
+func (h *Hub) loadConfigWithArgs(file string, cfg map[string]interface{}, args ...string) (map[string]interface{}, error) {
 	if len(args) > 0 {
 		args = args[1:]
 		var idx int

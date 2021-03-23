@@ -47,7 +47,7 @@ type config struct {
 
 type define struct{}
 
-func (d *define) Service() []string { return []string{"redis", "redis-client"} }
+func (d *define) Services() []string { return []string{"redis", "redis-client"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{
 		interfaceType, clientType,

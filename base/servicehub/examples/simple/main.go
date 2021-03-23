@@ -14,7 +14,7 @@ import (
 type define struct{}
 
 // Declare what services the provider provides
-func (d *define) Service() []string { return []string{"hello"} }
+func (d *define) Services() []string { return []string{"hello"} }
 
 // Describe information about this provider
 func (d *define) Description() string { return "hello for example" }
@@ -39,8 +39,8 @@ type subConfig struct {
 }
 
 type provider struct {
-	C *config     // auto inject this field
-	L logs.Logger // auto inject this field
+	Cfg *config     // auto inject this field
+	Log logs.Logger // auto inject this field
 }
 
 func init() {

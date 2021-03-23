@@ -13,7 +13,7 @@ import (
 
 type define struct{}
 
-func (d *define) Service() []string { return []string{"http-endpoints"} }
+func (d *define) Services() []string { return []string{"http-endpoints"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
 }

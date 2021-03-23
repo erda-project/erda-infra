@@ -33,7 +33,7 @@ var mutexType = reflect.TypeOf((*Mutex)(nil)).Elem()
 
 type define struct{}
 
-func (d *define) Service() []string      { return []string{"etcd-mutex"} }
+func (d *define) Services() []string     { return []string{"etcd-mutex"} }
 func (d *define) Dependencies() []string { return []string{"etcd"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{

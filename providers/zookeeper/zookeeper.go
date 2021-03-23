@@ -25,7 +25,7 @@ type config struct {
 
 type define struct{}
 
-func (d *define) Service() []string { return []string{"zookeeper"} }
+func (d *define) Services() []string { return []string{"zookeeper"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
 }

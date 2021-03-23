@@ -38,7 +38,7 @@ var clientType = reflect.TypeOf((*clientv3.Client)(nil))
 
 type define struct{}
 
-func (d *define) Service() []string { return []string{"etcd", "etcd-client"} }
+func (d *define) Services() []string { return []string{"etcd", "etcd-client"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{
 		reflect.TypeOf((*Interface)(nil)).Elem(),

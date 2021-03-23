@@ -51,7 +51,7 @@ func (t *NopTranslator) Sprintf(lang LanguageCodes, key string, args ...interfac
 
 type define struct{}
 
-func (d *define) Service() []string { return []string{"i18n"} }
+func (d *define) Services() []string { return []string{"i18n"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{i18nType, translatorType}
 }
