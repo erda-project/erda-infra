@@ -16,7 +16,7 @@ import (
 type define struct{}
 
 // Declare what services the provider provides
-func (d *define) Service() []string { return []string{"hello"} }
+func (d *define) Services() []string { return []string{"hello"} }
 
 // Declare which services the provider depends on
 func (d *define) Dependencies() []string { return []string{"example-dependency"} }
@@ -39,13 +39,13 @@ type config struct {
 }
 
 type provider struct {
-	C *config
-	L logs.Logger
-	D dependency.Interface `autowired:"example-dependency"`
+	Cfg *config
+	Log logs.Logger
+	Dep dependency.Interface `autowired:"example-dependency"`
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	fmt.Println(p.D.Hello(p.C.Name))
+	fmt.Println(p.Dep.Hello(p.Cfg.Name))
 	return nil
 }
 

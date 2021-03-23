@@ -37,7 +37,7 @@ type Interface interface {
 
 type define struct{}
 
-func (d *define) Service() []string      { return []string{"zk-master-election"} }
+func (d *define) Services() []string     { return []string{"zk-master-election"} }
 func (d *define) Dependencies() []string { return []string{"zookeeper"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}

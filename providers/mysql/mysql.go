@@ -46,7 +46,7 @@ func (c *config) url() string {
 
 type define struct{}
 
-func (d *define) Service() []string { return []string{"mysql", "mysql-client"} }
+func (d *define) Services() []string { return []string{"mysql", "mysql-client"} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{
 		interfaceType, gormType,

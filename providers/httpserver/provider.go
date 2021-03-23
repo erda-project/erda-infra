@@ -23,7 +23,7 @@ type config struct {
 
 type define struct{}
 
-func (d *define) Service() []string {
+func (d *define) Services() []string {
 	return []string{"http-server", "http-routes", "http-router"}
 }
 func (d *define) Types() []reflect.Type {

@@ -16,7 +16,7 @@ import (
 type define struct{}
 
 // Declare what services the provider provides
-func (d *define) Service() []string { return []string{"hello"} }
+func (d *define) Services() []string { return []string{"hello"} }
 
 // Describe information about this provider
 func (d *define) Description() string { return "hello for example" }
@@ -36,23 +36,23 @@ type config struct {
 }
 
 type provider struct {
-	C *config
-	L logs.Logger
+	Cfg *config
+	Log logs.Logger
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.L.Info("message: ", p.C.Message)
+	p.Log.Info("message: ", p.Cfg.Message)
 	return nil
 }
 
 func (p *provider) Run(ctx context.Context) error {
-	p.L.Info("hello provider is running...")
+	p.Log.Info("hello provider is running...")
 	tick := time.NewTicker(3 * time.Second)
 	defer tick.Stop()
 	for {
 		select {
 		case <-tick.C:
-			p.L.Info("do something...")
+			p.Log.Info("do something...")
 		case <-ctx.Done():
 			return nil
 		}

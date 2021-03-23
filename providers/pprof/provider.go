@@ -13,7 +13,7 @@ import (
 
 type define struct{}
 
-func (d *define) Service() []string      { return []string{"pprof"} }
+func (d *define) Services() []string     { return []string{"pprof"} }
 func (d *define) Dependencies() []string { return []string{"http-server"} }
 func (d *define) Summary() string        { return "start pprof http server" }
 func (d *define) Description() string    { return d.Summary() }

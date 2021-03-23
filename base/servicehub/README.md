@@ -30,7 +30,7 @@ import (
 type define struct{}
 
 // Declare what services the provider provides
-func (d *define) Service() []string { return []string{"hello"} }
+func (d *define) Services() []string { return []string{"hello"} }
 
 // Describe information about this provider
 func (d *define) Description() string { return "hello for example" }
@@ -50,23 +50,23 @@ type config struct {
 }
 
 type provider struct {
-	C *config
-	L logs.Logger
+	Cfg *config
+	Log logs.Logger
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.L.Info("message: ", p.C.Message)
+	p.Log.Info("message: ", p.Cfg.Message)
 	return nil
 }
 
 func (p *provider) Run(ctx context.Context) error {
-	p.L.Info("hello provider is running...")
+	p.Log.Info("hello provider is running...")
 	tick := time.NewTicker(3 * time.Second)
 	defer tick.Stop()
 	for {
 		select {
 		case <-tick.C:
-			p.L.Info("do something...")
+			p.Log.Info("do something...")
 		case <-ctx.Done():
 			return nil
 		}
@@ -81,19 +81,20 @@ func main() {
 	hub := servicehub.New()
 	hub.Run("examples", "", os.Args...)
 }
+
 ```
 
 Output:
 ```sh
 ➜ go run main.go
-INFO[2021-03-18 14:18:26.313] message: hello world                          module=hello-provider
-INFO[2021-03-18 14:18:26.313] provider hello-provider initialized          
-INFO[2021-03-18 14:18:26.313] signals to quit:[hangup interrupt terminated quit] 
-INFO[2021-03-18 14:18:26.314] hello provider is running...                  module=hello-provider
-INFO[2021-03-18 14:18:29.315] do something...                               module=hello-provider
-INFO[2021-03-18 14:18:32.317] do something...                               module=hello-provider
+INFO[2021-03-23 11:55:34.830] message: hello world                          module=hello-provider
+INFO[2021-03-23 11:55:34.830] provider hello-provider initialized          
+INFO[2021-03-23 11:55:34.830] signals to quit:[hangup interrupt terminated quit] 
+INFO[2021-03-23 11:55:34.831] hello provider is running...                  module=hello-provider
+INFO[2021-03-23 11:55:37.831] do something...                               module=hello-provider
+INFO[2021-03-23 11:55:40.835] do something...                               module=hello-provider
 ^C
-INFO[2021-03-18 14:18:34.468] provider hello-provider exit   
+INFO[2021-03-23 11:55:41.624] provider hello-provider exit  
 ```
 
 [Example details](./examples/run/main.go)

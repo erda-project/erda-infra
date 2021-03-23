@@ -4,12 +4,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"context"
+	"time"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/base/servicehub/examples/dependency/dependency"
 )
 
 // define Represents the definition of provider and provides some information
@@ -17,9 +16,6 @@ type define struct{}
 
 // Declare what services the provider provides
 func (d *define) Services() []string { return []string{"hello"} }
-
-// Declare which services the provider depends on
-func (d *define) Dependencies() []string { return []string{"example-dependency@label"} }
 
 // Describe information about this provider
 func (d *define) Description() string { return "hello for example" }
@@ -35,7 +31,7 @@ func (d *define) Creator() servicehub.Creator {
 }
 
 type config struct {
-	Name string `file:"name" default:"recallsong"`
+	Message string `file:"message" flag:"msg" default:"hi" desc:"message to show" env:"HELLO_MESSAGE"`
 }
 
 type provider struct {
@@ -44,14 +40,22 @@ type provider struct {
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	dep1 := ctx.Service("example-dependency@label").(dependency.Interface)
-	fmt.Println(dep1.Hello(p.Cfg.Name))
-	fmt.Printf("get with label: %p\n", dep1)
-
-	dep2 := ctx.Service("example-dependency").(dependency.Interface)
-	fmt.Println(dep2.Hello(p.Cfg.Name))
-	fmt.Printf("get only service name: %p\n", dep2)
+	p.Log.Info("message: ", p.Cfg.Message)
 	return nil
+}
+
+func (p *provider) Run(ctx context.Context) error {
+	p.Log.Info("hello provider is running...")
+	tick := time.NewTicker(3 * time.Second)
+	defer tick.Stop()
+	for {
+		select {
+		case <-tick.C:
+			p.Log.Info("do something...")
+		case <-ctx.Done():
+			return nil
+		}
+	}
 }
 
 func init() {
@@ -59,6 +63,10 @@ func init() {
 }
 
 func main() {
-	hub := servicehub.New()
-	hub.Run("examples", "", os.Args...)
+	servicehub.Run(&servicehub.RunOptions{
+		Content: `
+hello-provider:
+   message: "hello world"	
+`,
+	})
 }

@@ -6,7 +6,6 @@ package dependency
 import (
 	"reflect"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
@@ -29,9 +28,6 @@ func (d *define) Types() []reflect.Type {
 // Describe information about this provider
 func (d *define) Description() string { return "dependency for example" }
 
-// Return an instance representing the configuration
-func (d *define) Config() interface{} { return &config{} }
-
 // Return a provider creator
 func (d *define) Creator() servicehub.Creator {
 	return func() servicehub.Provider {
@@ -39,12 +35,7 @@ func (d *define) Creator() servicehub.Creator {
 	}
 }
 
-type config struct{}
-
-type provider struct {
-	C *config
-	L logs.Logger
-}
+type provider struct{}
 
 func (p *provider) Hello(name string) string {
 	return "hello " + name

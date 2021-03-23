@@ -17,8 +17,17 @@ type Creator func() Provider
 
 // ProviderDefine .
 type ProviderDefine interface {
-	Service() []string
 	Creator() Creator
+}
+
+// ProviderService deprecated, use ProviderServices
+type ProviderService interface {
+	Service() []string
+}
+
+// ProviderServices .
+type ProviderServices interface {
+	Services() []string
 }
 
 // ServiceTypes .

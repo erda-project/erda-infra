@@ -4,9 +4,7 @@
 package kafka
 
 import (
-	"context"
 	"reflect"
-	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/erda-project/erda-infra/base/logs"
@@ -47,7 +45,7 @@ type config struct {
 
 type define struct{}
 
-func (d *define) Service() []string {
+func (d *define) Services() []string {
 	return []string{"kafka", "kafka-producer", "kafka-consumer"}
 }
 func (d *define) Types() []reflect.Type {

@@ -3,6 +3,6 @@ etcd:
     # tls:
     #     cert_file: "etcd-client.pem"
     #     cert_key_file: "etcd-client-key.pem"
-    #     ca_file: "etcd-ca.perm"
+    #     ca_file: "etcd-ca.pem"
   
 example:
