@@ -297,6 +297,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				errs = append(errs, err)
 				if !closed {
 					close(closeCh)
+					closed = true
 				}
 			}
 		}
