@@ -72,15 +72,14 @@ type config struct {
 }
 
 type provider struct {
-	C      *config
-	L      logs.Logger
+	Cfg    *config
+	Log    logs.Logger
 	common map[string]map[string]string
 	dic    map[string]map[string]map[string]string
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	log := ctx.Logger()
-	for _, file := range p.C.Common {
+	for _, file := range p.Cfg.Common {
 		f, err := os.Stat(file)
 		if err != nil {
 			return fmt.Errorf("fail to load i18n file: %s", err)
@@ -102,7 +101,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			return err
 		}
 	}
-	for _, file := range p.C.Files {
+	for _, file := range p.Cfg.Files {
 		f, err := os.Stat(file)
 		if err != nil {
 			return fmt.Errorf("fail to load i18n file: %s", err)
@@ -124,7 +123,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			return err
 		}
 	}
-	log.Infof("load i18n files: %v, %v", p.C.Common, p.C.Files)
+	p.Log.Infof("load i18n files: %v, %v", p.Cfg.Common, p.Cfg.Files)
 	return nil
 }
 
