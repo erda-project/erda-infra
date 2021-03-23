@@ -1,0 +1,4 @@
+zookeeper:
+    addrs: "localhost1:2181,localhost2:2181"
+
+example:

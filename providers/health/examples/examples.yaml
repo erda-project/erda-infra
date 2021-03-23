@@ -2,4 +2,4 @@ http-server:
     addr: ":8080"
 health:
 
-hello:
+examples:
