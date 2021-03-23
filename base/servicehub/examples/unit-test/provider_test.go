@@ -74,7 +74,7 @@ func Test_provider_Add(t *testing.T) {
 			3,
 		},
 		{
-			"test1",
+			"test2",
 			args{
 				a: 8,
 				b: 2,
@@ -111,7 +111,7 @@ func Test_provider_sub(t *testing.T) {
 			8,
 		},
 		{
-			"test1",
+			"test2",
 			args{
 				a: 10,
 				b: 4,
@@ -153,7 +153,7 @@ func Test_provider_testOnlyFunc(t *testing.T) {
 			12,
 		},
 		{
-			"test1",
+			"test2",
 			args{
 				a: 10,
 				b: 14,
@@ -164,7 +164,8 @@ func Test_provider_testOnlyFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := getService(t)
-			if got := s.Add(tt.args.a, tt.args.b); got != tt.want {
+			p := s.(*provider)
+			if got := p.testOnlyFunc(tt.args.a, tt.args.b); got != tt.want {
 				t.Errorf("provider.testOnlyFunc() = %v, want %v", got, tt.want)
 			}
 		})

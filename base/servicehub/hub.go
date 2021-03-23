@@ -265,25 +265,28 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.lock.Unlock()
 	runtime.Gosched()
 
-	closeCh, closed := make(chan os.Signal), false
-	for _, ch := range append(closer, closeCh) {
+	closeCh, closed := make(chan struct{}), false
+	var elock sync.Mutex
+	for _, ch := range closer {
 		go func(ch <-chan os.Signal) {
 			select {
 			case <-ch:
-				fmt.Println()
-				wait := make(chan error)
-				go func() {
-					wait <- h.Close()
-				}()
-				select {
-				case <-time.After(30 * time.Second):
-					h.logger.Errorf("exit service manager timeout !")
+			case <-closeCh:
+			}
+			elock.Lock()
+			fmt.Println()
+			wait := make(chan error)
+			go func() {
+				wait <- h.Close()
+			}()
+			select {
+			case <-time.After(30 * time.Second):
+				h.logger.Errorf("exit service manager timeout !")
+				os.Exit(1)
+			case err := <-wait:
+				if err != nil {
+					h.logger.Errorf("fail to exit: %s", err)
 					os.Exit(1)
-				case err := <-wait:
-					if err != nil {
-						h.logger.Errorf("fail to exit: %s", err)
-						os.Exit(1)
-					}
 				}
 			}
 		}(ch)
