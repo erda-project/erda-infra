@@ -63,7 +63,9 @@ func main() {
 		Content: `
 hello-provider:
     error: false
-hello-provider@run:
+hello-provider@error1:
+    error: true
+hello-provider@error2:
     error: true
 `,
 	})
