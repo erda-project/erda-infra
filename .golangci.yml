@@ -1,7 +1,7 @@
 run:
   concurrency: 4
   timeout: 2m
-  modules-download-mode: vendor
+  modules-download-mode: mod
   # include test files or not, default is true
   tests: false
   allow-parallel-runners: true
