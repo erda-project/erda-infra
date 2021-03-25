@@ -8,5 +8,5 @@ import (
 type IAPIError interface {
 	Render(locale i18n.LocaleResource) string
 	Code() string
-	HttpCode() int
+	HTTPCode() int
 }
