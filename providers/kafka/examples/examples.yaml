@@ -1,0 +1,12 @@
+kafka:
+    servers: "localhost:9092"
+    comsumer:
+      options:
+        auto.offset.reset: "latest"
+        auto.commit.interval.ms: "1000"
+
+examples:
+    input:
+        topics: "example-topic"
+        group: "example-topic-group"
+        parallelism: 1

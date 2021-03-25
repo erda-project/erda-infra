@@ -75,11 +75,11 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 // Provide .
-func (p *provider) Provide(name string, args ...interface{}) interface{} {
+func (p *provider) Provide(ctx servicehub.DependencyContext, options ...interface{}) interface{} {
 	return &service{
 		p:    p,
-		log:  p.Log.Sub(name),
-		name: name,
+		log:  p.Log.Sub(ctx.Caller()),
+		name: ctx.Caller(),
 	}
 }
 
@@ -88,6 +88,8 @@ type service struct {
 	log  logs.Logger
 	name string
 }
+
+var _ Interface = (*service)(nil)
 
 func (s *service) Servers() string { return s.p.Cfg.Servers }
 
