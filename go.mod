@@ -3,7 +3,7 @@ module github.com/erda-project/erda-infra
 go 1.14
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.6.1
+	github.com/confluentinc/confluent-kafka-go v1.5.2
 	github.com/coreos/bbolt v0.0.0-00010101000000-000000000000 // indirect
 	github.com/coreos/etcd v3.3.25+incompatible
 	github.com/coreos/go-semver v0.3.0 // indirect
