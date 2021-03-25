@@ -19,7 +19,7 @@ jobs:
           go-version: 1.14
       - name: Set up Go mod
         run: go mod tidy
-      - name: Run lint
+      - name: Run Lint
         uses: golangci/golangci-lint-action@v2
         with:
           # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
@@ -36,7 +36,7 @@ jobs:
           # skip-pkg-cache: true
           # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
           # skip-build-cache: true
-      - name: Run test
+      - name: Run Test
         run: |
           go test -cpu=2 -timeout 3s -race -coverprofile=coverage.txt -covermode=atomic ./...
           bash <(curl -s https://codecov.io/bash)
