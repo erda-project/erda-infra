@@ -21,12 +21,15 @@ const (
 	// ContentTypeJSON Content Type
 	ContentTypeJSON = "application/json"
 	// ResponseWriter context value key
-	ResponseWriter = "responseWriter"
+	ResponseWriter = ContextKey("responseWriter")
 	// Base64EncodedRequestBody .
 	Base64EncodedRequestBody = "base64-encoded-request-body"
 	// TraceID .
-	TraceID = "dice-trace-id"
+	TraceID = ContextKey("dice-trace-id")
 )
+
+// ContextKey ...
+type ContextKey string
 
 // RegisterEndpoints match URL path to corresponding handler
 func (p *provider) RegisterEndpoints(endpoints []Endpoint) {
@@ -66,10 +69,10 @@ func (p *provider) internal(handler func(context.Context, *http.Request, map[str
 			response = response.GetLocaledResp(locale)
 		}
 		if err != nil {
-			apiError, isApiError := err.(ierror.IAPIError)
-			if isApiError {
+			apiError, isAPIError := err.(ierror.IAPIError)
+			if isAPIError {
 				response = HTTPResponse{
-					Status: apiError.HttpCode(),
+					Status: apiError.HTTPCode(),
 					Content: Resp{
 						Success: false,
 						Err: ErrorResponse{

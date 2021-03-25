@@ -34,8 +34,8 @@ func (e *APIError) Code() string {
 	return e.code
 }
 
-// HttpCode .
-func (e *APIError) HttpCode() int {
+// HTTPCode ...
+func (e *APIError) HTTPCode() int {
 	return e.httpCode
 }
 

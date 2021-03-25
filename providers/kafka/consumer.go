@@ -101,7 +101,7 @@ func (s *service) NewConsumerWitchCreator(cfg *ConsumerConfig, creator func(i in
 						}
 						continue
 					}
-					topic := *message.TopicPartition.Topic
+					//topic := *message.TopicPartition.Topic
 					err = handler(message.Key, message.Value, message.TopicPartition.Topic, message.Timestamp)
 					if err != nil {
 						s.log.Errorf("fail to process message: %v", err)
