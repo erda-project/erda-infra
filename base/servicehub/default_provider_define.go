@@ -21,6 +21,19 @@ func RegisterProviderSpec(name string, spec *Spec) {
 	RegisterProvider(name, &specDefine{spec}) // wrap Spec as ProviderDefine
 }
 
+// ensure specDefine implements some interface
+var (
+	// _ ProviderDefine       = (*specDefine)(nil) // Through RegisterProvider to ensure
+	_ ProviderServices     = (*specDefine)(nil)
+	_ ServiceTypes         = (*specDefine)(nil)
+	_ ProviderUsageSummary = (*specDefine)(nil)
+	_ ProviderUsage        = (*specDefine)(nil)
+	_ ProviderUsage        = (*specDefine)(nil)
+	_ ServiceDependencies  = (*specDefine)(nil)
+	_ ConfigCreator        = (*specDefine)(nil)
+	_ ConfigCreator        = (*specDefine)(nil)
+)
+
 type specDefine struct {
 	s *Spec
 }
