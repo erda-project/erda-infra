@@ -28,12 +28,18 @@ func Usage(names ...string) string {
 
 func providerUsage(name string, define ProviderDefine, buf *bytes.Buffer) {
 	buf.WriteString(name)
-	if usage, ok := define.(ProviderUsageSummary); ok {
+	var usage string
+	if s, ok := define.(ProviderUsageSummary); ok {
+		usage = s.Summary()
+	}
+	if len(usage) <= 0 {
+		if u, ok := define.(ProviderUsage); ok {
+			usage = u.Description()
+		}
+	}
+	if len(usage) > 0 {
 		buf.WriteString("\n    ")
-		buf.WriteString(usage.Summary())
-	} else if usage, ok := define.(ProviderUsage); ok {
-		buf.WriteString("\n    ")
-		buf.WriteString(usage.Description())
+		buf.WriteString(usage)
 	}
 	if creator, ok := define.(ConfigCreator); ok {
 		cfg := creator.Config()

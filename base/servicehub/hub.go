@@ -346,25 +346,27 @@ var loggerType = reflect.TypeOf((*logs.Logger)(nil)).Elem()
 func (c *providerContext) BindConfig(flags *pflag.FlagSet) (err error) {
 	if creator, ok := c.define.(ConfigCreator); ok {
 		cfg := creator.Config()
-		err = unmarshal.BindDefault(cfg)
-		if err != nil {
-			return err
-		}
-		if c.cfg != nil {
-			err = config.ConvertData(c.cfg, cfg, "file")
+		if cfg != nil {
+			err = unmarshal.BindDefault(cfg)
 			if err != nil {
 				return err
 			}
+			if c.cfg != nil {
+				err = config.ConvertData(c.cfg, cfg, "file")
+				if err != nil {
+					return err
+				}
+			}
+			err = unmarshal.BindEnv(cfg)
+			if err != nil {
+				return err
+			}
+			err = unmarshalflag.BindFlag(flags, cfg)
+			if err != nil {
+				return err
+			}
+			c.cfg = cfg
 		}
-		err = unmarshal.BindEnv(cfg)
-		if err != nil {
-			return err
-		}
-		err = unmarshalflag.BindFlag(flags, cfg)
-		if err != nil {
-			return err
-		}
-		c.cfg = cfg
 	}
 	return nil
 }
