@@ -16,7 +16,7 @@ import (
 
 type define struct{}
 
-func (d *define) Service() []string      { return []string{"hello"} }
+func (d *define) Services() []string     { return []string{"hello"} }
 func (d *define) Dependencies() []string { return []string{"kubernetes"} }
 func (d *define) Description() string    { return "hello for example" }
 func (d *define) Creator() servicehub.Creator {
