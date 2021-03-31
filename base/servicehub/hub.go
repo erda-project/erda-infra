@@ -126,7 +126,7 @@ func (h *Hub) Init(config map[string]interface{}, flags *pflag.FlagSet, args []s
 			h.logger.Infof("provider %s initialized", ctx.name)
 		}
 	}
-	for i, l := 0, len(h.listeners); i < l; i++ {
+	for i := len(h.listeners) - 1; i >= 0; i-- {
 		err = h.listeners[i].AfterInitialization(h)
 		if err != nil {
 			return err
@@ -305,7 +305,11 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 			}
 		}
 	}
-	return errs.MaybeUnwrap()
+	err = errs.MaybeUnwrap()
+	for i, l := 0, len(h.listeners); i < l; i++ {
+		err = h.listeners[i].BeforeExit(h, err)
+	}
+	return err
 }
 
 // Close .
@@ -479,10 +483,18 @@ func (c *providerContext) Define() ProviderDefine {
 
 // Define .
 func (c *providerContext) Dependencies() []string {
+	var list []string
 	if deps, ok := c.define.(ServiceDependencies); ok {
-		return deps.Dependencies()
+		list = deps.Dependencies()
 	}
-	return nil
+	if deps, ok := c.define.(OptionalServiceDependencies); ok {
+		for _, service := range deps.OptionalDependencies() {
+			if len(c.hub.servicesMap[service]) > 0 {
+				list = append(list, service)
+			}
+		}
+	}
+	return list
 }
 
 // Hub .
@@ -609,7 +621,13 @@ func (h *Hub) RunWithOptions(opts *RunOptions) {
 	config.LoadEnvFile()
 
 	var err error
+	var start bool
 	defer func() {
+		if !start {
+			for i, l := 0, len(h.listeners); i < l; i++ {
+				err = h.listeners[i].BeforeExit(h, err)
+			}
+		}
 		if err != nil {
 			os.Exit(1)
 		}
@@ -659,6 +677,7 @@ func (h *Hub) RunWithOptions(opts *RunOptions) {
 		return
 	}
 	defer h.Close()
+	start = true
 	err = h.StartWithSignal()
 	if err != nil {
 		return

@@ -12,17 +12,18 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 
 ## 特性
 * 模块化设计，支持可插拔
-* 统一配置读取，支持默认值、支持从文件、环境变量、命令行参数等
+* 统一配置读取，支持默认值、支持从文件、环境变量、命令行参数读取
 * 统一模块的初始化、启动、关闭
 * 统一管理模块间的依赖关系
 * 支持模块间的依赖注入
 * 包含大量现成的微模块
-* 支持统一 grpc 和 http 接口设计
+* 支持统一 grpc 和 http 接口设计、以及拦截器
+* 提供快速构建模块的脚本
 * 等等
 
 ## 概念 
 * Service，服务，表示某个具体的功能
-* Provider，服务的提供者，提供一个或多个 Service，也可以依赖0个或多个其他 Service，被依赖的 Service 由其他 Provider 提供。
+* Provider，服务的提供者，提供0个或多个 Service，也可以依赖0个或多个其他 Service，被依赖的 Service 由其他 Provider 提供。
 * ProviderDefine，提供 Provider 相关的元信息，比如：提供 Provider 的构造函数。通过 *servicehub.RegisterProvider* 来注册 Provider。
 * Hub，是所有 Provider 的容器，管理所有已加载的 Provider 的生命周期。
 
@@ -54,6 +55,25 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 * redis，对 redis 客户端的封装
 * zk-master-election，通过 zookeeper 实现主从选举
 * zookeeper，对 zookeeper 客户端的封装
+* serviceregister，封装提供统一注册 grpc 和 http 接口的能力
+
+# 工具
+protoc-gen-go-* 系列工具依赖 protobuf 编译器，参考 [protobuf](https://github.com/protocolbuffers/protobuf) 项目进行安装。
+
+也可以通过 Docker 容器来使用以下工具。
+
+```sh
+docker run --rm -ti -v $(pwd):/go \
+    registry.cn-hangzhou.aliyuncs.com/dice/erda-tools protoc.sh usage
+```
+
+* protoc-gen-go-grpc，根据 *.proto 文件，提供 grpc server 和 client 支持。
+* protoc-gen-go-http，根据 *.proto 文件，对定义的 Service 提供 http server 支持。
+* protoc-gen-go-form，根据 *.proto 文件，对定义的 Message 提供 http form 编解码的支持。
+* protoc-gen-go-client，根据 *.proto 文件，编译统一的客户端，以及对应的 Provider 。
+* protoc-gen-go-register，方便 Provider 注册 Service 。
+* protoc-gen-go-provider，根据 *.proto 文件，生成 实现 Service 的 Provider 模版，方便快速开发模块。
+* protoc.sh，针对 protoc-gen-go-* 系列工具的封装，方便 Service 模块的开发。
 
 ## License
 Erda is under the Apache 2.0 license. See the [LICENSE](/LICENSE) file for details.

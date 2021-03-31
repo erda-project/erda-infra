@@ -7,71 +7,76 @@ import (
 	"fmt"
 )
 
-type testWrite struct {
+type testWriter struct {
 	capacity int
 }
 
-func (w *testWrite) Write(data interface{}) error {
+func (w *testWriter) Write(data interface{}) error {
 	fmt.Printf("Write data ok")
 	return nil
 }
 
-func (w *testWrite) WriteN(data ...interface{}) (int, error) {
+func (w *testWriter) WriteN(data ...interface{}) (int, error) {
 	if w.capacity <= 0 {
 		err := fmt.Errorf("buffer max capacity")
 		return 0, err
 	}
 	w.capacity -= len(data)
-	fmt.Println("WriteN ", len(data), data)
+	fmt.Printf("WriteN size: %d, data: %v\n", len(data), data)
 	return len(data), nil
 }
 
-func (w *testWrite) Close() error {
+func (w *testWriter) Close() error {
 	fmt.Println("Close")
 	return nil
 }
 
 func ExampleBuffer() {
-	buf := NewBuffer(&testWrite{2}, 4)
+	buf := NewBuffer(&testWriter{2}, 4)
 	n, err := buf.WriteN(1, 2, 3, 4, 5, 6, 7, 8, 9)
-	fmt.Println(n, buf.buf, err)
+	fmt.Printf("writes: %d, buffered: %v, err: %s\n", n, buf.buf, err)
 
 	err = buf.Close()
 	fmt.Println(err)
 
 	// Output:
-	// WriteN  4 [1 2 3 4]
-	// 8 [5 6 7 8] buffer max capacity
+	// WriteN size: 4, data: [1 2 3 4]
+	// writes: 8, buffered: [5 6 7 8], err: buffer max capacity
 	// Close
 	// buffer max capacity
 }
 
-func ExampleBuffer_spitWrite() {
-	buf := NewBuffer(&testWrite{10}, 3)
+func ExampleBuffer_write() {
+	buf := NewBuffer(&testWriter{10}, 3)
 	n, err := buf.WriteN(1, 2, 3, 4, 5)
-	fmt.Println(n, buf.buf, err)
+	fmt.Printf("writes: %d, buffered: %v, err: %v\n", n, buf.buf, err)
 
 	n, err = buf.WriteN(6)
-	fmt.Println(n, buf.buf, err)
+	fmt.Printf("writes: %d, buffered: %v, err: %v\n", n, buf.buf, err)
 
 	n, err = buf.WriteN(7, 8, 9)
-	fmt.Println(n, buf.buf, err)
+	fmt.Printf("writes: %d, buffered: %v, err: %v\n", n, buf.buf, err)
 
 	n, err = buf.WriteN(10, 11)
-	fmt.Println(n, buf.buf, err)
+	fmt.Printf("writes: %d, buffered: %v, err: %v\n", n, buf.buf, err)
+
+	n, err = buf.WriteN(10, 11)
+	fmt.Printf("writes: %d, buffered: %v, err: %v\n", n, buf.buf, err)
 
 	// Output:
-	// WriteN  3 [1 2 3]
-	// 5 [4 5] <nil>
-	// WriteN  3 [4 5 6]
-	// 1 [] <nil>
-	// 3 [7 8 9] <nil>
-	// WriteN  3 [7 8 9]
-	// 2 [10 11] <nil>
+	// WriteN size: 3, data: [1 2 3]
+	// writes: 5, buffered: [4 5], err: <nil>
+	// WriteN size: 3, data: [4 5 6]
+	// writes: 1, buffered: [], err: <nil>
+	// writes: 3, buffered: [7 8 9], err: <nil>
+	// WriteN size: 3, data: [7 8 9]
+	// writes: 2, buffered: [10 11], err: <nil>
+	// WriteN size: 3, data: [10 11 10]
+	// writes: 2, buffered: [11], err: <nil>
 }
 
 func ExampleBuffer_for() {
-	buf := NewBuffer(&testWrite{100}, 3)
+	buf := NewBuffer(&testWriter{100}, 3)
 	data := make([]interface{}, 10, 10)
 	for i := range data {
 		data[i] = i
@@ -87,25 +92,25 @@ func ExampleBuffer_for() {
 	fmt.Println(buf.buf, err)
 
 	// Output:
-	// WriteN  3 [0 0 1]
-	// WriteN  3 [0 1 2]
-	// WriteN  3 [0 1 2]
-	// WriteN  3 [3 0 1]
-	// WriteN  3 [2 3 4]
-	// WriteN  3 [0 1 2]
-	// WriteN  3 [3 4 5]
-	// WriteN  3 [0 1 2]
-	// WriteN  3 [3 4 5]
-	// WriteN  3 [6 0 1]
-	// WriteN  3 [2 3 4]
-	// WriteN  3 [5 6 7]
-	// WriteN  3 [0 1 2]
-	// WriteN  3 [3 4 5]
-	// WriteN  3 [6 7 8]
-	// WriteN  3 [0 1 2]
-	// WriteN  3 [3 4 5]
-	// WriteN  3 [6 7 8]
-	// WriteN  1 [9]
+	// WriteN size: 3, data: [0 0 1]
+	// WriteN size: 3, data: [0 1 2]
+	// WriteN size: 3, data: [0 1 2]
+	// WriteN size: 3, data: [3 0 1]
+	// WriteN size: 3, data: [2 3 4]
+	// WriteN size: 3, data: [0 1 2]
+	// WriteN size: 3, data: [3 4 5]
+	// WriteN size: 3, data: [0 1 2]
+	// WriteN size: 3, data: [3 4 5]
+	// WriteN size: 3, data: [6 0 1]
+	// WriteN size: 3, data: [2 3 4]
+	// WriteN size: 3, data: [5 6 7]
+	// WriteN size: 3, data: [0 1 2]
+	// WriteN size: 3, data: [3 4 5]
+	// WriteN size: 3, data: [6 7 8]
+	// WriteN size: 3, data: [0 1 2]
+	// WriteN size: 3, data: [3 4 5]
+	// WriteN size: 3, data: [6 7 8]
+	// WriteN size: 1, data: [9]
 	// Close
 	// [] <nil>
 }
