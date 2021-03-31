@@ -41,7 +41,7 @@ func (p *provider) Run(ctx context.Context) error {
 }
 
 func init() {
-	servicehub.RegisterProviderSpec("hello-provider", &servicehub.Spec{
+	servicehub.Register("hello-provider", &servicehub.Spec{
 		Services:    []string{"hello"},
 		Description: "hello for example",
 		ConfigFunc: func() interface{} {

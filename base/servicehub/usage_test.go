@@ -7,7 +7,7 @@ import "testing"
 
 func TestUsage(t *testing.T) {
 
-	RegisterProviderSpec("test1-provider", &Spec{
+	Register("test1-provider", &Spec{
 		Services:    []string{"test"},
 		Description: "this is provider for test1",
 		ConfigFunc: func() interface{} {
@@ -20,7 +20,7 @@ func TestUsage(t *testing.T) {
 		},
 	})
 
-	RegisterProviderSpec("test2-provider", &Spec{
+	Register("test2-provider", &Spec{
 		Services:    []string{"test"},
 		Description: "this is provider for test2",
 		ConfigFunc: func() interface{} {

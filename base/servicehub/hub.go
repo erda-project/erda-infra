@@ -231,7 +231,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				if key != name {
 					key = fmt.Sprintf("%s (%s)", key, name)
 				}
-				h.logger.Debugf("provider %s starting ...", key)
+				h.logger.Infof("provider %s starting ...", key)
 				err := provider.Start()
 				if err != nil {
 					h.logger.Errorf("fail to start provider %s: %s", key, err)
@@ -249,7 +249,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				if key != name {
 					key = fmt.Sprintf("%s (%s)", key, name)
 				}
-				h.logger.Debugf("provider %s running ...", key)
+				h.logger.Infof("provider %s running ...", key)
 				err := provider.Run(ctx)
 				if err != nil {
 					h.logger.Errorf("fail to run provider %s: %s", key, err)

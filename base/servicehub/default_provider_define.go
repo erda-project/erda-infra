@@ -5,7 +5,7 @@ package servicehub
 
 import "reflect"
 
-// Spec define provider and register with RegisterProviderSpec function
+// Spec define provider and register with Register function
 type Spec struct {
 	Services     []string           // optional
 	Dependencies []string           // optional
@@ -16,14 +16,14 @@ type Spec struct {
 	Creator      Creator            // required
 }
 
-// RegisterProviderSpec .
-func RegisterProviderSpec(name string, spec *Spec) {
+// Register .
+func Register(name string, spec *Spec) {
 	RegisterProvider(name, &specDefine{spec}) // wrap Spec as ProviderDefine
 }
 
 // ensure specDefine implements some interface
 var (
-	// _ ProviderDefine       = (*specDefine)(nil) // Through RegisterProvider to ensure
+	// _ ProviderDefine       = (*specDefine)(nil) // through RegisterProvider to ensure
 	_ ProviderServices     = (*specDefine)(nil)
 	_ ServiceTypes         = (*specDefine)(nil)
 	_ ProviderUsageSummary = (*specDefine)(nil)
@@ -59,7 +59,10 @@ func (d *specDefine) Description() string {
 }
 
 func (d *specDefine) Config() interface{} {
-	return d.s.ConfigFunc()
+	if d.s.ConfigFunc != nil {
+		return d.s.ConfigFunc()
+	}
+	return nil
 }
 
 func (d *specDefine) Creator() Creator {

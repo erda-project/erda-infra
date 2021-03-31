@@ -1,9 +1,5 @@
 http-server:
     addr: ":8080"
 
-http-server@admin:
-    addr: ":8081"
-pprof:
-
 hello:
     message: "hello world"
