@@ -101,7 +101,7 @@ hub-test-provider:
 		t.Errorf("logger is nil")
 	}
 	if provider.Cfg != cfg {
-		t.Errorf("config is got %v, but want %v", provider.Cfg, cfg)
+		t.Errorf("config got %v, but want %v", provider.Cfg, cfg)
 	}
 	if cfg.Message != "hello world" {
 		t.Errorf("read config error, got cfg.Message = %q, but want %q", cfg.Message, "hello world")
