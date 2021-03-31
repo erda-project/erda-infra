@@ -10,7 +10,7 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 一些 Go 项目基于该框架进行构建:
 * [Erda](https://github.com/erda-project/erda)
 
-# 特性
+## 特性
 * 模块化设计，支持可插拔
 * 统一配置读取，支持默认值、支持从文件、环境变量、命令行参数等
 * 统一模块的初始化、启动、关闭
@@ -20,7 +20,7 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 * 支持统一 grpc 和 http 接口设计
 * 等等
 
-# 概念 
+## 概念 
 * Service，服务，表示某个具体的功能
 * Provider，服务的提供者，提供一个或多个 Service，也可以依赖0个或多个其他 Service，被依赖的 Service 由其他 Provider 提供。
 * ProviderDefine，提供 Provider 相关的元信息，比如：提供 Provider 的构造函数。通过 *servicehub.RegisterProvider* 来注册 Provider。
@@ -35,7 +35,7 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 
 [例子](base/servicehub/examples)
 
-# 微模块
+## 微模块
 该项目中已经封装了许多可用的模块，在 [providers/](providers/) 目录下可以找到。
 
 每一个模块下面，都有一个 examples 目录，包含了该模块的使用例子。
