@@ -62,12 +62,11 @@ func (p *test1Provider) Close() error {
 }
 
 func TestHub(t *testing.T) {
-
 	runningWait.Add(2)
 	initWait.Add(3)
-	Register("test1-provider", &Spec{
+	Register("hub-test-provider", &Spec{
 		Services:    []string{"test"},
-		Description: "this is provider for test1",
+		Description: "this is provider for test",
 		ConfigFunc: func() interface{} {
 			defer initWait.Done()
 			step = append(step, "create config")
@@ -87,7 +86,7 @@ func TestHub(t *testing.T) {
 		defer wg.Done()
 		hub.RunWithOptions(&RunOptions{
 			Content: `
-test1-provider:
+hub-test-provider:
     message: "hello world"
 `})
 	}()

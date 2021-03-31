@@ -65,7 +65,9 @@ test2-provider
 		},
 		{
 			name: "all providers",
-			args: args{},
+			args: args{
+				names: []string{"test1-provider", "test2-provider"},
+			},
 			want: `Service Providers:
 test1-provider
     this is provider for test1
