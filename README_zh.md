@@ -36,6 +36,42 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 
 [例子](base/servicehub/examples)
 
+## Quick Start
+
+```sh
+➜ # create service interface
+➜ ROOT_PATH=$(pwd)
+➜ ${ROOT_PATH}/tools/protoc.sh protocol examples/protocol/*.proto
+➜ 
+➜ # init module and implement service interface
+➜ mkdir -p examples/helloworld
+➜ cd examples/helloworld
+➜ ${ROOT_PATH}/tools/protoc.sh init "${ROOT_PATH}/examples/protocol/*.proto"
+➜ 
+➜ cd ${ROOT_PATH}/examples
+➜ 
+➜ # create main.go, like examples/main.go
+➜ # create examples.yaml, like examples/examples.yaml
+➜ 
+➜ go run main.go
+INFO[2021-04-02 20:30:34.072] provider http-server initialized             
+INFO[2021-04-02 20:30:34.073] provider grpc-server initialized             
+INFO[2021-04-02 20:30:34.073] provider health (depends [http-server]) initialized 
+INFO[2021-04-02 20:30:34.073] provider service-register (depends [grpc-server http-server]) initialized 
+INFO[2021-04-02 20:30:34.073] provider erda.infra.example (depends [service-register]) initialized 
+INFO[2021-04-02 20:30:34.073] signals to quit:[hangup interrupt terminated quit] 
+INFO[2021-04-02 20:30:34.073] provider http-server starting ...            
+INFO[2021-04-02 20:30:34.073] provider grpc-server starting ...            
+INFO[2021-04-02 20:30:34.073] :8080 --> [health] GET     /health            module=http-server
+INFO[2021-04-02 20:30:34.073] :8080 --> [service-register] GET     /api/hello/:name  module=http-server
+INFO[2021-04-02 20:30:34.073] :8080 --> [service-register] GET     /api/user/:id  module=http-server
+INFO[2021-04-02 20:30:34.073] starting grpc server at :7070                 module=grpc-server
+INFO[2021-04-02 20:30:34.073] :8080 --> [service-register] PUT     /api/user/:id  module=http-server
+INFO[2021-04-02 20:30:34.073] starting http server at :8080                 module=http-server
+
+```
+[Hello World](/examples)
+
 ## 微模块
 该项目中已经封装了许多可用的模块，在 [providers/](providers/) 目录下可以找到。
 
@@ -47,11 +83,11 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 * grpcserver，启动一个 grpc server
 * health，通过 httpserver 注册一个健康检查的接口
 * httpserver，提供一个 http server, 支持任意形式的处理函数、拦截器、参数绑定、参数校验等
-* i18n，提供了国际化的支持，可以统一管理国际化文件、支持模版。
-* kafka，提供了访问 kafka 相关的能力，更方便地去批量消费和推送消息。
+* i18n，提供了国际化的支持，可以统一管理国际化文件、支持模版
+* kafka，提供了访问 kafka 相关的能力，更方便地去批量消费和推送消息
 * kubernetes，对 kubernetes 客户端的封装
 * mysql，对 mysql 客户端的封装
-* pprof，通过 httpserver 注册一些 pprof 相关的接口。
+* pprof，通过 httpserver 注册一些 pprof 相关的接口
 * redis，对 redis 客户端的封装
 * zk-master-election，通过 zookeeper 实现主从选举
 * zookeeper，对 zookeeper 客户端的封装
@@ -67,13 +103,13 @@ docker run --rm -ti -v $(pwd):/go \
     registry.cn-hangzhou.aliyuncs.com/dice/erda-tools protoc.sh usage
 ```
 
-* protoc-gen-go-grpc，根据 *.proto 文件，提供 grpc server 和 client 支持。
-* protoc-gen-go-http，根据 *.proto 文件，对定义的 Service 提供 http server 支持。
-* protoc-gen-go-form，根据 *.proto 文件，对定义的 Message 提供 http form 编解码的支持。
-* protoc-gen-go-client，根据 *.proto 文件，编译统一的客户端，以及对应的 Provider 。
-* protoc-gen-go-register，方便 Provider 注册 Service 。
-* protoc-gen-go-provider，根据 *.proto 文件，生成 实现 Service 的 Provider 模版，方便快速开发模块。
-* protoc.sh，针对 protoc-gen-go-* 系列工具的封装，方便 Service 模块的开发。
+* protoc-gen-go-grpc，根据 *.proto 文件，提供 grpc server 和 client 支持
+* protoc-gen-go-http，根据 *.proto 文件，对定义的 Service 提供 http server 支持
+* protoc-gen-go-form，根据 *.proto 文件，对定义的 Message 提供 http form 编解码的支持
+* protoc-gen-go-client，根据 *.proto 文件，编译统一的客户端，以及对应的 Provider
+* protoc-gen-go-register，方便 Provider 注册 Service 
+* protoc-gen-go-provider，根据 *.proto 文件，生成 实现 Service 的 Provider 模版，方便快速开发模块
+* protoc.sh，针对 protoc-gen-go-* 系列工具的封装，方便 Service 模块的开发
 
 ## License
 Erda is under the Apache 2.0 license. See the [LICENSE](/LICENSE) file for details.

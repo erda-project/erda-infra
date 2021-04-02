@@ -75,6 +75,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func (p *provider) Start() error {
+	p.Log.Infof("starting grpc server at %s", p.Cfg.Addr)
 	return p.server.Serve(p.listen)
 }
 

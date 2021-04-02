@@ -35,4 +35,4 @@ RUN wget -O protoc.zip https://github.com/protocolbuffers/protobuf/releases/down
 
 COPY --from=build "$GOPATH/src/github.com/erda-project/erda-infra/tools/include/" "/usr/local/include/"
 COPY --from=build "$GOPATH/bin/" "/bin/"
-COPY --from=build "$GOPATH/src/github.com/erda-project/erda-infra/tools/dockerfile/protoc.sh" "/bin/"
+COPY --from=build "$GOPATH/src/github.com/erda-project/erda-infra/tools/protoc.sh" "/bin/"
