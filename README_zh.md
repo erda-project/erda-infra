@@ -59,7 +59,7 @@ INFO[2021-04-02 20:30:34.073] provider grpc-server initialized
 INFO[2021-04-02 20:30:34.073] provider health (depends [http-server]) initialized 
 INFO[2021-04-02 20:30:34.073] provider service-register (depends [grpc-server http-server]) initialized 
 INFO[2021-04-02 20:30:34.073] provider erda.infra.example (depends [service-register]) initialized 
-INFO[2021-04-02 20:30:34.073] signals to quit:[hangup interrupt terminated quit] 
+INFO[2021-04-02 20:30:34.073] signals to quit: [hangup interrupt terminated quit] 
 INFO[2021-04-02 20:30:34.073] provider http-server starting ...            
 INFO[2021-04-02 20:30:34.073] provider grpc-server starting ...            
 INFO[2021-04-02 20:30:34.073] :8080 --> [health] GET     /health            module=http-server

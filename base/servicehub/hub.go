@@ -212,7 +212,7 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 // StartWithSignal .
 func (h *Hub) StartWithSignal() error {
 	sigs := []os.Signal{syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT}
-	h.logger.Info("signals to quit:", sigs)
+	h.logger.Infof("signals to quit: %v", sigs)
 	return h.Start(signalx.Notify(sigs...))
 }
 

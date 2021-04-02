@@ -125,13 +125,14 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 	}
 	g.P("		},")
 	g.P("		Types: []", reflectPackage.Ident("Type"), "{")
-	g.P("		// client types")
+	g.P("			clientsType,")
+	g.P("			// client types")
 	for _, file := range files {
 		for _, ser := range file.Services {
 			g.P(lowerCaptain(ser.GoName+"ClientType"), ",")
 		}
 	}
-	g.P("		// server types")
+	g.P("			// server types")
 	for _, file := range files {
 		for _, ser := range file.Services {
 			g.P(lowerCaptain(ser.GoName+"ServerType"), ",")

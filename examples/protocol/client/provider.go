@@ -88,6 +88,7 @@ func init() {
 			"erda.infra.example.UserService",
 		},
 		Types: []reflect.Type{
+			clientsType,
 			// client types
 			greeterServiceClientType,
 			userServiceClientType,
