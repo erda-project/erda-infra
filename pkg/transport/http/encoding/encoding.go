@@ -64,6 +64,7 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 // EncodeResponse .
 func EncodeResponse(w http.ResponseWriter, r *http.Request, out interface{}) error {
 	accept := r.Header.Get("Accept")
+	var acceptAny bool
 	if len(accept) > 0 {
 		// TODO select MediaType of max q
 		for _, item := range strings.Split(accept, ",") {
@@ -71,49 +72,70 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, out interface{}) err
 			if err != nil {
 				return err
 			}
-			if mtype == "*/*" || mtype == "" {
+			if mtype == "*/*" {
+				acceptAny = true
 				continue
 			}
-			accept = mtype
-			break
+			ok, err := encodeResponse(mtype, w, r, out)
+			if ok {
+				if err != nil {
+					return err
+				}
+				return nil
+			}
 		}
 	}
-	if len(accept) <= 0 {
+	if acceptAny {
 		contentType := r.Header.Get("Content-Type")
-		if len(contentType) <= 0 {
-			return nil
+		if len(contentType) > 0 {
+			mtype, _, err := mime.ParseMediaType(contentType)
+			if err != nil {
+				return err
+			}
+			ok, err := encodeResponse(mtype, w, r, out)
+			if ok {
+				if err != nil {
+					return err
+				}
+				return nil
+			}
 		}
-		mtype, _, err := mime.ParseMediaType(contentType)
-		if err != nil {
-			return err
-		}
-		accept = mtype
+		_, err := encodeResponse("application/json", w, r, out)
+		return err
 	}
-	switch accept {
+	return fmt.Errorf("not support Marshal type %s with Accept %q", reflect.TypeOf(out).Name(), accept)
+}
+
+func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out interface{}) (bool, error) {
+	switch mtype {
 	case "application/protobuf", "application/x-protobuf":
 		if msg, ok := out.(proto.Message); ok {
 			byts, err := proto.Marshal(msg)
 			if err != nil {
-				return err
+				return false, err
 			}
+			w.Header().Set("Content-Type", "application/protobuf")
 			_, err = w.Write(byts)
-			return err
+			return true, err
+		}
+	case "application/x-www-form-urlencoded", "multipart/form-data":
+		if m, ok := out.(urlenc.URLValuesMarshaler); ok {
+			vals := make(url.Values)
+			w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+			return true, m.MarshalURLValues("", vals)
 		}
 	case "application/json":
 		if msg, ok := out.(proto.Message); ok {
 			byts, err := protojson.Marshal(msg)
 			if err != nil {
-				return err
+				return false, err
 			}
+			w.Header().Set("Content-Type", "application/json")
 			_, err = w.Write(byts)
-			return err
+			return true, err
 		}
-		return json.NewEncoder(w).Encode(out)
-	case "application/x-www-form-urlencoded", "multipart/form-data":
-		if m, ok := out.(urlenc.URLValuesMarshaler); ok {
-			vals := make(url.Values)
-			return m.MarshalURLValues("", vals)
-		}
+		w.Header().Set("Content-Type", "application/json")
+		return true, json.NewEncoder(w).Encode(out)
 	}
-	return fmt.Errorf("not support Marshal type %s with %s", reflect.TypeOf(out).Name(), accept)
+	return false, nil
 }
