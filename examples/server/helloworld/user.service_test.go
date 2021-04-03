@@ -48,7 +48,7 @@ func Test_userService_UpdateUser(t *testing.T) {
 	}
 	type args struct {
 		ctx context.Context
-		req *pb.GetUserRequest
+		req *pb.UpdateUserRequest
 	}
 	tests := []struct {
 		name     string

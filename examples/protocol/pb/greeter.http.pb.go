@@ -6,8 +6,12 @@ package pb
 import (
 	context "context"
 	http1 "net/http"
+	strings "strings"
 
+	transport "github.com/erda-project/erda-infra/pkg/transport"
 	http "github.com/erda-project/erda-infra/pkg/transport/http"
+	httprule "github.com/erda-project/erda-infra/pkg/transport/http/httprule"
+	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
 	urlenc "github.com/erda-project/erda-infra/pkg/urlenc"
 )
 
@@ -18,7 +22,7 @@ const _ = http.SupportPackageIsVersion1
 // GreeterServiceHandler is the server API for GreeterService service.
 type GreeterServiceHandler interface {
 	// say hello
-	// GET /api/hello/{name}
+	// GET /api/greeter/{name}
 	SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
 }
 
@@ -28,8 +32,7 @@ func RegisterGreeterServiceHandler(r http.Router, srv GreeterServiceHandler, opt
 	for _, op := range opts {
 		op(h)
 	}
-	type ConvertFunc func(http1.ResponseWriter, *http1.Request) (interface{}, error)
-	encodeFunc := func(fn ConvertFunc) http.HandlerFunc {
+	encodeFunc := func(fn func(http1.ResponseWriter, *http1.Request) (interface{}, error)) http.HandlerFunc {
 		return func(w http1.ResponseWriter, r *http1.Request) {
 			out, err := fn(w, r)
 			if err != nil {
@@ -42,31 +45,62 @@ func RegisterGreeterServiceHandler(r http.Router, srv GreeterServiceHandler, opt
 		}
 	}
 
-	convert_SayHello_to_HandlerFunc := func(fn func(context.Context, *HelloRequest) (*HelloResponse, error)) ConvertFunc {
+	add_SayHello := func(method, path string, fn func(context.Context, *HelloRequest) (*HelloResponse, error)) {
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return fn(ctx, req.(*HelloRequest))
 		}
+		var SayHello_info transport.ServiceInfo
 		if h.Interceptor != nil {
+			SayHello_info = transport.NewServiceInfo("erda.infra.example.GreeterService", "SayHello", srv)
 			handler = h.Interceptor(handler)
 		}
-		return func(w http1.ResponseWriter, r *http1.Request) (interface{}, error) {
-			var in HelloRequest
-			if err := h.Decode(r, &in); err != nil {
-				return nil, err
-			}
-			var input interface{} = &in
-			if u, ok := (input).(urlenc.URLValuesUnmarshaler); ok {
-				if err := u.UnmarshalURLValues("", r.URL.Query()); err != nil {
+		compiler, _ := httprule.Parse(path)
+		temp := compiler.Compile()
+		pattern, _ := runtime.NewPattern(httprule.SupportPackageIsVersion1, temp.OpCodes, temp.Pool, temp.Verb)
+		r.Add(method, path, encodeFunc(
+			func(w http1.ResponseWriter, r *http1.Request) (interface{}, error) {
+				var in HelloRequest
+				if err := h.Decode(r, &in); err != nil {
 					return nil, err
 				}
-			}
-			out, err := handler(r.Context(), &in)
-			if err != nil {
-				return out, err
-			}
-			return out, nil
-		}
+				var input interface{} = &in
+				if u, ok := (input).(urlenc.URLValuesUnmarshaler); ok {
+					if err := u.UnmarshalURLValues("", r.URL.Query()); err != nil {
+						return nil, err
+					}
+				}
+				path := r.URL.Path
+				if len(path) > 0 {
+					components := strings.Split(path[1:], "/")
+					last := len(components) - 1
+					var verb string
+					if idx := strings.LastIndex(components[last], ":"); idx >= 0 {
+						c := components[last]
+						components[last], verb = c[:idx], c[idx+1:]
+					}
+					vars, err := pattern.Match(components, verb)
+					if err != nil {
+						return nil, err
+					}
+					for k, val := range vars {
+						switch k {
+						case "name":
+							in.Name = val
+						}
+					}
+				}
+				ctx := context.WithValue(r.Context(), http.RequestContextKey, r)
+				if h.Interceptor != nil {
+					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, SayHello_info)
+				}
+				out, err := handler(ctx, &in)
+				if err != nil {
+					return out, err
+				}
+				return out, nil
+			}),
+		)
 	}
 
-	r.Add("GET", "/api/hello/{name}", encodeFunc(convert_SayHello_to_HandlerFunc(srv.SayHello)))
+	add_SayHello("GET", "/api/greeter/{name}", srv.SayHello)
 }

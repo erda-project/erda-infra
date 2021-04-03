@@ -86,6 +86,7 @@ func init() {
 		Services: []string{
 			"erda.infra.example.GreeterService",
 			"erda.infra.example.UserService",
+			"erda.infra.example-client",
 		},
 		Types: []reflect.Type{
 			clientsType,

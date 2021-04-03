@@ -6,23 +6,27 @@ package pb
 import (
 	reflect "reflect"
 
-	grpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
-	http "github.com/erda-project/erda-infra/pkg/transport/http"
+	transport "github.com/erda-project/erda-infra/pkg/transport"
 )
 
-// RegisterServices register all services.
-func RegisterServices(router_ http.Router, server_ grpc.ServiceRegistrar,
-	// greeter.proto
-	greeterService GreeterServiceServer,
-	// user.proto
-	userService UserServiceServer,
-) {
-	// greeter.proto
-	RegisterGreeterServiceHandler(router_, GreeterServiceHandler(greeterService))
-	RegisterGreeterServiceServer(server_, greeterService)
-	// user.proto
-	RegisterUserServiceHandler(router_, UserServiceHandler(userService))
-	RegisterUserServiceServer(server_, userService)
+// RegisterGreeterServiceImp greeter.proto
+func RegisterGreeterServiceImp(regester transport.Register, srv GreeterServiceServer, opts ...transport.ServiceOption) {
+	_ops := transport.DefaultServiceOptions()
+	for _, op := range opts {
+		op(_ops)
+	}
+	RegisterGreeterServiceHandler(regester, GreeterServiceHandler(srv), _ops.HTTP...)
+	RegisterGreeterServiceServer(regester, srv, _ops.GRPC...)
+}
+
+// RegisterUserServiceImp user.proto
+func RegisterUserServiceImp(regester transport.Register, srv UserServiceServer, opts ...transport.ServiceOption) {
+	_ops := transport.DefaultServiceOptions()
+	for _, op := range opts {
+		op(_ops)
+	}
+	RegisterUserServiceHandler(regester, UserServiceHandler(srv), _ops.HTTP...)
+	RegisterUserServiceServer(regester, srv, _ops.GRPC...)
 }
 
 // ServiceNames return all service names

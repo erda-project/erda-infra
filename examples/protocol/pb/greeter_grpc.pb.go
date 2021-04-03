@@ -6,6 +6,7 @@ package pb
 import (
 	context "context"
 
+	transport "github.com/erda-project/erda-infra/pkg/transport"
 	grpc1 "github.com/erda-project/erda-infra/pkg/transport/grpc"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -78,7 +79,9 @@ func _get_GreeterService_serviceDesc(srv GreeterServiceServer, opts ...grpc1.Han
 	_GreeterService_SayHello_Handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.SayHello(ctx, req.(*HelloRequest))
 	}
+	var _GreeterService_SayHello_info transport.ServiceInfo
 	if h.Interceptor != nil {
+		_GreeterService_SayHello_info = transport.NewServiceInfo("erda.infra.example.GreeterService", "SayHello", srv)
 		_GreeterService_SayHello_Handler = h.Interceptor(_GreeterService_SayHello_Handler)
 	}
 
@@ -93,6 +96,12 @@ func _get_GreeterService_serviceDesc(srv GreeterServiceServer, opts ...grpc1.Han
 				}
 				if interceptor == nil && h.Interceptor == nil {
 					return srv.(GreeterServiceServer).SayHello(ctx, in)
+				}
+				if h.Interceptor != nil {
+					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, _GreeterService_SayHello_info)
+				}
+				if interceptor == nil {
+					return _GreeterService_SayHello_Handler(ctx, in)
 				}
 				info := &grpc.UnaryServerInfo{
 					Server:     srv,

@@ -6,8 +6,13 @@ package pb
 import (
 	context "context"
 	http1 "net/http"
+	strconv "strconv"
+	strings "strings"
 
+	transport "github.com/erda-project/erda-infra/pkg/transport"
 	http "github.com/erda-project/erda-infra/pkg/transport/http"
+	httprule "github.com/erda-project/erda-infra/pkg/transport/http/httprule"
+	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
 	urlenc "github.com/erda-project/erda-infra/pkg/urlenc"
 )
 
@@ -21,8 +26,8 @@ type UserServiceHandler interface {
 	// GET /api/user/{id}
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	// update user
-	// PUT /api/user/{id}
-	UpdateUser(context.Context, *GetUserRequest) (*UpdateUserResponse, error)
+	// PUT /api/user/{user.id}
+	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 }
 
 // RegisterUserServiceHandler register UserServiceHandler to http.Router.
@@ -31,8 +36,7 @@ func RegisterUserServiceHandler(r http.Router, srv UserServiceHandler, opts ...h
 	for _, op := range opts {
 		op(h)
 	}
-	type ConvertFunc func(http1.ResponseWriter, *http1.Request) (interface{}, error)
-	encodeFunc := func(fn ConvertFunc) http.HandlerFunc {
+	encodeFunc := func(fn func(http1.ResponseWriter, *http1.Request) (interface{}, error)) http.HandlerFunc {
 		return func(w http1.ResponseWriter, r *http1.Request) {
 			out, err := fn(w, r)
 			if err != nil {
@@ -45,58 +49,127 @@ func RegisterUserServiceHandler(r http.Router, srv UserServiceHandler, opts ...h
 		}
 	}
 
-	convert_GetUser_to_HandlerFunc := func(fn func(context.Context, *GetUserRequest) (*GetUserResponse, error)) ConvertFunc {
+	add_GetUser := func(method, path string, fn func(context.Context, *GetUserRequest) (*GetUserResponse, error)) {
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return fn(ctx, req.(*GetUserRequest))
 		}
+		var GetUser_info transport.ServiceInfo
 		if h.Interceptor != nil {
+			GetUser_info = transport.NewServiceInfo("erda.infra.example.UserService", "GetUser", srv)
 			handler = h.Interceptor(handler)
 		}
-		return func(w http1.ResponseWriter, r *http1.Request) (interface{}, error) {
-			var in GetUserRequest
-			if err := h.Decode(r, &in); err != nil {
-				return nil, err
-			}
-			var input interface{} = &in
-			if u, ok := (input).(urlenc.URLValuesUnmarshaler); ok {
-				if err := u.UnmarshalURLValues("", r.URL.Query()); err != nil {
+		compiler, _ := httprule.Parse(path)
+		temp := compiler.Compile()
+		pattern, _ := runtime.NewPattern(httprule.SupportPackageIsVersion1, temp.OpCodes, temp.Pool, temp.Verb)
+		r.Add(method, path, encodeFunc(
+			func(w http1.ResponseWriter, r *http1.Request) (interface{}, error) {
+				var in GetUserRequest
+				if err := h.Decode(r, &in); err != nil {
 					return nil, err
 				}
-			}
-			out, err := handler(r.Context(), &in)
-			if err != nil {
-				return out, err
-			}
-			return out, nil
-		}
+				var input interface{} = &in
+				if u, ok := (input).(urlenc.URLValuesUnmarshaler); ok {
+					if err := u.UnmarshalURLValues("", r.URL.Query()); err != nil {
+						return nil, err
+					}
+				}
+				path := r.URL.Path
+				if len(path) > 0 {
+					components := strings.Split(path[1:], "/")
+					last := len(components) - 1
+					var verb string
+					if idx := strings.LastIndex(components[last], ":"); idx >= 0 {
+						c := components[last]
+						components[last], verb = c[:idx], c[idx+1:]
+					}
+					vars, err := pattern.Match(components, verb)
+					if err != nil {
+						return nil, err
+					}
+					for k, val := range vars {
+						switch k {
+						case "id":
+							in.Id = val
+						}
+					}
+				}
+				ctx := context.WithValue(r.Context(), http.RequestContextKey, r)
+				if h.Interceptor != nil {
+					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, GetUser_info)
+				}
+				out, err := handler(ctx, &in)
+				if err != nil {
+					return out, err
+				}
+				return out, nil
+			}),
+		)
 	}
 
-	convert_UpdateUser_to_HandlerFunc := func(fn func(context.Context, *GetUserRequest) (*UpdateUserResponse, error)) ConvertFunc {
+	add_UpdateUser := func(method, path string, fn func(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)) {
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			return fn(ctx, req.(*GetUserRequest))
+			return fn(ctx, req.(*UpdateUserRequest))
 		}
+		var UpdateUser_info transport.ServiceInfo
 		if h.Interceptor != nil {
+			UpdateUser_info = transport.NewServiceInfo("erda.infra.example.UserService", "UpdateUser", srv)
 			handler = h.Interceptor(handler)
 		}
-		return func(w http1.ResponseWriter, r *http1.Request) (interface{}, error) {
-			var in GetUserRequest
-			if err := h.Decode(r, &in); err != nil {
-				return nil, err
-			}
-			var input interface{} = &in
-			if u, ok := (input).(urlenc.URLValuesUnmarshaler); ok {
-				if err := u.UnmarshalURLValues("", r.URL.Query()); err != nil {
+		compiler, _ := httprule.Parse(path)
+		temp := compiler.Compile()
+		pattern, _ := runtime.NewPattern(httprule.SupportPackageIsVersion1, temp.OpCodes, temp.Pool, temp.Verb)
+		r.Add(method, path, encodeFunc(
+			func(w http1.ResponseWriter, r *http1.Request) (interface{}, error) {
+				var in UpdateUserRequest
+				if err := h.Decode(r, &in); err != nil {
 					return nil, err
 				}
-			}
-			out, err := handler(r.Context(), &in)
-			if err != nil {
-				return out, err
-			}
-			return out, nil
-		}
+				var input interface{} = &in
+				if u, ok := (input).(urlenc.URLValuesUnmarshaler); ok {
+					if err := u.UnmarshalURLValues("", r.URL.Query()); err != nil {
+						return nil, err
+					}
+				}
+				path := r.URL.Path
+				if len(path) > 0 {
+					components := strings.Split(path[1:], "/")
+					last := len(components) - 1
+					var verb string
+					if idx := strings.LastIndex(components[last], ":"); idx >= 0 {
+						c := components[last]
+						components[last], verb = c[:idx], c[idx+1:]
+					}
+					vars, err := pattern.Match(components, verb)
+					if err != nil {
+						return nil, err
+					}
+					for k, val := range vars {
+						switch k {
+						case "user.id":
+							if in.User == nil {
+								in.User = &User{}
+							}
+							val, err := strconv.ParseInt(val, 10, 64)
+							if err != nil {
+								return nil, err
+							}
+							in.User.Id = val
+						}
+					}
+				}
+				ctx := context.WithValue(r.Context(), http.RequestContextKey, r)
+				if h.Interceptor != nil {
+					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, UpdateUser_info)
+				}
+				out, err := handler(ctx, &in)
+				if err != nil {
+					return out, err
+				}
+				return out, nil
+			}),
+		)
 	}
 
-	r.Add("GET", "/api/user/{id}", encodeFunc(convert_GetUser_to_HandlerFunc(srv.GetUser)))
-	r.Add("PUT", "/api/user/{id}", encodeFunc(convert_UpdateUser_to_HandlerFunc(srv.UpdateUser)))
+	add_GetUser("GET", "/api/user/{id}", srv.GetUser)
+	add_UpdateUser("PUT", "/api/user/{user.id}", srv.UpdateUser)
 }

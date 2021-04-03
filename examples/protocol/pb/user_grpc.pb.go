@@ -6,6 +6,7 @@ package pb
 import (
 	context "context"
 
+	transport "github.com/erda-project/erda-infra/pkg/transport"
 	grpc1 "github.com/erda-project/erda-infra/pkg/transport/grpc"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -23,7 +24,7 @@ type UserServiceClient interface {
 	// get user
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	// update user
-	UpdateUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
+	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
 }
 
 type userServiceClient struct {
@@ -43,7 +44,7 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opt
 	return out, nil
 }
 
-func (c *userServiceClient) UpdateUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error) {
+func (c *userServiceClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error) {
 	out := new(UpdateUserResponse)
 	err := c.cc.Invoke(ctx, "/erda.infra.example.UserService/UpdateUser", in, out, opts...)
 	if err != nil {
@@ -59,7 +60,7 @@ type UserServiceServer interface {
 	// get user
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	// update user
-	UpdateUser(context.Context, *GetUserRequest) (*UpdateUserResponse, error)
+	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 }
 
 // UnimplementedUserServiceServer should be embedded to have forward compatible implementations.
@@ -69,7 +70,7 @@ type UnimplementedUserServiceServer struct {
 func (*UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (*UnimplementedUserServiceServer) UpdateUser(context.Context, *GetUserRequest) (*UpdateUserResponse, error) {
+func (*UnimplementedUserServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
 
@@ -94,14 +95,18 @@ func _get_UserService_serviceDesc(srv UserServiceServer, opts ...grpc1.HandleOpt
 	_UserService_GetUser_Handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.GetUser(ctx, req.(*GetUserRequest))
 	}
+	var _UserService_GetUser_info transport.ServiceInfo
 	if h.Interceptor != nil {
+		_UserService_GetUser_info = transport.NewServiceInfo("erda.infra.example.UserService", "GetUser", srv)
 		_UserService_GetUser_Handler = h.Interceptor(_UserService_GetUser_Handler)
 	}
 
 	_UserService_UpdateUser_Handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.UpdateUser(ctx, req.(*GetUserRequest))
+		return srv.UpdateUser(ctx, req.(*UpdateUserRequest))
 	}
+	var _UserService_UpdateUser_info transport.ServiceInfo
 	if h.Interceptor != nil {
+		_UserService_UpdateUser_info = transport.NewServiceInfo("erda.infra.example.UserService", "UpdateUser", srv)
 		_UserService_UpdateUser_Handler = h.Interceptor(_UserService_UpdateUser_Handler)
 	}
 
@@ -117,6 +122,12 @@ func _get_UserService_serviceDesc(srv UserServiceServer, opts ...grpc1.HandleOpt
 				if interceptor == nil && h.Interceptor == nil {
 					return srv.(UserServiceServer).GetUser(ctx, in)
 				}
+				if h.Interceptor != nil {
+					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, _UserService_GetUser_info)
+				}
+				if interceptor == nil {
+					return _UserService_GetUser_Handler(ctx, in)
+				}
 				info := &grpc.UnaryServerInfo{
 					Server:     srv,
 					FullMethod: "/erda.infra.example.UserService/GetUser",
@@ -127,12 +138,18 @@ func _get_UserService_serviceDesc(srv UserServiceServer, opts ...grpc1.HandleOpt
 		{
 			MethodName: "UpdateUser",
 			Handler: func(_ interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-				in := new(GetUserRequest)
+				in := new(UpdateUserRequest)
 				if err := dec(in); err != nil {
 					return nil, err
 				}
 				if interceptor == nil && h.Interceptor == nil {
 					return srv.(UserServiceServer).UpdateUser(ctx, in)
+				}
+				if h.Interceptor != nil {
+					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, _UserService_UpdateUser_info)
+				}
+				if interceptor == nil {
+					return _UserService_UpdateUser_Handler(ctx, in)
 				}
 				info := &grpc.UnaryServerInfo{
 					Server:     srv,

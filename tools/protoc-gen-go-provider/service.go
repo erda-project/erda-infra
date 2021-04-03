@@ -34,7 +34,7 @@ func genServices(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 			for _, m := range ser.Methods {
 				g.P("func (s *", typeName, ") ", m.GoName, "(ctx ", contextPackage.Ident("Context"), ",req *", m.Input.GoIdent, ") (*", m.Output.GoIdent, ", error) {")
 				g.P("	// TODO .")
-				g.P("	return nil, ", statusPackage.Ident("Errorf"), "(", codesPackage.Ident("Unimplemented"), ", \"method SayHello not implemented\")")
+				g.P("	return nil, ", statusPackage.Ident("Errorf"), "(", codesPackage.Ident("Unimplemented"), ", \"method ", m.GoName, " not implemented\")")
 				g.P("}")
 			}
 

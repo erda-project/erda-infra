@@ -34,6 +34,34 @@ type HandleOptions struct {
 	Interceptor interceptor.Interceptor
 }
 
+// WithInterceptor .
+func WithInterceptor(o interceptor.Interceptor) HandleOption {
+	return func(opts *HandleOptions) {
+		opts.Interceptor = o
+	}
+}
+
+// WithDecoder .
+func WithDecoder(o DecodeRequestFunc) HandleOption {
+	return func(opts *HandleOptions) {
+		opts.Decode = o
+	}
+}
+
+// WithEncoder .
+func WithEncoder(o EncodeResponseFunc) HandleOption {
+	return func(opts *HandleOptions) {
+		opts.Encode = o
+	}
+}
+
+// WithErrorEncoder .
+func WithErrorEncoder(o EncodeErrorFunc) HandleOption {
+	return func(opts *HandleOptions) {
+		opts.Error = o
+	}
+}
+
 // HandlerFunc .
 type HandlerFunc func(http.ResponseWriter, *http.Request)
 
@@ -49,3 +77,8 @@ type RouterFunc func(method, path string, handler HandlerFunc)
 func (fn RouterFunc) Add(method, path string, handler HandlerFunc) {
 	fn(method, path, handler)
 }
+
+type requestContextKey int8
+
+// RequestContextKey .
+const RequestContextKey = requestContextKey(0)

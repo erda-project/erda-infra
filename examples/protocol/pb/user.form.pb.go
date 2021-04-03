@@ -37,6 +37,16 @@ func (m *User) UnmarshalURLValues(prefix string, values url.Values) error {
 					return err
 				}
 				m.Age = int32(val)
+			case "books":
+				list := make([]int64, 0, len(vals))
+				for _, text := range vals {
+					val, err := strconv.ParseInt(text, 10, 64)
+					if err != nil {
+						return err
+					}
+					list = append(list, val)
+				}
+				m.Books = list
 			}
 		}
 	}
@@ -94,6 +104,19 @@ func (m *GetUserResponse) UnmarshalURLValues(prefix string, values url.Values) e
 					return err
 				}
 				m.Data.Age = int32(val)
+			case "data.books":
+				if m.Data == nil {
+					m.Data = &User{}
+				}
+				list := make([]int64, 0, len(vals))
+				for _, text := range vals {
+					val, err := strconv.ParseInt(text, 10, 64)
+					if err != nil {
+						return err
+					}
+					list = append(list, val)
+				}
+				m.Data.Books = list
 			}
 		}
 	}
@@ -105,33 +128,46 @@ func (m *UpdateUserRequest) UnmarshalURLValues(prefix string, values url.Values)
 	for key, vals := range values {
 		if len(vals) > 0 {
 			switch prefix + key {
-			case "data":
-				if m.Data == nil {
-					m.Data = &User{}
+			case "user":
+				if m.User == nil {
+					m.User = &User{}
 				}
-			case "data.id":
-				if m.Data == nil {
-					m.Data = &User{}
+			case "user.id":
+				if m.User == nil {
+					m.User = &User{}
 				}
 				val, err := strconv.ParseInt(vals[0], 10, 64)
 				if err != nil {
 					return err
 				}
-				m.Data.Id = val
-			case "data.name":
-				if m.Data == nil {
-					m.Data = &User{}
+				m.User.Id = val
+			case "user.name":
+				if m.User == nil {
+					m.User = &User{}
 				}
-				m.Data.Name = vals[0]
-			case "data.age":
-				if m.Data == nil {
-					m.Data = &User{}
+				m.User.Name = vals[0]
+			case "user.age":
+				if m.User == nil {
+					m.User = &User{}
 				}
 				val, err := strconv.ParseInt(vals[0], 10, 32)
 				if err != nil {
 					return err
 				}
-				m.Data.Age = int32(val)
+				m.User.Age = int32(val)
+			case "user.books":
+				if m.User == nil {
+					m.User = &User{}
+				}
+				list := make([]int64, 0, len(vals))
+				for _, text := range vals {
+					val, err := strconv.ParseInt(text, 10, 64)
+					if err != nil {
+						return err
+					}
+					list = append(list, val)
+				}
+				m.User.Books = list
 			}
 		}
 	}

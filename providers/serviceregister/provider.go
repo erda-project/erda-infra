@@ -4,12 +4,14 @@
 package register
 
 import (
+	"fmt"
 	"net/url"
 	"reflect"
 	"strings"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/pkg/transport"
 	transgrpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
 	transhttp "github.com/erda-project/erda-infra/pkg/transport/http"
 	"github.com/erda-project/erda-infra/providers/grpcserver"
@@ -18,23 +20,20 @@ import (
 )
 
 // Interface .
-type Interface interface {
-	transhttp.Router
-	transgrpc.ServiceRegistrar
-}
-
-type config struct{}
+type Interface = transport.Register
 
 type provider struct {
-	Cfg    *config
 	Log    logs.Logger
 	router httpserver.Router
 	grpc   grpcserver.Interface
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.router = ctx.Service("http-server").(httpserver.Router)
-	p.grpc = ctx.Service("grpc-server").(grpcserver.Interface)
+	p.router, _ = ctx.Service("http-server").(httpserver.Router)
+	p.grpc, _ = ctx.Service("grpc-server").(grpcserver.Interface)
+	if p.router == nil && p.grpc == nil {
+		return fmt.Errorf("not found http-server of grpc-server")
+	}
 	return nil
 }
 
@@ -55,12 +54,16 @@ type service struct {
 }
 
 func (s *service) Add(method, path string, handler transhttp.HandlerFunc) {
-	path = buildPath(path)
-	s.router.Add(method, path, handler)
+	if s.router != nil {
+		path = buildPath(path)
+		s.router.Add(method, path, handler)
+	}
 }
 
 func (s *service) RegisterService(sd *grpc.ServiceDesc, impl interface{}) {
-	s.grpc.RegisterService(sd, impl)
+	if s.grpc != nil {
+		s.grpc.RegisterService(sd, impl)
+	}
 }
 
 // buildPath convert googleapis path to echo path
@@ -121,11 +124,8 @@ func init() {
 			reflect.TypeOf((*transgrpc.ServiceRegistrar)(nil)).Elem(),
 			reflect.TypeOf((*transhttp.Router)(nil)).Elem(),
 		},
-		Dependencies: []string{"grpc-server", "http-server"},
-		Description:  "provide grpc and http server",
-		ConfigFunc: func() interface{} {
-			return &config{}
-		},
+		OptionalDependencies: []string{"grpc-server", "http-server"},
+		Description:          "provide grpc and http server",
 		Creator: func() servicehub.Provider {
 			return &provider{}
 		},

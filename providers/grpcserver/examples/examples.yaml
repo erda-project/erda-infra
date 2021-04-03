@@ -1,4 +1,4 @@
 grpc-server:
-    addr: ":7900"
+    addr: ":7070"
 
 examples:

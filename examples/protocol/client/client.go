@@ -58,6 +58,6 @@ func (s *userServiceWrapper) GetUser(ctx context.Context, req *pb.GetUserRequest
 	return s.client.GetUser(ctx, req, s.opts...)
 }
 
-func (s *userServiceWrapper) UpdateUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UpdateUserResponse, error) {
+func (s *userServiceWrapper) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	return s.client.UpdateUser(ctx, req, s.opts...)
 }

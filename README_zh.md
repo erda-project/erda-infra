@@ -34,7 +34,7 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 
 但更简单的是通过 *servicehub.Spec* 来描述一个模块，并 通过 *servicehub.Register* 函数进行注册。
 
-[例子](base/servicehub/examples)
+[例子](./base/servicehub/examples)
 
 ## Quick Start
 
@@ -43,37 +43,26 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 ➜ ROOT_PATH=$(pwd)
 ➜ ${ROOT_PATH}/tools/protoc.sh protocol examples/protocol/*.proto
 ➜ 
-➜ # init module and implement service interface
-➜ mkdir -p examples/helloworld
-➜ cd examples/helloworld
+➜ # create module 
+➜ mkdir -p examples/server/helloworld
+➜ cd examples/server/helloworld
 ➜ ${ROOT_PATH}/tools/protoc.sh init "${ROOT_PATH}/examples/protocol/*.proto"
 ➜ 
-➜ cd ${ROOT_PATH}/examples
+➜ # implement the service interface in examples/server/helloworld directory
 ➜ 
-➜ # create main.go, like examples/main.go
-➜ # create examples.yaml, like examples/examples.yaml
+➜ cd ${ROOT_PATH}/examples/server
+➜ 
+➜ # create main.go, like examples/server/main.go
+➜ # create server.yaml, like examples/server/server.yaml
 ➜ 
 ➜ go run main.go
-INFO[2021-04-02 20:30:34.072] provider http-server initialized             
-INFO[2021-04-02 20:30:34.073] provider grpc-server initialized             
-INFO[2021-04-02 20:30:34.073] provider health (depends [http-server]) initialized 
-INFO[2021-04-02 20:30:34.073] provider service-register (depends [grpc-server http-server]) initialized 
-INFO[2021-04-02 20:30:34.073] provider erda.infra.example (depends [service-register]) initialized 
-INFO[2021-04-02 20:30:34.073] signals to quit: [hangup interrupt terminated quit] 
-INFO[2021-04-02 20:30:34.073] provider http-server starting ...            
-INFO[2021-04-02 20:30:34.073] provider grpc-server starting ...            
-INFO[2021-04-02 20:30:34.073] :8080 --> [health] GET     /health            module=http-server
-INFO[2021-04-02 20:30:34.073] :8080 --> [service-register] GET     /api/hello/:name  module=http-server
-INFO[2021-04-02 20:30:34.073] :8080 --> [service-register] GET     /api/user/:id  module=http-server
-INFO[2021-04-02 20:30:34.073] starting grpc server at :7070                 module=grpc-server
-INFO[2021-04-02 20:30:34.073] :8080 --> [service-register] PUT     /api/user/:id  module=http-server
-INFO[2021-04-02 20:30:34.073] starting http server at :8080                 module=http-server
-
 ```
-[Hello World](/examples)
+![example](./examples/example.jpg)
+
+[Hello World](./examples) \( [Server](./examples/server) | [Client](./examples/client) \)
 
 ## 微模块
-该项目中已经封装了许多可用的模块，在 [providers/](providers/) 目录下可以找到。
+该项目中已经封装了许多可用的模块，在 [providers/](./providers) 目录下可以找到。
 
 每一个模块下面，都有一个 examples 目录，包含了该模块的使用例子。
 
@@ -81,6 +70,7 @@ INFO[2021-04-02 20:30:34.073] starting http server at :8080                 modu
 * etcd，对 etcd 客户端的封装
 * etcd-mutex，利用 etcd 实现的分布式锁
 * grpcserver，启动一个 grpc server
+* grpcclient，统一管理 grpc 客户端
 * health，通过 httpserver 注册一个健康检查的接口
 * httpserver，提供一个 http server, 支持任意形式的处理函数、拦截器、参数绑定、参数校验等
 * i18n，提供了国际化的支持，可以统一管理国际化文件、支持模版
@@ -100,7 +90,7 @@ protoc-gen-go-* 系列工具依赖 protobuf 编译器，参考 [protobuf](https:
 
 ```sh
 docker run --rm -ti -v $(pwd):/go \
-    registry.cn-hangzhou.aliyuncs.com/dice/erda-tools protoc.sh usage
+    registry.cn-hangzhou.aliyuncs.com/dice/erda-tools:1.0 protoc.sh usage
 ```
 
 * protoc-gen-go-grpc，根据 *.proto 文件，提供 grpc server 和 client 支持

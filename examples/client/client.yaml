@@ -1,0 +1,7 @@
+grpc-client:
+    addr: ":7070"
+
+erda.infra.example-client:
+
+client-example:
+    name: "recallsong"

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/erda-project/erda-infra/pkg/transport/http/httprule"
+	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -16,13 +17,7 @@ import (
 )
 
 const (
-	contextPackage   = protogen.GoImportPath("context")
-	httpPackage      = protogen.GoImportPath("net/http")
-	transportPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport/http")
-	urlencPackage    = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/urlenc")
-
-	base64Package  = protogen.GoImportPath("encoding/base64")
-	strconvPackage = protogen.GoImportPath("strconv")
+	transhttpPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport/http")
 )
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) (*protogen.GeneratedFile, error) {
@@ -47,8 +42,8 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) (*protogen.Generate
 	g.P()
 
 	g.P("// This is a compile-time assertion to ensure that this generated file")
-	g.P("// is compatible with the ", transportPackage, " package it is being compiled against.")
-	g.P("const _ = ", transportPackage.Ident("SupportPackageIsVersion1"))
+	g.P("// is compatible with the ", transhttpPackage, " package it is being compiled against.")
+	g.P("const _ = ", transhttpPackage.Ident("SupportPackageIsVersion1"))
 
 	for _, service := range file.Services {
 		err := genService(gen, file, g, service)
@@ -178,6 +173,10 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		}
 		tp := compiler.Compile()
 		pathParams = tp.Fields
+		_, err = runtime.NewPattern(httprule.SupportPackageIsVersion1, tp.OpCodes, tp.Pool, tp.Verb)
+		if err != nil {
+			return nil, fmt.Errorf("path %q NewPattern return error: %s", path, err)
+		}
 	}
 	return &methodDesc{
 		Name:        m.GoName,

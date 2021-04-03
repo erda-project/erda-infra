@@ -18,6 +18,7 @@ const (
 	codesPackage     = protogen.GoImportPath("google.golang.org/grpc/codes")
 	statusPackage    = protogen.GoImportPath("google.golang.org/grpc/status")
 	transgrpcPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport/grpc")
+	transportPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport")
 )
 
 // generateFile generates a _grpc.pb.go file containing gRPC service definitions.
@@ -232,7 +233,10 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 		g.P(hname, " := func(ctx ", contextPackage.Ident("Context"), ", req interface{}) (interface{}, error) {")
 		g.P("	return srv.", method.GoName, "(ctx, req.(*", method.Input.GoIdent, "))")
 		g.P("}")
+		infoVar := fmt.Sprintf("_%s_%s_info", service.GoName, method.GoName)
+		g.P("var ", infoVar, " ", transportPackage.Ident("ServiceInfo"))
 		g.P("if h.Interceptor != nil {")
+		g.P("	", infoVar, " = ", transportPackage.Ident("NewServiceInfo"), "(", strconv.Quote(string(service.Desc.FullName())), ",", strconv.Quote(method.GoName), ", srv)")
 		g.P("	", hname, " = h.Interceptor(", hname, ")")
 		g.P("}")
 		g.P()
@@ -244,12 +248,19 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 			continue
 		}
 		hname := handlerNames[i]
+		infoVar := fmt.Sprintf("_%s_%s_info", service.GoName, method.GoName)
 		g.P("	{")
 		g.P("		MethodName: ", strconv.Quote(string(method.Desc.Name())), ",")
 		g.P("		Handler: func (_ interface{}, ctx ", contextPackage.Ident("Context"), ", dec func(interface{}) error, interceptor ", grpcPackage.Ident("UnaryServerInterceptor"), ") (interface{}, error) {")
 		g.P("			in := new(", method.Input.GoIdent, ")")
 		g.P("			if err := dec(in); err != nil { return nil, err }")
 		g.P("			if interceptor == nil && h.Interceptor == nil { return srv.(", service.GoName, "Server).", method.GoName, "(ctx, in) }")
+		g.P("			if h.Interceptor != nil {")
+		g.P("				ctx = ", contextPackage.Ident("WithValue"), "(ctx, ", transportPackage.Ident("ServiceInfoContextKey"), ", ", infoVar, ")")
+		g.P("			}")
+		g.P("			if interceptor == nil {")
+		g.P("				return ", hname, "(ctx, in)")
+		g.P("			}")
 		g.P("			info := &", grpcPackage.Ident("UnaryServerInfo"), "{")
 		g.P("				Server: srv,")
 		g.P("				FullMethod: ", strconv.Quote(fmt.Sprintf("/%s/%s", service.Desc.FullName(), method.GoName)), ",")

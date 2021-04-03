@@ -14,9 +14,9 @@ type userService struct {
 
 func (s *userService) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	// TODO .
-	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (s *userService) UpdateUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UpdateUserResponse, error) {
+func (s *userService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	// TODO .
-	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }

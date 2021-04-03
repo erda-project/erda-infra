@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	transportPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport")
 	transhttpPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport/http")
 	transgrpcPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport/grpc")
 	reflectPackage   = protogen.GoImportPath("reflect")
@@ -56,24 +57,21 @@ func generateFiles(gen *protogen.Plugin, files []*protogen.File) (*protogen.Gene
 	g.P("// Source: ", strings.Join(sources, ", "))
 	g.P()
 	g.P("package ", file.GoPackageName)
-	g.P("// RegisterServices register all services.")
-	g.P("func RegisterServices(router_ ", transhttpPackage.Ident("Router"), ", server_ ", transgrpcPackage.Ident("ServiceRegistrar"), ",")
-	for _, file := range files {
-		g.P("// ", file.Desc.Path())
-		for _, ser := range file.Services {
-			g.P(lowerCaptain(ser.GoName), " ", ser.GoName, "Server,")
-		}
-	}
-	g.P(") {")
-	for _, file := range files {
-		g.P("// ", file.Desc.Path())
-		for _, ser := range file.Services {
-			g.P("Register", ser.GoName, "Handler(router_, ", ser.GoName, "Handler(", lowerCaptain(ser.GoName), "))")
-			g.P("Register", ser.GoName, "Server(server_, ", lowerCaptain(ser.GoName), ")")
-		}
-	}
-	g.P("}")
 	g.P()
+	for _, file := range files {
+		for _, ser := range file.Services {
+			g.P("// Register", ser.GoName, "Imp ", file.Desc.Path())
+			g.P("func Register", ser.GoName, "Imp(regester ", transportPackage.Ident("Register"), ", srv ", ser.GoName, "Server, opts ...", transportPackage.Ident("ServiceOption"), ") {")
+			g.P("	_ops := ", transportPackage.Ident("DefaultServiceOptions"), "()")
+			g.P("	for _, op := range opts {")
+			g.P("		op(_ops)")
+			g.P("	}")
+			g.P("	Register", ser.GoName, "Handler(regester, ", ser.GoName, "Handler(srv), _ops.HTTP...)")
+			g.P("	Register", ser.GoName, "Server(regester, srv, _ops.GRPC...)")
+			g.P("}")
+		}
+		g.P()
+	}
 	g.P("// ServiceNames return all service names")
 	g.P("func ServiceNames(svr ...string) []string {")
 	g.P("	return append(svr,")

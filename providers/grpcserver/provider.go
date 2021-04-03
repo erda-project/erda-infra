@@ -34,17 +34,16 @@ func (d *define) Description() string { return "grpc server" }
 func (d *define) Config() interface{} { return &config{} }
 func (d *define) Creator() servicehub.Creator {
 	return func() servicehub.Provider {
-		p := &provider{}
-		return p
+		return &provider{}
 	}
 }
 
 // config .
 type config struct {
-	Addr string `file:"addr" default:":7800" desc:"http address to listen"`
+	Addr string `file:"addr" default:":7070" desc:"grpc address to listen"`
 	TLS  struct {
-		CertFile string `file:"cert_file"`
-		KeyFile  string `file:"key_file"`
+		CertFile string `file:"cert_file" desc:"the TLS cert file"`
+		KeyFile  string `file:"key_file" desc:"the TLS key file"`
 	} `file:"tls"`
 }
 

@@ -51,3 +51,10 @@ type HandleOptions struct {
 func DefaultHandleOptions() *HandleOptions {
 	return &HandleOptions{}
 }
+
+// WithInterceptor .
+func WithInterceptor(o interceptor.Interceptor) HandleOption {
+	return func(opts *HandleOptions) {
+		opts.Interceptor = o
+	}
+}

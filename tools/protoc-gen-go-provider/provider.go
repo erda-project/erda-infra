@@ -15,7 +15,7 @@ import (
 const (
 	logPackage        = protogen.GoImportPath("github.com/erda-project/erda-infra/base/logs")
 	servicehubPackage = protogen.GoImportPath("github.com/erda-project/erda-infra/base/servicehub")
-	registerPackage   = protogen.GoImportPath("github.com/erda-project/erda-infra/providers/serviceregister")
+	transportPackage  = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport")
 )
 
 func generateFiles(gen *protogen.Plugin, files []*protogen.File) error {
@@ -60,7 +60,7 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 	g.P("type provider struct {")
 	g.P("	Cfg    *config")
 	g.P("	Log    ", logPackage.Ident("Logger"))
-	g.P("	Register   ", registerPackage.Ident("Interface"))
+	g.P("	Register   ", transportPackage.Ident("Register"))
 	g.P("}")
 	g.P()
 	g.P("func (p *provider) Init(ctx ", servicehubPackage.Ident("Context"), ") error {")
@@ -68,18 +68,11 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 	g.P()
 	for _, file := range files {
 		for _, ser := range file.Services {
-			g.P(lowerCaptain(ser.GoName), " := &", lowerCaptain(ser.GoName), "{}")
-
+			g.P(lowerCaptain(ser.GoName), " := &", lowerCaptain(ser.GoName), "{p}")
+			g.P(root.GoImportPath.Ident("Register"+ser.GoName+"Imp"), "(p.Register, ", lowerCaptain(ser.GoName), ")")
+			g.P()
 		}
 	}
-	g.P()
-	g.P("	", root.GoImportPath.Ident("RegisterServices"), "(p.Register, p.Register,")
-	for _, file := range files {
-		for _, ser := range file.Services {
-			g.P(lowerCaptain(ser.GoName), ",")
-		}
-	}
-	g.P("	)")
 	g.P("	return nil")
 	g.P("}")
 	g.P()

@@ -7,7 +7,9 @@ import (
 )
 
 const (
-	opcodeVersion = 1
+	// SupportPackageIsVersion1 .
+	SupportPackageIsVersion1 = 1
+	opcodeVersion            = 1
 )
 
 // Template is a compiled representation of path templates.

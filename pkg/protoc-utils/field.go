@@ -11,10 +11,11 @@ import (
 )
 
 // GetFieldPath .
-func GetFieldPath(key string, fields []*protogen.Field) (string, error) {
+func GetFieldPath(key string, fields []*protogen.Field) (string, *protogen.Field, error) {
 	keys := strings.Split(key, ".")
 	names := make([]string, len(keys))
 	last := len(keys) - 1
+	var pfield *protogen.Field
 
 	var fn func(keys []string, fields []*protogen.Field) error
 	fn = func(keys []string, fields []*protogen.Field) error {
@@ -30,6 +31,9 @@ func GetFieldPath(key string, fields []*protogen.Field) (string, error) {
 					return fn(keys[1:], field.Message.Fields)
 				}
 				names[last] = field.GoName
+				if pfield == nil {
+					pfield = field
+				}
 				last--
 				return nil
 			}
@@ -38,7 +42,7 @@ func GetFieldPath(key string, fields []*protogen.Field) (string, error) {
 	}
 	err := fn(strings.Split(key, "."), fields)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return strings.Join(names, "."), nil
+	return strings.Join(names, "."), pfield, nil
 }
