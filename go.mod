@@ -17,7 +17,6 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-zookeeper/zk v1.0.2
 	github.com/gofrs/uuid v4.0.0+incompatible
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.5.1 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/uuid v1.2.0 // indirect

@@ -23,9 +23,9 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 
 ## 概念 
 * Service，服务，表示某个具体的功能
-* Provider，服务的提供者，提供0个或多个 Service，也可以依赖0个或多个其他 Service，被依赖的 Service 由其他 Provider 提供。
-* ProviderDefine，提供 Provider 相关的元信息，比如：提供 Provider 的构造函数。通过 *servicehub.RegisterProvider* 来注册 Provider。
-* Hub，是所有 Provider 的容器，管理所有已加载的 Provider 的生命周期。
+* Provider，服务的提供者，提供0个或多个 Service，也可以依赖0个或多个其他 Service，被依赖的 Service 由其他 Provider 提供
+* ProviderDefine，提供 Provider 相关的元信息，比如：提供 Provider 的构造函数。通过 *servicehub.RegisterProvider* 来注册 Provider
+* Hub，是所有 Provider 的容器，管理所有已加载的 Provider 的生命周期
 
 所有已注册的 Provider 通过 一份配置来确定是否 加载，由 Hub 对已加载的 Provider 的进行初始化、启动、关闭等。
 
