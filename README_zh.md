@@ -102,4 +102,4 @@ docker run --rm -ti -v $(pwd):/go \
 * protoc.sh，针对 protoc-gen-go-* 系列工具的封装，方便 Service 模块的开发
 
 ## License
-Erda is under the Apache 2.0 license. See the [LICENSE](/LICENSE) file for details.
+Erda is under the AGPL 3.0 license. See the [LICENSE](/LICENSE) file for details.
