@@ -109,7 +109,7 @@ func (s *serviceDesc) execute(g *protogen.GeneratedFile) error {
 		if len(m.PathParams) > 0 {
 			g.P("	compiler, _ := ", httprulePackage.Ident("Parse"), "(path)")
 			g.P("	temp := compiler.Compile()")
-			g.P("	pattern, _ := runtime.NewPattern(", httprulePackage.Ident("SupportPackageIsVersion1"), ", temp.OpCodes, temp.Pool, temp.Verb)")
+			g.P("	pattern, _ := ", runtimePackage.Ident("NewPattern"), "(", httprulePackage.Ident("SupportPackageIsVersion1"), ", temp.OpCodes, temp.Pool, temp.Verb)")
 		}
 		g.P("	r.Add(method, path, encodeFunc(")
 		g.P("	func(w ", httpPackage.Ident("ResponseWriter"), ", r *", httpPackage.Ident("Request"), ") (interface{}, error) {")
