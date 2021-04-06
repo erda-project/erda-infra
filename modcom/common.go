@@ -55,10 +55,23 @@ func RegisterInitializer(fn func()) {
 // Hub global variable
 var Hub *servicehub.Hub
 
+var listener = &servicehub.DefaultListener{
+	BeforeInitFunc: func(h *servicehub.Hub, config map[string]interface{}) error {
+		if _, ok := config["i18n"]; !ok {
+			config["i18n"] = nil // i18n is required
+		}
+		return nil
+	},
+	AfterInitFunc: func(h *servicehub.Hub) error {
+		api.I18n = h.Service("i18n").(i18n.I18n)
+		return nil
+	},
+}
+
 // Run .
 func Run(cfg string) {
 	prepare()
-	Hub := servicehub.New(servicehub.WithListener(&listener{}))
+	Hub := servicehub.New(servicehub.WithListener(listener))
 	Hub.Run("", cfg, os.Args...)
 }
 
@@ -72,20 +85,6 @@ func RunWithCfgDir(dir, name string) {
 	cfg := path.Join(dir, name+GetEnv("CONFIG_SUFFIX", ".yaml"))
 
 	// create and run service hub
-	Hub := servicehub.New(servicehub.WithListener(&listener{}))
+	Hub := servicehub.New(servicehub.WithListener(listener))
 	Hub.Run("", cfg, os.Args...)
-}
-
-type listener struct{}
-
-func (l *listener) BeforeInitialization(h *servicehub.Hub, config map[string]interface{}) error {
-	if _, ok := config["i18n"]; !ok {
-		config["i18n"] = nil // i18n is required
-	}
-	return nil
-}
-
-func (l *listener) AfterInitialization(h *servicehub.Hub) error {
-	api.I18n = h.Service("i18n").(i18n.I18n)
-	return nil
 }

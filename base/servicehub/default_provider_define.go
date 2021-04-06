@@ -7,13 +7,14 @@ import "reflect"
 
 // Spec define provider and register with Register function
 type Spec struct {
-	Services     []string           // optional
-	Dependencies []string           // optional
-	Summary      string             // optional
-	Description  string             // optional
-	ConfigFunc   func() interface{} // optional
-	Types        []reflect.Type     // optional
-	Creator      Creator            // required
+	Services             []string           // optional
+	Dependencies         []string           // optional
+	OptionalDependencies []string           // optional
+	Summary              string             // optional
+	Description          string             // optional
+	ConfigFunc           func() interface{} // optional
+	Types                []reflect.Type     // optional
+	Creator              Creator            // required
 }
 
 // Register .
@@ -24,14 +25,15 @@ func Register(name string, spec *Spec) {
 // ensure specDefine implements some interface
 var (
 	// _ ProviderDefine       = (*specDefine)(nil) // through RegisterProvider to ensure
-	_ ProviderServices     = (*specDefine)(nil)
-	_ ServiceTypes         = (*specDefine)(nil)
-	_ ProviderUsageSummary = (*specDefine)(nil)
-	_ ProviderUsage        = (*specDefine)(nil)
-	_ ProviderUsage        = (*specDefine)(nil)
-	_ ServiceDependencies  = (*specDefine)(nil)
-	_ ConfigCreator        = (*specDefine)(nil)
-	_ ConfigCreator        = (*specDefine)(nil)
+	_ ProviderServices            = (*specDefine)(nil)
+	_ ServiceTypes                = (*specDefine)(nil)
+	_ ProviderUsageSummary        = (*specDefine)(nil)
+	_ ProviderUsage               = (*specDefine)(nil)
+	_ ProviderUsage               = (*specDefine)(nil)
+	_ ServiceDependencies         = (*specDefine)(nil)
+	_ OptionalServiceDependencies = (*specDefine)(nil)
+	_ ConfigCreator               = (*specDefine)(nil)
+	_ ConfigCreator               = (*specDefine)(nil)
 )
 
 type specDefine struct {
@@ -48,6 +50,10 @@ func (d *specDefine) Types() []reflect.Type {
 
 func (d *specDefine) Dependencies() []string {
 	return d.s.Dependencies
+}
+
+func (d *specDefine) OptionalDependencies() []string {
+	return d.s.OptionalDependencies
 }
 
 func (d *specDefine) Summary() string {

@@ -50,6 +50,11 @@ type ServiceDependencies interface {
 	Dependencies() []string
 }
 
+// OptionalServiceDependencies .
+type OptionalServiceDependencies interface {
+	OptionalDependencies() []string
+}
+
 // ConfigCreator .
 type ConfigCreator interface {
 	Config() interface{}

@@ -1,0 +1,11 @@
+http-server:
+    addr: ":8080"
+health:
+
+grpc-server:
+    addr: ":7070"
+
+service-register:
+
+# provide grpc and http service in server
+erda.infra.example:

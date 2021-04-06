@@ -115,3 +115,101 @@ hub-test-provider:
 		t.Errorf("tasks(%d) != exist(%d), maybe some function not exit", tasks, exits)
 	}
 }
+
+func TestHub_Dependencies(t *testing.T) {
+	Register("hub-test1-deps-provider", &Spec{
+		Services: []string{"test1"},
+		Creator: func() Provider {
+			return struct{}{}
+		},
+	})
+	Register("hub-test2-deps-provider", &Spec{
+		Services:     []string{"test2"},
+		Dependencies: []string{"test1"},
+		Creator: func() Provider {
+			return struct{}{}
+		},
+	})
+	Register("hub-test3-deps-provider", &Spec{
+		Services:             []string{"test3"},
+		Dependencies:         []string{"test1"},
+		OptionalDependencies: []string{"test2", "test4"},
+		Creator: func() Provider {
+			return struct{}{}
+		},
+	})
+	Register("hub-test4-deps-provider", &Spec{
+		Services:     []string{"test4"},
+		Dependencies: []string{"test3"},
+		Creator: func() Provider {
+			return struct{}{}
+		},
+	})
+
+	tests := []struct {
+		name    string
+		content string
+		hasErr  bool
+	}{
+		{
+			name: "Dependencies",
+			content: `
+hub-test1-deps-provider:
+hub-test2-deps-provider:
+`,
+		},
+		{
+			name: "Miss Dependencies",
+			content: `
+hub-test2-deps-provider:
+`,
+			hasErr: true,
+		},
+		{
+			name: "Dependencies And Optional Dependencies",
+			content: `
+hub-test1-deps-provider:
+hub-test2-deps-provider:
+hub-test3-deps-provider:
+`,
+		},
+		{
+			name: "Optional Dependencies",
+			content: `
+hub-test1-deps-provider:
+hub-test3-deps-provider:
+`,
+		},
+		{
+			name: "Circular Dependency",
+			content: `
+hub-test1-deps-provider:
+hub-test3-deps-provider:
+hub-test4-deps-provider:
+`,
+			hasErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			errCh := make(chan error)
+			hub := New(WithListener(&DefaultListener{
+				BeforeExitFunc: func(h *Hub, err error) error {
+					errCh <- err
+					return nil
+				},
+			}))
+			go func() {
+				hub.RunWithOptions(&RunOptions{Content: tt.content})
+			}()
+			err := <-errCh
+			if (err != nil) != tt.hasErr {
+				if tt.hasErr {
+					t.Errorf("got error %v, want err != nil", err)
+				} else {
+					t.Errorf("got error %v, want err == nil", err)
+				}
+			}
+		})
+	}
+}
