@@ -27,7 +27,8 @@ fi
 PB_DIR=$(dirname "${PB_FIELS}")
 
 WORKDIR="$(pwd)"
-PB_INCLUDES="${PB_INCLUDES} -I=/usr/local/include/"
+PKG_PATH=$(go run github.com/erda-project/erda-infra/tools/gopkg github.com/erda-project/erda-infra)
+PB_INCLUDES="${PB_INCLUDES} -I=${PKG_PATH}/tools/include/ -I=/usr/local/include/"
 
 # build protocol
 build_protocol() {
@@ -53,11 +54,14 @@ clean_result() {
 
 # build message only
 build_message() {
+    if [ -z "$PB_OUTPUT" ]; then
+        PB_OUTPUT=${PB_DIR}
+    fi
     protoc \
         -I=${PB_DIR} ${PB_INCLUDES} \
-        --go_out=${PB_DIR} --go_opt=paths=source_relative \
+        --go_out=${PB_OUTPUT} --go_opt=paths=source_relative \
         ${PB_FIELS}
-    goimports -w ${PB_DIR}/*.go
+    goimports -w ${PB_OUTPUT}/*.go
 }
 
 # init module
