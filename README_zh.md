@@ -41,7 +41,7 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量模块化设计相�
 ```sh
 ➜ # create service interface
 ➜ ROOT_PATH=$(pwd)
-➜ ${ROOT_PATH}/tools/protoc.sh protocol examples/protocol/*.proto
+➜ ${ROOT_PATH}/tools/protoc.sh protocol "examples/protocol/*.proto"
 ➜ 
 ➜ # create module 
 ➜ mkdir -p examples/server/helloworld

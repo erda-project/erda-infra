@@ -32,22 +32,35 @@ PB_INCLUDES="${PB_INCLUDES} -I=${PKG_PATH}/tools/include/ -I=/usr/local/include/
 
 # build protocol
 build_protocol() {
-    mkdir -p ${PB_DIR}/pb && mkdir -p ${PB_DIR}/client;
+    if [ -z "$PB_OUTPUT" ]; then
+        PB_OUTPUT=${PB_DIR}
+    fi
+    mkdir -p ${PB_OUTPUT}/pb && mkdir -p ${PB_OUTPUT}/client;
     protoc \
         -I=${PB_DIR} ${PB_INCLUDES} \
-        --go_out=${PB_DIR}/pb --go_opt=paths=source_relative \
-        --go-grpc_out=${PB_DIR}/pb --go-grpc_opt=paths=source_relative \
-        --go-http_out=${PB_DIR}/pb --go-http_opt=paths=source_relative \
-        --go-form_out=${PB_DIR}/pb --go-form_opt=paths=source_relative \
-        --go-register_out=${PB_DIR}/pb --go-register_opt=paths=source_relative \
-        --go-client_out=${PB_DIR}/client --go-client_opt=paths=source_relative \
+        --go_out=${PB_OUTPUT}/pb --go_opt=paths=source_relative \
+        --go-grpc_out=${PB_OUTPUT}/pb --go-grpc_opt=paths=source_relative \
+        --go-http_out=${PB_OUTPUT}/pb --go-http_opt=paths=source_relative \
+        --go-form_out=${PB_OUTPUT}/pb --go-form_opt=paths=source_relative \
+        --go-register_out=${PB_OUTPUT}/pb --go-register_opt=paths=source_relative \
+        --go-client_out=${PB_OUTPUT}/client --go-client_opt=paths=source_relative \
         ${PB_FIELS}
-    goimports -w ${PB_DIR}/client/*.go ${PB_DIR}/pb/*.go
+    HAS_GO_FILE=$(eval echo $(bash -c "find "${PB_OUTPUT}/client" -maxdepth 1 -name *.go 2>/dev/null" | wc -l));
+    if [ ${HAS_GO_FILE} -gt 0 ]; then
+        goimports -w ${PB_OUTPUT}/client/*.go
+    fi
+    HAS_GO_FILE=$(eval echo $(bash -c "find "${PB_OUTPUT}/pb" -maxdepth 1 -name *.go 2>/dev/null" | wc -l));
+    if [ ${HAS_GO_FILE} -gt 0 ]; then
+        goimports -w ${PB_OUTPUT}/pb/*.go
+    fi
 }
 
 # clean result files of building
 clean_result() {
-    cd ${PB_DIR}
+    if [ -z "$PB_OUTPUT" ]; then
+        PB_OUTPUT=${PB_DIR}
+    fi
+    cd ${PB_OUTPUT}
     rm -rf ./client/
     rm -rf ./pb/
 }
