@@ -5,7 +5,6 @@
   ],
   "ignore": [
     "vendor/",
-    "**/*.pb.go",
-    "examples/protocol/client"
+    "examples/protocol/"
   ]
 }
