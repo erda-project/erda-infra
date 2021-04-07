@@ -30,11 +30,22 @@ func DefaultHandleOptions() *HandleOptions {
 	}
 }
 
+// Error .
+type Error interface {
+	HTTPStatus() int
+}
+
 // EncodeError default EncodeErrorFunc implement
 func EncodeError(w http.ResponseWriter, r *http.Request, err error) {
-	// TODO optimize
+	var status int
+	if e, ok := err.(Error); ok {
+		status = e.HTTPStatus()
+	} else {
+		status = http.StatusInternalServerError
+	}
+	w.WriteHeader(status)
 	byts, _ := json.Marshal(map[string]interface{}{
-		"code": "400",
+		"code": status,
 		"err":  err.Error(),
 	})
 	w.Write(byts)
