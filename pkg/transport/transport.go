@@ -47,6 +47,13 @@ func WithInterceptors(o ...interceptor.Interceptor) ServiceOption {
 	}
 }
 
+// WithHTTPOption .
+func WithHTTPOptions(o ...transhttp.HandleOption) ServiceOption {
+	return func(opts *ServiceOptions) {
+		opts.HTTP = append(opts.HTTP, o...)
+	}
+}
+
 // DefaultServiceOptions .
 func DefaultServiceOptions() *ServiceOptions {
 	return &ServiceOptions{}
