@@ -83,7 +83,7 @@ Under each module, there is an examples directory, which contains examples of th
 * zookeeper, provide zookeeper client.
 * serviceregister, use it to register services to expose gRPC and HTTP APIs.
 
-# 工具
+# Tools
 protoc-gen-go-* tools depends on protobuf compiler，see [protobuf](https://github.com/protocolbuffers/protobuf) to install protoc。
 
 You can also use the following tools through a Docker container.
