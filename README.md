@@ -81,6 +81,7 @@ Under each module, there is an examples directory, which contains examples of th
 * redis, provide redis client APIs.
 * zk-master-election, provide interface about master-slave election, it is implemented by zookeeper.
 * zookeeper, provide zookeeper client.
+* cassandra, provide cassandra APIs, and easy to write batch data
 * serviceregister, use it to register services to expose gRPC and HTTP APIs.
 
 # Tools
