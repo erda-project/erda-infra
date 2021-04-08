@@ -102,4 +102,4 @@ docker run --rm -ti -v $(pwd):/go \
 * protoc.sh, wrap the protoc-gen-go-* series of tools for the development.
 
 ## License
-Erda is under the Apache 2.0 license. See the [LICENSE](/LICENSE) file for details.
+Erda Infra is under the Apache 2.0 license. See the [LICENSE](/LICENSE) file for details.
