@@ -34,7 +34,7 @@ func Test_formatDuration(t *testing.T) {
 		{
 			"",
 			args{
-				 Duration(1*time.Microsecond + 999*time.Nanosecond),
+				Duration(1*time.Microsecond + 999*time.Nanosecond),
 				2,
 			},
 			"2µs",
