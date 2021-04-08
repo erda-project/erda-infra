@@ -16,6 +16,7 @@ package cassandra
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -54,8 +55,8 @@ type KeyspaceReplicationConfig struct {
 	Factor int32  `file:"factor" default:"2"`
 }
 
-// Cassandra .
-type Cassandra interface {
+// Interface .
+type Interface interface {
 	CreateKeyspaces(ksc ...*KeyspaceConfig) error
 	Session(cfg *SessionConfig) (*gocql.Session, error)
 	NewBatchWriter(session *gocql.Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer
@@ -71,10 +72,15 @@ type config struct {
 
 type define struct{}
 
-func (d *define) Service() []string   { return []string{"cassandra"} }
+func (d *define) Services() []string  { return []string{"cassandra"} }
 func (d *define) Summary() string     { return "cassandra" }
 func (d *define) Description() string { return d.Summary() }
 func (d *define) Config() interface{} { return &config{} }
+func (d *define) Types() []reflect.Type {
+	return []reflect.Type{
+		reflect.TypeOf((*Interface)(nil)).Elem(),
+	}
+}
 func (d *define) Creator() servicehub.Creator {
 	return func() servicehub.Provider {
 		return &provider{}
@@ -83,35 +89,34 @@ func (d *define) Creator() servicehub.Creator {
 
 // provider .
 type provider struct {
-	C     *config
-	L     logs.Logger
+	Cfg   *config
+	Log   logs.Logger
 	hosts []string
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.hosts = strings.Split(p.C.Hosts, ",")
+	p.hosts = strings.Split(p.Cfg.Hosts, ",")
 	return nil
 }
 
 func (p *provider) newSession(keyspace, consistency string) (*gocql.Session, error) {
 	cluster := gocql.NewCluster(p.hosts...)
-	if p.C.Security && p.C.Username != "" && p.C.Password != "" {
-		cluster.Authenticator = &gocql.PasswordAuthenticator{Username: p.C.Username, Password: p.C.Password}
+	if p.Cfg.Security && p.Cfg.Username != "" && p.Cfg.Password != "" {
+		cluster.Authenticator = &gocql.PasswordAuthenticator{Username: p.Cfg.Username, Password: p.Cfg.Password}
 	}
 	cluster.Consistency = gocql.ParseConsistency(consistency)
 	cluster.Keyspace = keyspace
-	cluster.Timeout = p.C.Timeout
-	cluster.ConnectTimeout = p.C.Timeout
+	cluster.Timeout = p.Cfg.Timeout
+	cluster.ConnectTimeout = p.Cfg.Timeout
 	return cluster.CreateSession()
 }
 
 // Provide .
-func (p *provider) Provide(name string, args ...interface{}) interface{} {
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	return &service{
 		p:    p,
-		log:  p.L.Sub(name),
-		name: name,
+		log:  p.Log.Sub(ctx.Caller()),
 	}
 }
 
