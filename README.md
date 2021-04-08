@@ -5,7 +5,7 @@
 
 Translations: [English](README.md) | [简体中文](README_zh.md)
 
-Erda Infra is a lightweight microservices framework implements by golang, which offers many useful modules and tools to help you quickly build a module-driven applications.
+Erda Infra is a lightweight microservices framework implements by golang, which offers many useful modules and tools to help you quickly build a module-driven application.
 
 Many Go projects are built using Erda Infra including:
 * [Erda](https://github.com/erda-project/erda)
