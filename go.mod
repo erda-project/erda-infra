@@ -3,7 +3,7 @@ module github.com/erda-project/erda-infra
 go 1.14
 
 require (
-    github.com/gocql/gocql v0.0.0-20210313142353-65899a66288b
+	github.com/gocql/gocql v0.0.0-20210313142353-65899a66288b
 	github.com/confluentinc/confluent-kafka-go v1.5.2
 	github.com/coreos/bbolt v1.3.2 // indirect
 	github.com/coreos/etcd v3.3.25+incompatible
