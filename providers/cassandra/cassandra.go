@@ -115,8 +115,8 @@ func (p *provider) newSession(keyspace, consistency string) (*gocql.Session, err
 // Provide .
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	return &service{
-		p:    p,
-		log:  p.Log.Sub(ctx.Caller()),
+		p:   p,
+		log: p.Log.Sub(ctx.Caller()),
 	}
 }
 

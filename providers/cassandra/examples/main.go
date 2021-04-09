@@ -47,7 +47,7 @@ type provider struct {
 
 func (p *provider) Init(ctx servicehub.Context) error {
 	session, err := p.Client.Session(&cassandra.SessionConfig{
-		Keyspace:    cassandra.KeyspaceConfig{
+		Keyspace: cassandra.KeyspaceConfig{
 			Name: "system",
 		},
 		Consistency: "LOCAL_ONE",
