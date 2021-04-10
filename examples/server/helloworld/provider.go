@@ -29,16 +29,18 @@ type config struct {
 }
 
 type provider struct {
-	Cfg      *config
-	Log      logs.Logger
-	Register transport.Register
+	Cfg            *config
+	Log            logs.Logger
+	Register       transport.Register
+	greeterService *greeterService
+	userService    *userService
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
 	// TODO initialize something ...
 
-	greeterService := &greeterService{p}
-	pb.RegisterGreeterServiceImp(p.Register, greeterService,
+	p.greeterService = &greeterService{p}
+	pb.RegisterGreeterServiceImp(p.Register, p.greeterService,
 		transport.WithInterceptors(func(h interceptor.Handler) interceptor.Handler {
 			fmt.Println("wrap greeterService methods")
 			return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -52,8 +54,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		}),
 	)
 
-	userService := &userService{p}
-	pb.RegisterUserServiceImp(p.Register, userService,
+	p.userService = &userService{p}
+	pb.RegisterUserServiceImp(p.Register, p.userService,
 		transport.WithInterceptors(func(h interceptor.Handler) interceptor.Handler {
 			fmt.Println("wrap userService methods")
 			return func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -68,6 +70,16 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	)
 
 	return nil
+}
+
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
+	switch {
+	case ctx.Service() == "erda.infra.example.GreeterService" || ctx.Type() == pb.GreeterServiceServerType():
+		return p.greeterService
+	case ctx.Service() == "erda.infra.example.UserService" || ctx.Type() == pb.UserServiceServerType():
+		return p.userService
+	}
+	return p
 }
 
 func init() {

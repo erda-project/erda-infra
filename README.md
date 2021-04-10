@@ -24,7 +24,7 @@ Many Go projects are built using Erda Infra including:
 ## Concept
 * Service, represents a function.
 * Provider, service provider, equivalent to module, provide some services. It can also depend on other services, witch provide by other provider.
-* ProviderDefine, describe a provider, includes provider's name, constructor function of provider, services, etc. Register by it *servicehub.RegisterProvider* function.
+* ProviderDefine, describe a provider, includes provider's name, constructor function of provider, services, etc. Register it by *servicehub.RegisterProvider* function.
 * Hub, is a container for all providers, and manage the life cycle of all loaded providers.
 
 A configuration is used to determine whether all registered Providers are loaded, and the Hub initializes, starts, and closes the loaded Providers.

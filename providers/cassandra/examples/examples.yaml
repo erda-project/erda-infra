@@ -1,5 +1,4 @@
 cassandra:
     host: "${CASSANDRA_ADDR:localhost:9042}"
 
-
 example:
