@@ -29,6 +29,8 @@ Many Go projects are built using Erda Infra including:
 
 A configuration is used to determine whether all registered Providers are loaded, and the Hub initializes, starts, and closes the loaded Providers.
 
+![servicehub](./docs/servicehub.jpg)
+
 ## Define Provider
 Define a provider by implementing the *servicehub.ProviderDefine* interface, and register it through the *servicehub.RegisterProvider* function.
 
@@ -57,7 +59,6 @@ But, it is simpler to describe a provider through *servicehub.Spec* and register
 ➜ 
 ➜ go run main.go
 ```
-![example](./examples/example.jpg)
 
 [Hello World](./examples) \( [Server](./examples/server) | [Client](./examples/client) \)
 
