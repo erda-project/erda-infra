@@ -47,7 +47,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 				p.Log.Infof("before %s/%s\n", info.Service(), info.Method())
 				p.Log.Info(req)
 				out, err := h(ctx, req)
-				p.Log.Info("after %s/%s\n", info.Service(), info.Method())
+				p.Log.Infof("after %s/%s\n", info.Service(), info.Method())
 				return out, err
 			}
 		}),
