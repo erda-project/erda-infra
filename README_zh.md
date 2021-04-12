@@ -29,6 +29,8 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量现成的模块和�
 
 所有已注册的 Provider 通过 一份配置来确定是否 加载，由 Hub 对已加载的 Provider 的进行初始化、启动、关闭等。
 
+![servicehub](./docs/servicehub.jpg)
+
 ## Provider 定义
 通过实现 *servicehub.ProviderDefine* 接口来定义一个模块，并 通过 *servicehub.RegisterProvider* 函数进行注册。
 
@@ -57,7 +59,6 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量现成的模块和�
 ➜ 
 ➜ go run main.go
 ```
-![example](./examples/example.jpg)
 
 [Hello World](./examples) \( [Server](./examples/server) | [Client](./examples/client) \)
 
