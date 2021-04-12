@@ -16,7 +16,6 @@ package example
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -29,45 +28,57 @@ type config struct {
 }
 
 type provider struct {
-	Cfg      *config
-	Log      logs.Logger
-	Register transport.Register
+	Cfg            *config
+	Log            logs.Logger
+	Register       transport.Register
+	greeterService *greeterService
+	userService    *userService
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
 	// TODO initialize something ...
 
-	greeterService := &greeterService{p}
-	pb.RegisterGreeterServiceImp(p.Register, greeterService,
+	p.greeterService = &greeterService{p}
+	pb.RegisterGreeterServiceImp(p.Register, p.greeterService,
 		transport.WithInterceptors(func(h interceptor.Handler) interceptor.Handler {
-			fmt.Println("wrap greeterService methods")
+			p.Log.Info("wrap greeterService methods")
 			return func(ctx context.Context, req interface{}) (interface{}, error) {
 				info := ctx.Value(transport.ServiceInfoContextKey).(transport.ServiceInfo)
-				fmt.Printf("before %s/%s\n", info.Service(), info.Method())
-				fmt.Println(req)
+				p.Log.Infof("before %s/%s\n", info.Service(), info.Method())
+				p.Log.Info(req)
 				out, err := h(ctx, req)
-				fmt.Printf("after %s/%s\n", info.Service(), info.Method())
+				p.Log.Infof("after %s/%s\n", info.Service(), info.Method())
 				return out, err
 			}
 		}),
 	)
 
-	userService := &userService{p}
-	pb.RegisterUserServiceImp(p.Register, userService,
+	p.userService = &userService{p}
+	pb.RegisterUserServiceImp(p.Register, p.userService,
 		transport.WithInterceptors(func(h interceptor.Handler) interceptor.Handler {
-			fmt.Println("wrap userService methods")
+			p.Log.Info("wrap userService methods")
 			return func(ctx context.Context, req interface{}) (interface{}, error) {
 				info := ctx.Value(transport.ServiceInfoContextKey).(transport.ServiceInfo)
-				fmt.Printf("before %s/%s\n", info.Service(), info.Method())
-				fmt.Println(req)
+				p.Log.Infof("before %s/%s\n", info.Service(), info.Method())
+				p.Log.Info(req)
 				out, err := h(ctx, req)
-				fmt.Printf("after %s/%s\n", info.Service(), info.Method())
+				p.Log.Infof("after %s/%s\n", info.Service(), info.Method())
 				return out, err
 			}
 		}),
 	)
 
 	return nil
+}
+
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
+	switch {
+	case ctx.Service() == "erda.infra.example.GreeterService" || ctx.Type() == pb.GreeterServiceServerType():
+		return p.greeterService
+	case ctx.Service() == "erda.infra.example.UserService" || ctx.Type() == pb.UserServiceServerType():
+		return p.userService
+	}
+	return p
 }
 
 func init() {

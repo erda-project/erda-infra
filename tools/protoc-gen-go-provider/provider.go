@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"unicode"
 
 	"google.golang.org/protobuf/compiler/protogen"
@@ -72,6 +73,11 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 	g.P("	Cfg    *config")
 	g.P("	Log    ", logPackage.Ident("Logger"))
 	g.P("	Register   ", transportPackage.Ident("Register"))
+	for _, file := range files {
+		for _, ser := range file.Services {
+			g.P(lowerCaptain(ser.GoName), " *", lowerCaptain(ser.GoName))
+		}
+	}
 	g.P("}")
 	g.P()
 	g.P("func (p *provider) Init(ctx ", servicehubPackage.Ident("Context"), ") error {")
@@ -79,12 +85,25 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 	g.P()
 	for _, file := range files {
 		for _, ser := range file.Services {
-			g.P(lowerCaptain(ser.GoName), " := &", lowerCaptain(ser.GoName), "{p}")
-			g.P(root.GoImportPath.Ident("Register"+ser.GoName+"Imp"), "(p.Register, ", lowerCaptain(ser.GoName), ")")
+			g.P("p.", lowerCaptain(ser.GoName), " = &", lowerCaptain(ser.GoName), "{p}")
+			g.P(root.GoImportPath.Ident("Register"+ser.GoName+"Imp"), "(p.Register, p.", lowerCaptain(ser.GoName), ")")
 			g.P()
 		}
 	}
 	g.P("	return nil")
+	g.P("}")
+	g.P()
+	g.P("func (p *provider) Provide(ctx ", servicehubPackage.Ident("DependencyContext"), ", args ...interface{}) interface{} {")
+	g.P("	switch {")
+	for _, file := range files {
+		for _, ser := range file.Services {
+			service := strings.TrimRight(string(file.Desc.Package()), ".") + "." + ser.GoName
+			g.P("	case ctx.Service() == ", strconv.Quote(service), " || ctx.Type() == ", root.GoImportPath.Ident(ser.GoName+"ServerType"), "():")
+			g.P("		return p.", lowerCaptain(ser.GoName))
+		}
+	}
+	g.P("	}")
+	g.P("	return p")
 	g.P("}")
 	g.P()
 	g.P("func init() {")
