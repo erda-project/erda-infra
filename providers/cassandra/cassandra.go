@@ -73,8 +73,7 @@ type config struct {
 type define struct{}
 
 func (d *define) Services() []string  { return []string{"cassandra"} }
-func (d *define) Summary() string     { return "cassandra" }
-func (d *define) Description() string { return d.Summary() }
+func (d *define) Description() string { return "cassandra" }
 func (d *define) Config() interface{} { return &config{} }
 func (d *define) Types() []reflect.Type {
 	return []reflect.Type{
