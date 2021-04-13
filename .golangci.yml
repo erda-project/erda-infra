@@ -6,6 +6,7 @@ run:
   tests: false
   allow-parallel-runners: true
   skip-dirs:
+    - tools
   skip-files:
 
 linters-settings:

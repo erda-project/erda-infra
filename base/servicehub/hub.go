@@ -276,6 +276,13 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.lock.Unlock()
 	runtime.Gosched()
 
+	for i, l := 0, len(h.listeners); i < l; i++ {
+		err = h.listeners[i].AfterStart(h)
+		if err != nil {
+			return err
+		}
+	}
+
 	closeCh, closed := make(chan struct{}), false
 	var elock sync.Mutex
 	for _, ch := range closer {
@@ -610,6 +617,27 @@ func (h *Hub) getService(dc DependencyContext, options ...interface{}) interface
 			}
 			return provider
 		}
+	}
+	return nil
+}
+
+// Provider .
+func (h *Hub) Provider(name string) interface{} {
+	var label string
+	idx := strings.Index(name, "@")
+	if idx > 0 {
+		label = name[idx+1:]
+		name = name[0:idx]
+	}
+	ps := h.providersMap[name]
+	if len(label) > 0 {
+		for _, p := range ps {
+			if p.label == label {
+				return p.provider
+			}
+		}
+	} else if len(ps) > 0 {
+		return ps[0].provider
 	}
 	return nil
 }

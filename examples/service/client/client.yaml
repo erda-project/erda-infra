@@ -1,0 +1,8 @@
+grpc-client:
+    addr: ":7070"
+
+# provide remote services
+erda.infra.example-client:
+
+caller:
+    name: "remote-caller"

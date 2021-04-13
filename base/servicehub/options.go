@@ -36,6 +36,7 @@ func WithLogger(logger logs.Logger) interface{} {
 type Listener interface {
 	BeforeInitialization(h *Hub, config map[string]interface{}) error
 	AfterInitialization(h *Hub) error
+	AfterStart(h *Hub) error
 	BeforeExit(h *Hub, err error) error
 }
 
@@ -50,6 +51,7 @@ func WithListener(l Listener) interface{} {
 type DefaultListener struct {
 	BeforeInitFunc func(h *Hub, config map[string]interface{}) error
 	AfterInitFunc  func(h *Hub) error
+	AfterStartFunc func(h *Hub) error
 	BeforeExitFunc func(h *Hub, err error) error
 }
 
@@ -67,6 +69,14 @@ func (l *DefaultListener) AfterInitialization(h *Hub) error {
 		return nil
 	}
 	return l.AfterInitFunc(h)
+}
+
+// AfterStart .
+func (l *DefaultListener) AfterStart(h *Hub) error {
+	if l.AfterStartFunc == nil {
+		return nil
+	}
+	return l.AfterStartFunc(h)
 }
 
 // BeforeExit .

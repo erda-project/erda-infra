@@ -39,28 +39,141 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量现成的模块和�
 [例子](./base/servicehub/examples)
 
 ## Quick Start
-
+### 快速创建一个模块
+第一步，创建模块
 ```sh
-➜ # create service interface
-➜ ROOT_PATH=$(pwd)
-➜ ${ROOT_PATH}/tools/protoc.sh protocol "examples/protocol/*.proto"
-➜ 
-➜ # create module 
-➜ mkdir -p examples/server/helloworld
-➜ cd examples/server/helloworld
-➜ ${ROOT_PATH}/tools/protoc.sh init "${ROOT_PATH}/examples/protocol/*.proto"
-➜ 
-➜ # implement the service interface in examples/server/helloworld directory
-➜ 
-➜ cd ${ROOT_PATH}/examples/server
-➜ 
-➜ # create main.go, like examples/server/main.go
-➜ # create server.yaml, like examples/server/server.yaml
-➜ 
-➜ go run main.go
+➜ gohub init -o helloworld
+Input Service Provider Name: helloworld
+➜ # 以上命令创建了一个模块的模版代码，文件如下：
+➜ tree helloworld
+helloworld
+├── provider.go
+└── provider_test.go
 ```
 
-[Hello World](./examples) \( [Server](./examples/server) | [Client](./examples/client) \)
+第二步，创建 main.go
+```go
+package main
+
+import (
+	"github.com/erda-project/erda-infra/base/servicehub"
+	_ "./helloworld" // your package import path
+)
+
+func main() {
+	servicehub.Run(&servicehub.RunOptions{
+		Content: `
+helloworld:
+`,
+	})
+}
+```
+
+第三步，运行程序
+```sh
+➜ go run main.go
+INFO[2021-04-13 13:17:36.416] message: hi                                   module=helloworld
+INFO[2021-04-13 13:17:36.416] provider helloworld initialized              
+INFO[2021-04-13 13:17:36.416] signals to quit: [hangup interrupt terminated quit] 
+INFO[2021-04-13 13:17:36.426] provider helloworld running ...              
+INFO[2021-04-13 13:17:39.429] do something...                               module=helloworld
+```
+[Hello World](./examples/example) \( [helloworld/](./examples/example/helloworld) | [main.go](./examples/example/main.go) \)
+
+### 创建 HTTP/gRPC 服务
+这些服务既可以被远程调用，也可以被本地模块调用。
+
+第一步，在 *.proto 文件中定义协议 (消息结构 和 接口)
+```protobuf
+syntax = "proto3";
+
+package erda.infra.example;
+import "google/api/annotations.proto";
+option go_package = "github.com/erda-project/erda-infra/examples/service/protocol/pb";
+
+// the greeting service definition.
+service GreeterService {
+  // say hello
+  rpc SayHello (HelloRequest) returns (HelloResponse)  {
+    option (google.api.http) = {
+      get: "/api/greeter/{name}",
+    };
+  }
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  bool success = 1;
+  string data = 2;
+}
+```
+
+第二步，编译生成接口 和 客户端代码
+```sh
+➜ gohub protoc protocol *.proto 
+➜ tree 
+.
+├── client
+│   ├── client.go
+│   └── provider.go
+├── greeter.proto
+└── pb
+    ├── greeter.form.pb.go
+    ├── greeter.http.pb.go
+    ├── greeter.pb.go
+    ├── greeter_grpc.pb.go
+    └── register.services.pb.go
+```
+
+第三步，实现协议接口
+```sh
+➜ gohub protoc imp *.proto --imp_out=../server/helloworld
+➜ tree ../server/helloworld
+../server/helloworld
+├── greeter.service.go
+├── greeter.service_test.go
+└── provider.go
+```
+
+第四步，创建 main.go 启动程序
+
+*main.go*
+```
+package main
+
+import (
+	"os"
+
+	"github.com/erda-project/erda-infra/base/servicehub"
+
+	// import all providers
+	_ "github.com/erda-project/erda-infra/examples/service/server/helloworld"
+	_ "github.com/erda-project/erda-infra/providers"
+)
+
+func main() {
+	hub := servicehub.New()
+	hub.Run("server", "server.yaml", os.Args...)
+}
+```
+
+*server.yaml*
+```yaml
+# optional
+http-server:
+    addr: ":8080"
+grpc-server:
+    addr: ":7070"
+service-register:
+# expose services and interface
+erda.infra.example:
+```
+
+[Service](./examples/service) \( [Protocol](./examples/service/protocol) | [Implementation](./examples/service/server/helloworld) | [Server](./examples/service/server) | [Caller](./examples/service/caller) | [Client](./examples/service/client)  \)
+
 
 ## 微模块
 该项目中已经封装了许多可用的模块，在 [providers/](./providers) 目录下可以找到。
@@ -86,22 +199,34 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量现成的模块和�
 * serviceregister，封装提供统一注册 gRPC 和 HTTP 接口的能力
 
 # 工具
-protoc-gen-go-* 系列工具依赖 protobuf 编译器，参考 [protobuf](https://github.com/protocolbuffers/protobuf) 项目进行安装。
-
-也可以通过 Docker 容器来使用以下工具。
-
+*gohub* 是一个能够帮助您快速构建模块的命令行工具，可以通过如下方式安装： 
 ```sh
-docker run --rm -ti -v $(pwd):/go \
-    registry.cn-hangzhou.aliyuncs.com/dice/erda-tools:1.0 protoc.sh usage
+git clone https://github.com/erda-project/erda-infra 
+cd erda-infra/tools/gohub
+go install .
 ```
 
-* protoc-gen-go-grpc，根据 *.proto 文件，提供 gRPC server 和 client 支持
-* protoc-gen-go-http，根据 *.proto 文件，对定义的 Service 提供 HTTP server 支持
-* protoc-gen-go-form，根据 *.proto 文件，对定义的 Message 提供 HTTP form 编解码的支持
-* protoc-gen-go-client，根据 *.proto 文件，编译统一的客户端，以及对应的 Provider
-* protoc-gen-go-register，方便 Provider 注册 Service 
-* protoc-gen-go-provider，根据 *.proto 文件，生成 实现 Service 的 Provider 模版，方便快速开发模块
-* protoc.sh，针对 protoc-gen-go-* 系列工具的封装，方便 Service 模块的开发
+也可以通过 Docker 容器来使用以下工具:
+```sh
+➜ docker run --rm -ti -v $(pwd):/go \
+    registry.cn-hangzhou.aliyuncs.com/dice/erda-tools:1.0 gohub                                                                
+Usage:
+  gohub [flags]
+  gohub [command]
+
+Available Commands:
+  help        Help about any command
+  init        Initialize a provider with name
+  pkgpath     Print the absolute path of go package
+  protoc      ProtoBuf compiler tools
+  tools       Tools
+  version     Print the version number
+
+Flags:
+  -h, --help   help for gohub
+
+Use "gohub [command] --help" for more information about a command.
+```
 
 ## License
 Erda Infra is under the Apache 2.0 license. See the [LICENSE](/LICENSE) file for details.
