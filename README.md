@@ -40,7 +40,7 @@ But, it is simpler to describe a provider through *servicehub.Spec* and register
 
 ## Quick Start
 ### Create a Provider
-Step 1, Create a Provider
+**Step 1**, Create a Provider
 ```sh
 ➜ gohub init -o helloworld
 Input Service Provider Name: helloworld
@@ -50,7 +50,7 @@ helloworld
 └── provider_test.go
 ```
 
-Step 2, Create *main.go*
+**Step 2**, Create *main.go*
 ```go
 package main
 
@@ -68,7 +68,7 @@ helloworld:
 }
 ```
 
-Step 3, Run
+**Step 3**, Run
 ```sh
 ➜ go run main.go
 INFO[2021-04-13 13:17:36.416] message: hi                                   module=helloworld
@@ -80,9 +80,9 @@ INFO[2021-04-13 13:17:39.429] do something...                               modu
 [Hello World](./examples/example) \( [helloworld/](./examples/example/helloworld) | [main.go](./examples/example/main.go) \)
 
 ### Create HTTP/gRPC Service
-These services can be called either remotely or by local Provider.
+These services can be called either remote or local Provider.
 
-Step 1, Define the protocol, in the *.proto files, includes Message and Interface.
+**Step 1**, Define the protocol, in the *.proto files, includes Message and Interface.
 ```protobuf
 syntax = "proto3";
 
@@ -110,7 +110,7 @@ message HelloResponse {
 }
 ```
 
-Step 2, build protocol to codes 
+**Step 2**, build protocol to codes 
 ```sh
 ➜ gohub protoc protocol *.proto 
 ➜ tree 
@@ -127,7 +127,7 @@ Step 2, build protocol to codes
     └── register.services.pb.go
 ```
 
-Step 3, implement the interface
+**Step 3**, implement the interface
 ```sh
 ➜ gohub protoc imp *.proto --imp_out=../server/helloworld
 ➜ tree ../server/helloworld
@@ -137,7 +137,7 @@ Step 3, implement the interface
 └── provider.go
 ```
 
-Step 4, Create *main.go* and run it
+**Step 4**, Create *main.go* and run it
 
 *main.go*
 ```

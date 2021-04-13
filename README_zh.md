@@ -40,7 +40,7 @@ Erda Infra 一套轻量级 Go 微服务框架，包含大量现成的模块和�
 
 ## Quick Start
 ### 快速创建一个模块
-第一步，创建模块
+**第一步**，创建模块
 ```sh
 ➜ gohub init -o helloworld
 Input Service Provider Name: helloworld
@@ -51,7 +51,7 @@ helloworld
 └── provider_test.go
 ```
 
-第二步，创建 main.go
+**第二步**，创建 main.go
 ```go
 package main
 
@@ -69,7 +69,7 @@ helloworld:
 }
 ```
 
-第三步，运行程序
+**第三步**，运行程序
 ```sh
 ➜ go run main.go
 INFO[2021-04-13 13:17:36.416] message: hi                                   module=helloworld
@@ -83,7 +83,7 @@ INFO[2021-04-13 13:17:39.429] do something...                               modu
 ### 创建 HTTP/gRPC 服务
 这些服务既可以被远程调用，也可以被本地模块调用。
 
-第一步，在 *.proto 文件中定义协议 (消息结构 和 接口)
+**第一步**，在 *.proto 文件中定义协议 (消息结构 和 接口)
 ```protobuf
 syntax = "proto3";
 
@@ -111,7 +111,7 @@ message HelloResponse {
 }
 ```
 
-第二步，编译生成接口 和 客户端代码
+**第二步**，编译生成接口 和 客户端代码
 ```sh
 ➜ gohub protoc protocol *.proto 
 ➜ tree 
@@ -128,7 +128,7 @@ message HelloResponse {
     └── register.services.pb.go
 ```
 
-第三步，实现协议接口
+**第三步**，实现协议接口
 ```sh
 ➜ gohub protoc imp *.proto --imp_out=../server/helloworld
 ➜ tree ../server/helloworld
@@ -138,7 +138,7 @@ message HelloResponse {
 └── provider.go
 ```
 
-第四步，创建 main.go 启动程序
+**第四步**，创建 main.go 启动程序
 
 *main.go*
 ```
