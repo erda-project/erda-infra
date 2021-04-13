@@ -199,9 +199,7 @@ Under each module, there is an examples directory, which contains examples of th
 # Tools
 *gohub* is a CLI tool, which to help you quickly build a Provider. It can be installed as follows:
 ```sh
-git clone https://github.com/erda-project/erda-infra 
-cd erda-infra/tools/gohub
-go install .
+go get -u github.com/erda-project/erda-infra/tools/gohub
 ```
 
 You can also use *gohub* through a Docker container.
