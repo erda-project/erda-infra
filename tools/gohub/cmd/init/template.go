@@ -62,13 +62,13 @@ type provider struct {
 	Log logs.Logger
 }
 
-// Run this is an optional
+// Run this is optional
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.Log.Info("message: ", p.Cfg.Message)
 	return nil
 }
 
-// Run this is an optional
+// Run this is optional
 func (p *provider) Run(ctx context.Context) error {
 	tick := time.NewTicker(3 * time.Second)
 	defer tick.Stop()
