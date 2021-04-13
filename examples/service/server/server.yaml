@@ -1,0 +1,14 @@
+http-server:
+    addr: ":8080"
+health:
+
+grpc-server:
+    addr: ":7070"
+
+service-register:
+
+# expose grpc and http services, and interface
+erda.infra.example:
+
+caller:
+    name: "local-caller"

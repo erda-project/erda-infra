@@ -5,6 +5,6 @@
   ],
   "ignore": [
     "vendor/",
-    "examples/protocol/"
+    "examples/service/protocol/"
   ]
 }

@@ -12,7 +12,7 @@ Many Go projects are built using Erda Infra including:
 
 ## Features
 * modular design to drive the implementation of the application system, and each module is pluggable.
-* each module is configurable，supports setting defaults、reading from files (YAML, HCL,、JSON、TOML、.env file)、environment、flags.
+* each module is configurable, supports setting defaults、reading from files (YAML, HCL,、JSON、TOML、.env file)、environment、flags.
 * manage the lifecycle of the module, includes initialization, startup, and shutdown.
 * manage dependencies between modules.
 * support Dependency Injection between modules.
@@ -39,28 +39,139 @@ But, it is simpler to describe a provider through *servicehub.Spec* and register
 [Examples](./base/servicehub/examples)
 
 ## Quick Start
-
+### Create a Provider
+**Step 1**, Create a Provider
 ```sh
-➜ # create service interface
-➜ ROOT_PATH=$(pwd)
-➜ ${ROOT_PATH}/tools/protoc.sh protocol "examples/protocol/*.proto"
-➜ 
-➜ # create module 
-➜ mkdir -p examples/server/helloworld
-➜ cd examples/server/helloworld
-➜ ${ROOT_PATH}/tools/protoc.sh init "${ROOT_PATH}/examples/protocol/*.proto"
-➜ 
-➜ # implement the service interface in examples/server/helloworld directory
-➜ 
-➜ cd ${ROOT_PATH}/examples/server
-➜ 
-➜ # create main.go, like examples/server/main.go
-➜ # create server.yaml, like examples/server/server.yaml
-➜ 
-➜ go run main.go
+➜ gohub init -o helloworld
+Input Service Provider Name: helloworld
+➜ tree helloworld
+helloworld
+├── provider.go
+└── provider_test.go
 ```
 
-[Hello World](./examples) \( [Server](./examples/server) | [Client](./examples/client) \)
+**Step 2**, Create *main.go*
+```go
+package main
+
+import (
+	"github.com/erda-project/erda-infra/base/servicehub"
+	_ "./helloworld" // your package import path
+)
+
+func main() {
+	servicehub.Run(&servicehub.RunOptions{
+		Content: `
+helloworld:
+`,
+	})
+}
+```
+
+**Step 3**, Run
+```sh
+➜ go run main.go
+INFO[2021-04-13 13:17:36.416] message: hi                                   module=helloworld
+INFO[2021-04-13 13:17:36.416] provider helloworld initialized              
+INFO[2021-04-13 13:17:36.416] signals to quit: [hangup interrupt terminated quit] 
+INFO[2021-04-13 13:17:36.426] provider helloworld running ...              
+INFO[2021-04-13 13:17:39.429] do something...                               module=helloworld
+```
+[Hello World](./examples/example) \( [helloworld/](./examples/example/helloworld) | [main.go](./examples/example/main.go) \)
+
+### Create HTTP/gRPC Service
+These services can be called either remote or local Provider.
+
+**Step 1**, Define the protocol, in the *.proto files, includes Message and Interface.
+```protobuf
+syntax = "proto3";
+
+package erda.infra.example;
+import "google/api/annotations.proto";
+option go_package = "github.com/erda-project/erda-infra/examples/service/protocol/pb";
+
+// the greeting service definition.
+service GreeterService {
+  // say hello
+  rpc SayHello (HelloRequest) returns (HelloResponse)  {
+    option (google.api.http) = {
+      get: "/api/greeter/{name}",
+    };
+  }
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  bool success = 1;
+  string data = 2;
+}
+```
+
+**Step 2**, build protocol to codes 
+```sh
+➜ gohub protoc protocol *.proto 
+➜ tree 
+.
+├── client
+│   ├── client.go
+│   └── provider.go
+├── greeter.proto
+└── pb
+    ├── greeter.form.pb.go
+    ├── greeter.http.pb.go
+    ├── greeter.pb.go
+    ├── greeter_grpc.pb.go
+    └── register.services.pb.go
+```
+
+**Step 3**, implement the interface
+```sh
+➜ gohub protoc imp *.proto --imp_out=../server/helloworld
+➜ tree ../server/helloworld
+../server/helloworld
+├── greeter.service.go
+├── greeter.service_test.go
+└── provider.go
+```
+
+**Step 4**, Create *main.go* and run it
+
+*main.go*
+```
+package main
+
+import (
+	"os"
+
+	"github.com/erda-project/erda-infra/base/servicehub"
+
+	// import all providers
+	_ "github.com/erda-project/erda-infra/examples/service/server/helloworld"
+	_ "github.com/erda-project/erda-infra/providers"
+)
+
+func main() {
+	hub := servicehub.New()
+	hub.Run("server", "server.yaml", os.Args...)
+}
+```
+
+*server.yaml*
+```yaml
+# optional
+http-server:
+    addr: ":8080"
+grpc-server:
+    addr: ":7070"
+service-register:
+# expose services and interface
+erda.infra.example:
+```
+
+[Service](./examples/service) \( [Protocol](./examples/service/protocol) | [Implementation](./examples/service/server/helloworld) | [Server](./examples/service/server) | [Caller](./examples/service/caller) | [Client](./examples/service/client)  \)
 
 ## Useful Providers
 Many available providers have been packaged in this project, it can be found in the [providers/](./providers) directory.
@@ -86,22 +197,34 @@ Under each module, there is an examples directory, which contains examples of th
 * serviceregister, use it to register services to expose gRPC and HTTP APIs.
 
 # Tools
-protoc-gen-go-* tools depends on protobuf compiler，see [protobuf](https://github.com/protocolbuffers/protobuf) to install protoc。
-
-You can also use the following tools through a Docker container.
-
+*gohub* is a CLI tool, which to help you quickly build a Provider. It can be installed as follows:
 ```sh
-docker run --rm -ti -v $(pwd):/go \
-    registry.cn-hangzhou.aliyuncs.com/dice/erda-tools:1.0 protoc.sh usage
+git clone https://github.com/erda-project/erda-infra 
+cd erda-infra/tools/gohub
+go install .
 ```
 
-* protoc-gen-go-grpc, according to *.proto file, provide gRPC server and client support
-* protoc-gen-go-http, according to the *.proto file, provide HTTP server support for the defined service.
-* protoc-gen-go-form, according to the *.proto file, provide HTTP form codec support for the defined message.
-* protoc-gen-go-client, according to the *.proto file, generate clients and provider for defined service.
-* protoc-gen-go-register, provide some functions to help a provider register services.
-* protoc-gen-go-provider, according to the *.proto file, generate a provider template that implements the service interface to facilitate rapid module development.
-* protoc.sh, wrap the protoc-gen-go-* series of tools for the development.
+You can also use *gohub* through a Docker container.
+```sh
+➜ docker run --rm -ti -v $(pwd):/go \
+    registry.cn-hangzhou.aliyuncs.com/dice/erda-tools:1.0 gohub                                                                
+Usage:
+  gohub [flags]
+  gohub [command]
+
+Available Commands:
+  help        Help about any command
+  init        Initialize a provider with name
+  pkgpath     Print the absolute path of go package
+  protoc      ProtoBuf compiler tools
+  tools       Tools
+  version     Print the version number
+
+Flags:
+  -h, --help   help for gohub
+
+Use "gohub [command] --help" for more information about a command.
+```
 
 ## License
 Erda Infra is under the Apache 2.0 license. See the [LICENSE](/LICENSE) file for details.
