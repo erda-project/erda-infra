@@ -19,6 +19,7 @@ import (
 	"go/build"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 	"github.com/spf13/cobra"
@@ -32,8 +33,18 @@ func FindPkgDir(path, srcDir string) string {
 	if abs, err := filepath.Abs(srcDir); err == nil {
 		srcDir = abs
 	}
-	bp, _ := build.Import(path, srcDir, build.FindOnly|build.AllowBinary)
-	return bp.Dir
+	bp, _ := build.Import(path, srcDir, build.FindOnly)
+	if len(bp.Dir) > 0 {
+		return bp.Dir
+	}
+	for _, gopath := range strings.Split(build.Default.GOPATH, string(os.PathListSeparator)) {
+		dir := filepath.Join(gopath, "src", path)
+		stat, err := os.Stat(dir)
+		if err == nil && stat.IsDir() {
+			return dir
+		}
+	}
+	return ""
 }
 
 func init() {

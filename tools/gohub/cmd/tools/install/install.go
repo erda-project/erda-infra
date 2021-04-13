@@ -74,7 +74,7 @@ func Download(override, verbose bool) {
 		}
 		pkgPath = pkgpath.FindPkgDir(cmd.PackagePath, ".")
 		if len(pkgPath) <= 0 {
-			cmd.CheckError(fmt.Errorf("not found package %q", pkgPath))
+			cmd.CheckError(fmt.Errorf("not found package %q", cmd.PackagePath))
 		}
 		fmt.Printf("tools go package path: %s\n", pkgPath)
 
