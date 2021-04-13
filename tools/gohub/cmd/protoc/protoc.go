@@ -144,7 +144,7 @@ func execProtoc(files, dirs []string, params ...string) {
 		params = append(params, fmt.Sprintf("-I=%s", d))
 	}
 	pkgPath := pkgpath.FindPkgDir(cmd.PackagePath, ".")
-	if len(pkgPath) >= 0 {
+	if len(pkgPath) > 0 {
 		params = append(params, fmt.Sprintf("-I=%s", filepath.Join(pkgPath, "/tools/protoc/include/")))
 	}
 	params = append(params, fmt.Sprintf("-I=%s", "/usr/local/include/"))
