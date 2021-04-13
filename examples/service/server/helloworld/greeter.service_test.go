@@ -37,23 +37,21 @@ func Test_greeterService_SayHello(t *testing.T) {
 		wantErr  bool
 	}{
 		// TODO: Add test cases.
-		{
-			"case 1",
-			"erda.infra.example.GreeterService",
-			`
-erda.infra.example:
-`,
-			args{
-				context.TODO(),
-				&pb.HelloRequest{
-					// TODO: setup fields
-				},
-			},
-			&pb.HelloResponse{
-				// TODO: setup fields.
-			},
-			false,
-		},
+		// {
+		// 	"case 1",
+		// 	"erda.infra.example.GreeterService",
+		// 	`erda.infra.example:`,
+		// 	args{
+		// 		context.TODO(),
+		// 		&pb.HelloRequest{
+		// 			// TODO: setup fields
+		// 		},
+		// 	},
+		// 	&pb.HelloResponse{
+		// 		// TODO: setup fields.
+		// 	},
+		// 	false,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

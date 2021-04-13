@@ -37,23 +37,21 @@ func Test_userService_GetUser(t *testing.T) {
 		wantErr  bool
 	}{
 		// TODO: Add test cases.
-		{
-			"case 1",
-			"erda.infra.example.UserService",
-			`
-erda.infra.example:
-`,
-			args{
-				context.TODO(),
-				&pb.GetUserRequest{
-					// TODO: setup fields
-				},
-			},
-			&pb.GetUserResponse{
-				// TODO: setup fields.
-			},
-			false,
-		},
+		// {
+		// 	"case 1",
+		// 	"erda.infra.example.UserService",
+		// 	`erda.infra.example:`,
+		// 	args{
+		// 		context.TODO(),
+		// 		&pb.GetUserRequest{
+		// 			// TODO: setup fields
+		// 		},
+		// 	},
+		// 	&pb.GetUserResponse{
+		// 		// TODO: setup fields.
+		// 	},
+		// 	false,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -94,23 +92,21 @@ func Test_userService_UpdateUser(t *testing.T) {
 		wantErr  bool
 	}{
 		// TODO: Add test cases.
-		{
-			"case 1",
-			"erda.infra.example.UserService",
-			`
-erda.infra.example:
-`,
-			args{
-				context.TODO(),
-				&pb.UpdateUserRequest{
-					// TODO: setup fields
-				},
-			},
-			&pb.UpdateUserResponse{
-				// TODO: setup fields.
-			},
-			false,
-		},
+		// {
+		// 	"case 1",
+		// 	"erda.infra.example.UserService",
+		// 	`erda.infra.example:`,
+		// 	args{
+		// 		context.TODO(),
+		// 		&pb.UpdateUserRequest{
+		// 			// TODO: setup fields
+		// 		},
+		// 	},
+		// 	&pb.UpdateUserResponse{
+		// 		// TODO: setup fields.
+		// 	},
+		// 	false,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
