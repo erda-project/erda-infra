@@ -201,9 +201,7 @@ erda.infra.example:
 # 工具
 *gohub* 是一个能够帮助您快速构建模块的命令行工具，可以通过如下方式安装： 
 ```sh
-git clone https://github.com/erda-project/erda-infra 
-cd erda-infra/tools/gohub
-go install .
+go get -u github.com/erda-project/erda-infra/tools/gohub
 ```
 
 也可以通过 Docker 容器来使用以下工具:
