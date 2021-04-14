@@ -156,6 +156,27 @@ func (h *Hub) addProvider(key string, cfg interface{}) error {
 		return fmt.Errorf("provider %s not exist", name)
 	}
 	provider := define.Creator()()
-	h.providersMap[name] = append(h.providersMap[name], &providerContext{h, key, label, name, cfg, provider, define})
+	pctx := &providerContext{
+		hub:      h,
+		key:      key,
+		label:    label,
+		name:     name,
+		cfg:      cfg,
+		provider: provider,
+		define:   define,
+	}
+	if provider != nil {
+		value := reflect.ValueOf(provider)
+		typ := value.Type()
+		for typ.Kind() == reflect.Ptr {
+			value = value.Elem()
+			typ = value.Type()
+		}
+		if typ.Kind() == reflect.Struct {
+			pctx.structValue = value
+			pctx.structType = typ
+		}
+	}
+	h.providersMap[name] = append(h.providersMap[name], pctx)
 	return nil
 }

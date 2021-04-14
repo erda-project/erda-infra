@@ -131,8 +131,9 @@ func (h *Hub) Init(config map[string]interface{}, flags *pflag.FlagSet, args []s
 		if err != nil {
 			return err
 		}
-		if len(ctx.Dependencies()) > 0 {
-			h.logger.Infof("provider %s (depends %v) initialized", ctx.name, ctx.Dependencies())
+		dependencies := ctx.dependencies()
+		if len(dependencies) > 0 {
+			h.logger.Infof("provider %s (depends %s) initialized", ctx.name, dependencies)
 		} else {
 			h.logger.Infof("provider %s initialized", ctx.name)
 		}
@@ -176,10 +177,10 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 	h.servicesTypes = types
 	var depGraph graph.Graph
 	for name, p := range providersMap {
-		depends := p[0].Dependencies()
 		providers := map[string]*providerContext{}
+		dependsServices, dependsProviders := p[0].Dependencies()
 	loop:
-		for _, service := range depends {
+		for _, service := range dependsServices {
 			name := service
 			var label string
 			idx := strings.Index(service, "@")
@@ -204,6 +205,11 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 		node := graph.NewNode(name)
 		for dep := range providers {
 			node.Deps = append(node.Deps, dep)
+		}
+		for _, dep := range dependsProviders {
+			if _, ok := providers[dep]; !ok {
+				node.Deps = append(node.Deps, dep)
+			}
 		}
 		depGraph = append(depGraph, node)
 	}
@@ -354,13 +360,15 @@ func (h *Hub) Close() error {
 }
 
 type providerContext struct {
-	hub      *Hub
-	key      string
-	label    string
-	name     string
-	cfg      interface{}
-	provider Provider
-	define   ProviderDefine
+	hub         *Hub
+	key         string
+	label       string
+	name        string
+	cfg         interface{}
+	provider    Provider
+	structValue reflect.Value
+	structType  reflect.Type
+	define      ProviderDefine
 }
 
 var loggerType = reflect.TypeOf((*logs.Logger)(nil)).Elem()
@@ -394,13 +402,8 @@ func (c *providerContext) BindConfig(flags *pflag.FlagSet) (err error) {
 }
 
 func (c *providerContext) Init() (err error) {
-	value := reflect.ValueOf(c.provider)
-	typ := value.Type()
-	if typ.Kind() == reflect.Ptr {
-		for typ.Kind() == reflect.Ptr {
-			value = value.Elem()
-			typ = value.Type()
-		}
+	if reflect.ValueOf(c.provider).Kind() == reflect.Ptr && c.structType != nil {
+		value, typ := c.structValue, c.structType
 		var (
 			cfgValue *reflect.Value
 			cfgType  reflect.Type
@@ -410,68 +413,66 @@ func (c *providerContext) Init() (err error) {
 			cfgValue = &value
 			cfgType = cfgValue.Type()
 		}
-		if typ.Kind() == reflect.Struct {
-			fields := typ.NumField()
-			for i := 0; i < fields; i++ {
-				if !value.Field(i).CanSet() {
-					continue
-				}
-				field := typ.Field(i)
-				if field.Type == loggerType {
-					logger := c.Logger()
-					value.Field(i).Set(reflect.ValueOf(logger))
-				}
-				if cfgValue != nil && field.Type == cfgType {
-					value.Field(i).Set(*cfgValue)
-				}
-				service := field.Tag.Get("service")
-				if len(service) <= 0 {
-					service = field.Tag.Get("autowired")
-				}
-				if service == "-" {
-					continue
-				}
-				dc := newDependencyContext(
-					service,
-					c.name,
-					field.Type,
-					field.Tag,
-				)
-				var instance interface{}
-				if len(service) > 0 {
-					instance = c.hub.getService(dc)
-					if instance == nil {
-						return fmt.Errorf("not found service %q", service)
-					}
-				} else {
-					var pc *providerContext
-					providers := c.hub.servicesTypes[field.Type]
-					for _, item := range providers {
-						if item.key == item.name {
-							pc = item
-							break
-						}
-					}
-					if pc == nil && len(providers) > 0 {
-						pc = providers[0]
-					}
-					if pc != nil {
-						provider := pc.provider
-						if prod, ok := provider.(DependencyProvider); ok {
-							instance = prod.Provide(dc)
-						} else {
-							instance = provider
-						}
-					}
-				}
-				if instance == nil {
-					continue
-				}
-				if !reflect.TypeOf(instance).AssignableTo(field.Type) {
-					return fmt.Errorf("service %q not implement %s", service, field.Type)
-				}
-				value.Field(i).Set(reflect.ValueOf(instance))
+		fields := typ.NumField()
+		for i := 0; i < fields; i++ {
+			if !value.Field(i).CanSet() {
+				continue
 			}
+			field := typ.Field(i)
+			if field.Type == loggerType {
+				logger := c.Logger()
+				value.Field(i).Set(reflect.ValueOf(logger))
+			}
+			if cfgValue != nil && field.Type == cfgType {
+				value.Field(i).Set(*cfgValue)
+			}
+			service := field.Tag.Get("service")
+			if len(service) <= 0 {
+				service = field.Tag.Get("autowired")
+			}
+			if service == "-" {
+				continue
+			}
+			dc := newDependencyContext(
+				service,
+				c.name,
+				field.Type,
+				field.Tag,
+			)
+			var instance interface{}
+			if len(service) > 0 {
+				instance = c.hub.getService(dc)
+				if instance == nil {
+					return fmt.Errorf("not found service %q", service)
+				}
+			} else {
+				var pc *providerContext
+				providers := c.hub.servicesTypes[field.Type]
+				for _, item := range providers {
+					if item.key == item.name {
+						pc = item
+						break
+					}
+				}
+				if pc == nil && len(providers) > 0 {
+					pc = providers[0]
+				}
+				if pc != nil {
+					provider := pc.provider
+					if prod, ok := provider.(DependencyProvider); ok {
+						instance = prod.Provide(dc)
+					} else {
+						instance = provider
+					}
+				}
+			}
+			if instance == nil {
+				continue
+			}
+			if !reflect.TypeOf(instance).AssignableTo(field.Type) {
+				return fmt.Errorf("service %q not implement %s", service, field.Type)
+			}
+			value.Field(i).Set(reflect.ValueOf(instance))
 		}
 	}
 	if c.cfg != nil {
@@ -499,20 +500,66 @@ func (c *providerContext) Define() ProviderDefine {
 	return c.define
 }
 
-// Define .
-func (c *providerContext) Dependencies() []string {
-	var list []string
-	if deps, ok := c.define.(ServiceDependencies); ok {
-		list = deps.Dependencies()
+func (c *providerContext) dependencies() string {
+	services, providers := c.Dependencies()
+	if len(services) > 0 && len(providers) > 0 {
+		return fmt.Sprintf("services: %v, providers: %v", services, providers)
+	} else if len(services) > 0 {
+		return fmt.Sprintf("services: %v", services)
+	} else if len(providers) > 0 {
+		return fmt.Sprintf("providers: %v", providers)
 	}
-	if deps, ok := c.define.(OptionalServiceDependencies); ok {
-		for _, service := range deps.OptionalDependencies() {
-			if len(c.hub.servicesMap[service]) > 0 {
-				list = append(list, service)
+	return ""
+}
+
+// Dependencies .
+func (c *providerContext) Dependencies() (services []string, providers []string) {
+	srvset, provset := make(map[string]bool), make(map[reflect.Type]bool)
+	if deps, ok := c.define.(ServiceDependencies); ok {
+		for _, service := range deps.Dependencies() {
+			if !srvset[service] {
+				services = append(services, service)
+				srvset[service] = true
 			}
 		}
 	}
-	return list
+	if deps, ok := c.define.(OptionalServiceDependencies); ok {
+		for _, service := range deps.OptionalDependencies() {
+			if len(c.hub.servicesMap[service]) > 0 && !srvset[service] {
+				services = append(services, service)
+				srvset[service] = true
+			}
+		}
+	}
+	if c.structType != nil {
+		fields := c.structType.NumField()
+		for i := 0; i < fields; i++ {
+			field := c.structType.Field(i)
+			service := field.Tag.Get("service")
+			if len(service) <= 0 {
+				service = field.Tag.Get("autowired")
+			}
+			if service == "-" {
+				continue
+			}
+			if len(service) > 0 {
+				if !srvset[service] {
+					services = append(services, service)
+					srvset[service] = true
+				}
+				continue
+			}
+			if !c.structValue.Field(i).CanSet() {
+				continue
+			}
+			plist := c.hub.servicesTypes[field.Type]
+			if len(plist) > 0 && !provset[field.Type] {
+				provset[field.Type] = true
+				providers = append(providers, plist[0].name)
+			}
+		}
+	}
+	return
 }
 
 // Hub .
