@@ -439,32 +439,9 @@ func (c *providerContext) Init() (err error) {
 				field.Type,
 				field.Tag,
 			)
-			var instance interface{}
-			if len(service) > 0 {
-				instance = c.hub.getService(dc)
-				if instance == nil {
-					return fmt.Errorf("not found service %q", service)
-				}
-			} else {
-				var pc *providerContext
-				providers := c.hub.servicesTypes[field.Type]
-				for _, item := range providers {
-					if item.key == item.name {
-						pc = item
-						break
-					}
-				}
-				if pc == nil && len(providers) > 0 {
-					pc = providers[0]
-				}
-				if pc != nil {
-					provider := pc.provider
-					if prod, ok := provider.(DependencyProvider); ok {
-						instance = prod.Provide(dc)
-					} else {
-						instance = provider
-					}
-				}
+			instance := c.hub.getService(dc)
+			if len(service) > 0 && instance == nil {
+				return fmt.Errorf("not found service %q", service)
 			}
 			if instance == nil {
 				continue
@@ -633,37 +610,49 @@ func (h *Hub) Service(name string, options ...interface{}) interface{} {
 	), options...)
 }
 
-func (h *Hub) getService(dc DependencyContext, options ...interface{}) interface{} {
-	if providers, ok := h.servicesMap[dc.Service()]; ok {
-		if len(providers) > 0 {
-			var pc *providerContext
-			if len(dc.Label()) > 0 {
-				for _, item := range providers {
-					if item.label == dc.Label() {
-						pc = item
-						break
+func (h *Hub) getService(dc DependencyContext, options ...interface{}) (instance interface{}) {
+	var pc *providerContext
+	if len(dc.Service()) > 0 {
+		if providers, ok := h.servicesMap[dc.Service()]; ok {
+			if len(providers) > 0 {
+				if len(dc.Label()) > 0 {
+					for _, item := range providers {
+						if item.label == dc.Label() {
+							pc = item
+							break
+						}
+					}
+				} else {
+					for _, item := range providers {
+						if item.key == item.name {
+							pc = item
+							break
+						}
+					}
+					if pc == nil && len(providers) > 0 {
+						pc = providers[0]
 					}
 				}
-			} else {
-				for _, item := range providers {
-					if item.key == item.name {
-						pc = item
-						break
-					}
-				}
-				if pc == nil && len(providers) > 0 {
-					pc = providers[0]
-				}
 			}
-			if pc == nil {
-				return nil
-			}
-			provider := pc.provider
-			if prod, ok := provider.(DependencyProvider); ok {
-				return prod.Provide(dc, options...)
-			}
-			return provider
 		}
+	} else if dc.Type() != nil {
+		providers := h.servicesTypes[dc.Type()]
+		for _, item := range providers {
+			if item.key == item.name {
+				pc = item
+				break
+			}
+		}
+		if pc == nil && len(providers) > 0 {
+			pc = providers[0]
+		}
+	}
+	if pc != nil {
+		provider := pc.provider
+		if prod, ok := provider.(DependencyProvider); ok {
+			return prod.Provide(dc, options...)
+		}
+		return provider
 	}
 	return nil
 }
