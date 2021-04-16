@@ -90,8 +90,14 @@ func Download(override, verbose bool) {
 			}
 		}
 	}
-	paths := os.Getenv("PATH")
-	os.Setenv("PATH", dir+string(os.PathListSeparator)+paths)
+	paths := []string{dir}
+	goPath := os.Getenv("GOPATH")
+	if len(goPath) > 0 {
+		for _, p := range strings.Split(goPath, string(os.PathListSeparator)) {
+			paths = append(paths, filepath.Join(p, "bin"))
+		}
+	}
+	joinPathList(paths...)
 }
 
 func ensureToolsDir() string {
@@ -189,4 +195,21 @@ func homeDir() string {
 	home, err := homedir.Dir()
 	cmd.CheckError(err)
 	return home
+}
+
+func joinPathList(list ...string) {
+	sep := string(os.PathListSeparator)
+	paths := os.Getenv("PATH")
+	set := make(map[string]bool)
+	for _, p := range strings.Split(paths, sep) {
+		set[filepath.Clean(p)] = true
+	}
+	for i := len(list) - 1; i >= 0; i-- {
+		p := filepath.Clean(list[i])
+		if !set[p] {
+			set[p] = true
+			paths = p + sep + paths
+		}
+	}
+	os.Setenv("PATH", paths)
 }

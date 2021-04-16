@@ -60,7 +60,7 @@ func getInterceptors(options []interface{}) []echo.MiddlewareFunc {
 	return list
 }
 
-func (r *router) add(method, path string, handler interface{}, inters []echo.MiddlewareFunc) {
+func (r *router) add(method, path string, handler interface{}, inters []echo.MiddlewareFunc, outer echo.MiddlewareFunc) {
 	var echoHandler echo.HandlerFunc
 	switch fn := handler.(type) {
 	case echo.HandlerFunc:
@@ -98,7 +98,15 @@ func (r *router) add(method, path string, handler interface{}, inters []echo.Mid
 			panic(fmt.Errorf("%s %s: not support http server handler type: %v", method, path, handler))
 		}
 	}
-	inters = append(r.interceptors[0:len(r.interceptors):len(r.interceptors)], inters...)
+	if outer != nil {
+		list := make([]echo.MiddlewareFunc, 1+len(r.interceptors)+len(inters))
+		list[0] = outer
+		copy(list[1:], r.interceptors)
+		copy(list[1+len(r.interceptors):], inters)
+		inters = list
+	} else {
+		inters = append(r.interceptors[0:len(r.interceptors):len(r.interceptors)], inters...)
+	}
 	if len(inters) > 0 {
 		handler := echoHandler
 		for i := len(inters) - 1; i >= 0; i-- {

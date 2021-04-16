@@ -45,6 +45,10 @@ func init() {
 	implementCmd.Flags().Bool("http", true, "implements HTTP APIs")
 	protoCmd.AddCommand(implementCmd)
 
+	pluginCmd.Flags().StringSlice("opt", nil, "options for protoc plugin")
+	pluginCmd.Flags().String("out", ".", "output directory of plugin")
+	protoCmd.AddCommand(pluginCmd)
+
 	cmd.AddCommand(protoCmd)
 }
 
@@ -90,6 +94,34 @@ var implementCmd = &cobra.Command{
 		dirs := protoDirs(files)
 		createImplementTemp(command, args, files, dirs)
 		fmt.Println("build successfully !")
+	},
+}
+
+var pluginCmd = &cobra.Command{
+	Use:   "exec [plugin]",
+	Short: "exec",
+	Run: func(command *cobra.Command, args []string) {
+		install.Download(false, cmd.Verbose())
+		if len(args) < 1 {
+			command.Usage()
+			os.Exit(1)
+		}
+		plugin := args[0]
+		out, err := command.Flags().GetString("out")
+		cmd.CheckError(err)
+		params := []string{
+			fmt.Sprintf("--%s_out=%s", plugin, out), fmt.Sprintf("--%s_opt=paths=source_relative", plugin),
+		}
+		opts, err := command.Flags().GetStringSlice("opt")
+		cmd.CheckError(err)
+		if len(opts) > 0 {
+			for _, op := range opts {
+				params = append(params, fmt.Sprintf("--%s_opt=%s", plugin, op))
+			}
+		}
+		files := protoFiles(args[1:])
+		dirs := protoDirs(files)
+		execProtoc(files, dirs, params...)
 	},
 }
 

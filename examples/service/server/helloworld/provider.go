@@ -45,7 +45,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			transport.WithInterceptors(func(h interceptor.Handler) interceptor.Handler {
 				p.Log.Info("wrap greeterService methods")
 				return func(ctx context.Context, req interface{}) (interface{}, error) {
-					info := ctx.Value(transport.ServiceInfoContextKey).(transport.ServiceInfo)
+					info := transport.ContextServiceInfo(ctx)
 					p.Log.Infof("before %s/%s\n", info.Service(), info.Method())
 					p.Log.Info(req)
 					out, err := h(ctx, req)
@@ -60,7 +60,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			transport.WithInterceptors(func(h interceptor.Handler) interceptor.Handler {
 				p.Log.Info("wrap userService methods")
 				return func(ctx context.Context, req interface{}) (interface{}, error) {
-					info := ctx.Value(transport.ServiceInfoContextKey).(transport.ServiceInfo)
+					info := transport.ContextServiceInfo(ctx)
 					p.Log.Infof("before %s/%s\n", info.Service(), info.Method())
 					p.Log.Info(req)
 					out, err := h(ctx, req)

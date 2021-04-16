@@ -16,9 +16,7 @@ package register
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
-	"strings"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -66,8 +64,7 @@ type service struct {
 
 func (s *service) Add(method, path string, handler transhttp.HandlerFunc) {
 	if s.router != nil {
-		path = buildPath(path)
-		s.router.Add(method, path, handler)
+		s.router.Add(method, path, handler, httpserver.WithPathFormat(httpserver.PathFormatGoogleAPIs))
 	}
 }
 
@@ -75,56 +72,6 @@ func (s *service) RegisterService(sd *grpc.ServiceDesc, impl interface{}) {
 	if s.grpc != nil {
 		s.grpc.RegisterService(sd, impl)
 	}
-}
-
-// buildPath convert googleapis path to echo path
-func buildPath(path string) string {
-	// skip query string
-	idx := strings.Index(path, "?")
-	if idx >= 0 {
-		path = path[0:idx]
-	}
-
-	sb := &strings.Builder{}
-	chars := []rune(path)
-	start, i, l := 0, 0, len(chars)
-	for ; i < l; i++ {
-		c := chars[i]
-		switch c {
-		case '{':
-			sb.WriteString(string(chars[start:i]))
-			start = i
-			var hasEq bool
-			var name string
-			begin := i
-			i++ // skip '{'
-		loop:
-			for ; i < l; i++ {
-				c = chars[i]
-				switch c {
-				case '}':
-					begin++ // skip '{' or '='
-					if len(chars[begin:i]) <= 0 || len(chars[begin:i]) == 1 && chars[begin] == '*' {
-						sb.WriteString("*")
-					} else if hasEq {
-						sb.WriteString(":" + name + strings.ReplaceAll(string(chars[begin:i]), ":", "%3A")) // replace ":" to %3A
-					} else {
-						sb.WriteString(":" + name + url.PathEscape(string(chars[begin:i])))
-					}
-					start = i + 1 // skip '}'
-					break loop
-				case '=':
-					name = url.PathEscape(string(chars[begin+1 : i]))
-					hasEq = true
-					begin = i
-				}
-			}
-		}
-	}
-	if start < l {
-		sb.WriteString(strings.ReplaceAll(string(chars[start:]), ":", "%3A")) // replace ":" to %3A
-	}
-	return sb.String()
 }
 
 func init() {

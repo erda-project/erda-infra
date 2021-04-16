@@ -22,6 +22,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -200,7 +201,7 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 					continue loop
 				}
 			}
-			return nil, fmt.Errorf("miss provider of service %s", service)
+			return nil, fmt.Errorf("provider %s depends on service %s, but it not found", p[0].name, service)
 		}
 		node := graph.NewNode(name)
 		for dep := range providers {
@@ -441,6 +442,13 @@ func (c *providerContext) Init() (err error) {
 			)
 			instance := c.hub.getService(dc)
 			if len(service) > 0 && instance == nil {
+				opt, err := boolTagValue(field.Tag, "optional", false)
+				if err != nil {
+					return fmt.Errorf("invalid optional tag value in %s.%s: %s", typ.String(), field.Name, err)
+				}
+				if opt {
+					continue
+				}
 				return fmt.Errorf("not found service %q", service)
 			}
 			if instance == nil {
@@ -489,6 +497,20 @@ func (c *providerContext) dependencies() string {
 	return ""
 }
 
+func boolTagValue(tag reflect.StructTag, key string, defval bool) (bool, error) {
+	opt, ok := tag.Lookup(key)
+	if ok {
+		if len(opt) > 0 {
+			b, err := strconv.ParseBool(opt)
+			if err != nil {
+				return defval, err
+			}
+			return b, nil
+		}
+	}
+	return defval, nil
+}
+
 // Dependencies .
 func (c *providerContext) Dependencies() (services []string, providers []string) {
 	srvset, provset := make(map[string]bool), make(map[reflect.Type]bool)
@@ -520,7 +542,13 @@ func (c *providerContext) Dependencies() (services []string, providers []string)
 				continue
 			}
 			if len(service) > 0 {
-				if !srvset[service] {
+				opt, _ := boolTagValue(field.Tag, "optional", false)
+				if opt {
+					if len(c.hub.servicesMap[service]) > 0 && !srvset[service] {
+						services = append(services, service)
+						srvset[service] = true
+					}
+				} else if !srvset[service] {
 					services = append(services, service)
 					srvset[service] = true
 				}
