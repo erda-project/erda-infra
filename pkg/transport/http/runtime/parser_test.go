@@ -25,8 +25,8 @@ func TestCompile(t *testing.T) {
 		url  string
 	}
 	type want struct {
-		params   map[string]string
-		notmatch bool
+		params map[string]string
+		err    error
 	}
 	tests := []struct {
 		name string
@@ -84,7 +84,7 @@ func TestCompile(t *testing.T) {
 				path: "/abc/{def}/g/{h=xx}/yz",
 				url:  "/abc/123/g/xx123/yz",
 			},
-			want: want{notmatch: true},
+			want: want{err: ErrNotMatch},
 		},
 		{
 			args: args{
@@ -98,14 +98,14 @@ func TestCompile(t *testing.T) {
 				path: "/abc/{def}/g/{h=xx/123/*}/yz:aaa",
 				url:  "/abc/123/g/xx/123/456/yz",
 			},
-			want: want{notmatch: true},
+			want: want{err: ErrNotMatch},
 		},
 		{
 			args: args{
 				path: "/abc/{def}/g/{h=xx/123/*}/yz:aaa",
 				url:  "/abc/123/g/xx/123/456/yz:bbb",
 			},
-			want: want{notmatch: true},
+			want: want{err: ErrNotMatch},
 		},
 		{
 			args: args{
@@ -124,8 +124,12 @@ func TestCompile(t *testing.T) {
 			}
 			vars, err := matcher.Match(tt.args.url)
 			if err != nil {
-				if !tt.want.notmatch {
-					t.Errorf("not match %q by %q", tt.args.url, tt.args.path)
+				if tt.want.err != err {
+					if err != ErrNotMatch {
+						t.Errorf("matcher.Match() = %s", err)
+					} else {
+						t.Errorf("not match %q by %q", tt.args.url, tt.args.path)
+					}
 					return
 				}
 				return
