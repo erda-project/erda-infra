@@ -15,7 +15,6 @@
 package runtime
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/erda-project/erda-infra/pkg/transport/http/httprule"
@@ -44,7 +43,7 @@ func Compile(path string) (Matcher, error) {
 	}
 	pattern, err := NewPattern(httprule.SupportPackageIsVersion1, temp.OpCodes, temp.Pool, temp.Verb)
 	if err != nil {
-		return nil, fmt.Errorf("fail to create path pattern: %s", err)
+		return nil, ErrInvalidPattern
 	}
 	return &paramsMatcher{&pattern, path, temp.Fields}, nil
 }
