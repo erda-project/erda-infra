@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-func TestMatcher(t *testing.T) {
+func TestCompile(t *testing.T) {
 	type args struct {
 		path string
 		url  string
