@@ -16,6 +16,7 @@ package servicehub
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -220,6 +221,82 @@ hub-test4-deps-provider:
 				} else {
 					t.Errorf("got error %v, want err == nil", err)
 				}
+			}
+		})
+	}
+}
+
+func Test_boolTagValue(t *testing.T) {
+	type args struct {
+		tag    reflect.StructTag
+		key    string
+		defval bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			args: args{
+				tag:    reflect.StructTag(`test-key:""`),
+				key:    "test-key",
+				defval: false,
+			},
+			want: false,
+		},
+		{
+			args: args{
+				tag:    reflect.StructTag(`test-key:""`),
+				key:    "test-key",
+				defval: true,
+			},
+			want: true,
+		},
+		{
+			args: args{
+				tag:    reflect.StructTag(``),
+				key:    "test-key",
+				defval: true,
+			},
+			want: true,
+		},
+		{
+			args: args{
+				tag:    reflect.StructTag(`test-key:"true"`),
+				key:    "test-key",
+				defval: false,
+			},
+			want: true,
+		},
+		{
+			args: args{
+				tag:    reflect.StructTag(`test-key:"false"`),
+				key:    "test-key",
+				defval: true,
+			},
+			want: false,
+		},
+		{
+			args: args{
+				tag:    reflect.StructTag(`test-key:"error"`),
+				key:    "test-key",
+				defval: true,
+			},
+			want:    true,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := boolTagValue(tt.args.tag, tt.args.key, tt.args.defval)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("boolTagValue() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("boolTagValue() = %v, want %v", got, tt.want)
 			}
 		})
 	}
