@@ -114,12 +114,20 @@ func TestCompile(t *testing.T) {
 			},
 			want: want{params: map[string]string{"def": "123", "h": "xx/123/456"}},
 		},
+		{
+			args: args{
+				path: "invalid/path",
+			},
+			want: want{err: ErrInvalidPattern},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			matcher, err := Compile(tt.args.path)
 			if err != nil {
-				t.Errorf("Compile() return %s", err)
+				if tt.want.err != err {
+					t.Errorf("Compile() return %s", err)
+				}
 				return
 			}
 			vars, err := matcher.Match(tt.args.url)

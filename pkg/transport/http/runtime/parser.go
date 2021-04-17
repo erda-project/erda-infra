@@ -36,7 +36,7 @@ func Compile(path string) (Matcher, error) {
 	}
 	compiler, err := httprule.Parse(path)
 	if err != nil {
-		return nil, fmt.Errorf("invalid path format: %s", err)
+		return nil, ErrInvalidPattern
 	}
 	temp := compiler.Compile()
 	if len(temp.Fields) <= 0 {
