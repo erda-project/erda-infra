@@ -30,12 +30,19 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+// IncludeDir .
+func IncludeDir() string {
+	home := homeDir()
+	repo := filepath.Base(cmd.PackagePath)
+	return filepath.Join(home, "."+cmd.Name, repo, "tools/protoc/include")
+}
+
 // Download .
 func Download(override, verbose bool) {
 	dir := ensureToolsDir()
 
 	// download protoc
-	if !cmd.IsFileExist(filepath.Join(dir, "protoc")) || override {
+	if !cmd.IsFileExist(filepath.Join(dir, "protoc")) || (!*localInstall && override) {
 		file := downloadProtoc(dir, verbose)
 		err := unzip(file, func(f *zip.File) (string, bool) {
 			if f.Name == "bin/protoc" {
@@ -65,25 +72,36 @@ func Download(override, verbose bool) {
 	}
 
 	if checkPlugins || override {
-		// find package path
-		pkgPath := pkgpath.FindPkgDir(cmd.PackagePath, ".")
-		if len(pkgPath) <= 0 {
-			command := exec.Command("go", "get", cmd.PackagePath)
-			err := command.Run()
+		repo := filepath.Base(cmd.PackagePath)
+		repodir := filepath.Join(dir, repo)
+		var pkgPath string
+		if *localInstall {
+			pkgPath = pkgpath.FindPkgDir(cmd.PackagePath+"/tools", ".")
+			if len(pkgPath) <= 0 {
+				cmd.CheckError(fmt.Errorf("not found package %q", cmd.PackagePath))
+			}
+			fmt.Printf("tools go package path: %s\n", pkgPath)
+			destDir := filepath.Join(repodir, "tools/protoc/")
+			err := os.MkdirAll(destDir, os.ModePerm)
 			cmd.CheckError(err)
+			copyDir(filepath.Join(pkgPath, "protoc/include"), destDir)
+		} else {
+			tmpdir := filepath.Join(dir, repo+".tmp")
+			err := os.RemoveAll(tmpdir)
+			cmd.CheckError(err)
+			runCommand(dir, "git", "clone", "https://"+cmd.PackagePath, tmpdir)
+			err = os.RemoveAll(repodir)
+			cmd.CheckError(err)
+			err = os.Rename(tmpdir, repodir)
+			cmd.CheckError(err)
+			pkgPath = filepath.Join(repodir, "tools")
 		}
-		pkgPath = pkgpath.FindPkgDir(cmd.PackagePath, ".")
-		if len(pkgPath) <= 0 {
-			cmd.CheckError(fmt.Errorf("not found package %q", cmd.PackagePath))
-		}
-		fmt.Printf("tools go package path: %s\n", pkgPath)
-
 		// build protoc plugins
 		for _, plugin := range plugins {
 			if !cmd.IsFileExist(filepath.Join(dir, plugin)) || override {
 				fmt.Printf("building %s ...\n", plugin)
 				command := exec.Command("go", "build", "-o", filepath.Join(dir, plugin))
-				command.Dir = filepath.Join(pkgPath, "tools", "protoc", plugin)
+				command.Dir = filepath.Join(pkgPath, "protoc", plugin)
 				err := command.Run()
 				cmd.CheckError(err)
 				fmt.Printf("build %s successfully !\n", plugin)
@@ -116,6 +134,16 @@ func ensureToolsDir() string {
 		cmd.CheckError(fmt.Errorf("%s file already exist, it not a directory.", dir))
 	}
 	return dir
+}
+
+func runCommand(wd string, exe string, params ...string) {
+	command := exec.Command(exe, params...)
+	command.Dir = wd
+	command.Stderr = os.Stderr
+	command.Stdout = os.Stdout
+	command.Stdin = os.Stdin
+	err := command.Run()
+	cmd.CheckError(err)
 }
 
 func downloadProtoc(dir string, verbose bool) string {
@@ -195,6 +223,26 @@ func homeDir() string {
 	home, err := homedir.Dir()
 	cmd.CheckError(err)
 	return home
+}
+
+func copyDir(src string, dest string) {
+	formatPath := func(s string) string {
+		switch runtime.GOOS {
+		case "windows":
+			return strings.Replace(s, "/", "\\", -1)
+		case "darwin", "linux":
+			return strings.Replace(s, "\\", "/", -1)
+		default:
+			return s
+		}
+	}
+	src, dest = formatPath(src), formatPath(dest)
+	switch runtime.GOOS {
+	case "windows":
+		runCommand("", "xcopy", src, dest, "/I", "/E")
+	case "darwin", "linux":
+		runCommand("", "cp", "-R", src, dest)
+	}
 }
 
 func joinPathList(list ...string) {

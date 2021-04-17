@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/erda-project/erda-infra/tools/gohub/cmd"
-	"github.com/erda-project/erda-infra/tools/gohub/cmd/pkgpath"
 	"github.com/erda-project/erda-infra/tools/gohub/cmd/tools/install"
 	"github.com/spf13/cobra"
 )
@@ -175,10 +174,12 @@ func execProtoc(files, dirs []string, params ...string) {
 	for _, d := range dirs {
 		params = append(params, fmt.Sprintf("-I=%s", d))
 	}
-	pkgPath := pkgpath.FindPkgDir(cmd.PackagePath, ".")
-	if len(pkgPath) > 0 {
-		params = append(params, fmt.Sprintf("-I=%s", filepath.Join(pkgPath, "/tools/protoc/include/")))
+
+	include := install.IncludeDir()
+	if len(include) > 0 {
+		params = append(params, fmt.Sprintf("-I=%s", include))
 	}
+
 	params = append(params, fmt.Sprintf("-I=%s", "/usr/local/include/"))
 	params = append(params, files...)
 	fmt.Println("protoc", strings.Join(params, " "))

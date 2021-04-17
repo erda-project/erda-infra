@@ -16,10 +16,8 @@ package httpserver
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
-	"github.com/erda-project/erda-infra/pkg/transport/http/httprule"
 	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
 )
 
@@ -197,29 +195,16 @@ func Test_buildGoogleAPIsPath(t *testing.T) {
 				t.Errorf("buildGoogleAPIsPath() = %v, want %v", got, tt.want.path)
 				return
 			}
-			if len(tt.want.path) <= 0 || tt.want.path == "/" || tt.want.skip {
+			if tt.want.skip {
 				return
 			}
-			compiler, err := httprule.Parse(tt.args.path)
+			matcher, err := runtime.Compile(tt.args.path)
 			if err != nil {
-				t.Errorf("httprule.Parse() return %s", err)
-				return
-			}
-			temp := compiler.Compile()
-			pattern, err := runtime.NewPattern(httprule.SupportPackageIsVersion1, temp.OpCodes, temp.Pool, temp.Verb)
-			if err != nil {
-				t.Errorf("runtime.NewPattern() return %s", err)
+				t.Errorf("runtime.Compile() return %s", err)
 				return
 			}
 			if len(tt.args.url) > 0 {
-				components := strings.Split(tt.args.url[1:], "/")
-				last := len(components) - 1
-				var verb string
-				if idx := strings.LastIndex(components[last], ":"); idx >= 0 {
-					c := components[last]
-					components[last], verb = c[:idx], c[idx+1:]
-				}
-				vars, err := pattern.Match(components, verb)
+				vars, err := matcher.Match(tt.args.url)
 				if err != nil {
 					if !tt.want.notmatch {
 						t.Errorf("not match %q by %q", tt.args.url, tt.args.path)

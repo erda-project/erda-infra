@@ -20,7 +20,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var localInstall *bool
+
 func init() {
+	localInstall = installCmd.Flags().Bool("local", false, "find local package")
 	tools.AddCommand(installCmd)
 }
 
