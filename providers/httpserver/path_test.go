@@ -223,3 +223,26 @@ func Test_buildGoogleAPIsPath(t *testing.T) {
 		})
 	}
 }
+
+func Test_buildEchoPath(t *testing.T) {
+	tests := []struct {
+		path string
+		want string
+	}{
+		{
+			path: "/abc/def",
+			want: "/abc/def",
+		},
+		{
+			path: "/abc/:def/g",
+			want: "/abc/:def/g",
+		},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			if got := buildEchoPath(tt.path); got != tt.want {
+				t.Errorf("buildEchoPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

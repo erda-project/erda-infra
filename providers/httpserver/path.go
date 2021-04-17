@@ -19,7 +19,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/erda-project/erda-infra/pkg/transport/http/httprule"
 	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
 	"github.com/labstack/echo"
 )
@@ -115,40 +114,23 @@ func googleAPIsPathParamsInterceptor(path string) func(echo.HandlerFunc) echo.Ha
 	raw := func(handler echo.HandlerFunc) echo.HandlerFunc {
 		return handler
 	}
-	if path == "/" {
-		return raw
-	}
-	compiler, err := httprule.Parse(path)
+	matcher, err := runtime.Compile(path)
 	if err != nil {
-		panic(fmt.Errorf("invalid path format: %s", err))
+		panic(fmt.Errorf("path %q error: %s", path, err))
 	}
-	temp := compiler.Compile()
-	if len(temp.Fields) <= 0 {
+	if matcher.IsStatic() {
 		return raw
-	}
-	pattern, err := runtime.NewPattern(httprule.SupportPackageIsVersion1, temp.OpCodes, temp.Pool, temp.Verb)
-	if err != nil {
-		panic(fmt.Errorf("fail to create path pattern: %s", err))
 	}
 	return func(handler echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 			path := ctx.Request().URL.Path
-			if len(path) > 0 {
-				components := strings.Split(path[1:], "/")
-				last := len(components) - 1
-				var verb string
-				if idx := strings.LastIndex(components[last], ":"); idx >= 0 {
-					c := components[last]
-					components[last], verb = c[:idx], c[idx+1:]
-				}
-				vars, err := pattern.Match(components, verb)
-				if err != nil {
-					return echo.NotFoundHandler(ctx)
-				}
-				c := ctx.(*context)
-				c.vars = vars
-				ctx = c
+			vars, err := matcher.Match(path)
+			if err != nil {
+				return echo.NotFoundHandler(ctx)
 			}
+			c := ctx.(*context)
+			c.vars = vars
+			ctx = c
 			return handler(ctx)
 		}
 	}
