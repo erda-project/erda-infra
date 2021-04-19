@@ -15,8 +15,9 @@
 package modcom
 
 import (
+	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -47,7 +48,7 @@ func GetEnv(key, def string) string {
 }
 
 func loadModuleEnvFile(dir string) {
-	path := path.Join(dir, ".env")
+	path := filepath.Join(dir, ".env")
 	config.LoadEnvFileWithPath(path, false)
 }
 
@@ -82,13 +83,6 @@ var listener = &servicehub.DefaultListener{
 	},
 }
 
-// Run .
-func Run(cfg string) {
-	prepare()
-	Hub := servicehub.New(servicehub.WithListener(listener))
-	Hub.Run("", cfg, os.Args...)
-}
-
 // RunWithCfgDir .
 func RunWithCfgDir(dir, name string) {
 	prepare()
@@ -96,9 +90,33 @@ func RunWithCfgDir(dir, name string) {
 	dir = strings.TrimRight(dir, "/")
 	os.Setenv("CONFIG_PATH", dir)
 	loadModuleEnvFile(dir)
-	cfg := path.Join(dir, name+GetEnv("CONFIG_SUFFIX", ".yaml"))
+	cfg := filepath.Join(dir, name+GetEnv("CONFIG_SUFFIX", ".yaml"))
 
 	// create and run service hub
 	Hub := servicehub.New(servicehub.WithListener(listener))
 	Hub.Run("", cfg, os.Args...)
+}
+
+// Run .
+func Run(opts *servicehub.RunOptions) {
+	prepare()
+	opts.Name = GetEnv("CONFIG_NAME", opts.Name)
+	cfg := opts.ConfigFile
+	if len(cfg) <= 0 && len(opts.Name) > 0 {
+		cfg = opts.Name + GetEnv("CONFIG_SUFFIX", ".yaml")
+	}
+	if len(cfg) > 0 {
+		dir := strings.TrimRight(filepath.Dir(cfg), "/")
+		os.Setenv("CONFIG_PATH", dir)
+		loadModuleEnvFile(dir)
+	}
+	if opts.Args == nil {
+		opts.Args = os.Args
+	}
+
+	fmt.Println("CONFIG_PATH", os.Getenv("CONFIG_PATH"))
+
+	// create and run service hub
+	Hub := servicehub.New(servicehub.WithListener(listener))
+	Hub.RunWithOptions(opts)
 }

@@ -22,6 +22,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -200,7 +201,7 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 					continue loop
 				}
 			}
-			return nil, fmt.Errorf("miss provider of service %s", service)
+			return nil, fmt.Errorf("provider %s depends on service %s, but it not found", p[0].name, service)
 		}
 		node := graph.NewNode(name)
 		for dep := range providers {
@@ -439,32 +440,16 @@ func (c *providerContext) Init() (err error) {
 				field.Type,
 				field.Tag,
 			)
-			var instance interface{}
-			if len(service) > 0 {
-				instance = c.hub.getService(dc)
-				if instance == nil {
-					return fmt.Errorf("not found service %q", service)
+			instance := c.hub.getService(dc)
+			if len(service) > 0 && instance == nil {
+				opt, err := boolTagValue(field.Tag, "optional", false)
+				if err != nil {
+					return fmt.Errorf("invalid optional tag value in %s.%s: %s", typ.String(), field.Name, err)
 				}
-			} else {
-				var pc *providerContext
-				providers := c.hub.servicesTypes[field.Type]
-				for _, item := range providers {
-					if item.key == item.name {
-						pc = item
-						break
-					}
+				if opt {
+					continue
 				}
-				if pc == nil && len(providers) > 0 {
-					pc = providers[0]
-				}
-				if pc != nil {
-					provider := pc.provider
-					if prod, ok := provider.(DependencyProvider); ok {
-						instance = prod.Provide(dc)
-					} else {
-						instance = provider
-					}
-				}
+				return fmt.Errorf("not found service %q", service)
 			}
 			if instance == nil {
 				continue
@@ -512,6 +497,20 @@ func (c *providerContext) dependencies() string {
 	return ""
 }
 
+func boolTagValue(tag reflect.StructTag, key string, defval bool) (bool, error) {
+	opt, ok := tag.Lookup(key)
+	if ok {
+		if len(opt) > 0 {
+			b, err := strconv.ParseBool(opt)
+			if err != nil {
+				return defval, err
+			}
+			return b, nil
+		}
+	}
+	return defval, nil
+}
+
 // Dependencies .
 func (c *providerContext) Dependencies() (services []string, providers []string) {
 	srvset, provset := make(map[string]bool), make(map[reflect.Type]bool)
@@ -543,7 +542,13 @@ func (c *providerContext) Dependencies() (services []string, providers []string)
 				continue
 			}
 			if len(service) > 0 {
-				if !srvset[service] {
+				opt, _ := boolTagValue(field.Tag, "optional", false)
+				if opt {
+					if len(c.hub.servicesMap[service]) > 0 && !srvset[service] {
+						services = append(services, service)
+						srvset[service] = true
+					}
+				} else if !srvset[service] {
 					services = append(services, service)
 					srvset[service] = true
 				}
@@ -633,37 +638,49 @@ func (h *Hub) Service(name string, options ...interface{}) interface{} {
 	), options...)
 }
 
-func (h *Hub) getService(dc DependencyContext, options ...interface{}) interface{} {
-	if providers, ok := h.servicesMap[dc.Service()]; ok {
-		if len(providers) > 0 {
-			var pc *providerContext
-			if len(dc.Label()) > 0 {
-				for _, item := range providers {
-					if item.label == dc.Label() {
-						pc = item
-						break
+func (h *Hub) getService(dc DependencyContext, options ...interface{}) (instance interface{}) {
+	var pc *providerContext
+	if len(dc.Service()) > 0 {
+		if providers, ok := h.servicesMap[dc.Service()]; ok {
+			if len(providers) > 0 {
+				if len(dc.Label()) > 0 {
+					for _, item := range providers {
+						if item.label == dc.Label() {
+							pc = item
+							break
+						}
+					}
+				} else {
+					for _, item := range providers {
+						if item.key == item.name {
+							pc = item
+							break
+						}
+					}
+					if pc == nil && len(providers) > 0 {
+						pc = providers[0]
 					}
 				}
-			} else {
-				for _, item := range providers {
-					if item.key == item.name {
-						pc = item
-						break
-					}
-				}
-				if pc == nil && len(providers) > 0 {
-					pc = providers[0]
-				}
 			}
-			if pc == nil {
-				return nil
-			}
-			provider := pc.provider
-			if prod, ok := provider.(DependencyProvider); ok {
-				return prod.Provide(dc, options...)
-			}
-			return provider
 		}
+	} else if dc.Type() != nil {
+		providers := h.servicesTypes[dc.Type()]
+		for _, item := range providers {
+			if item.key == item.name {
+				pc = item
+				break
+			}
+		}
+		if pc == nil && len(providers) > 0 {
+			pc = providers[0]
+		}
+	}
+	if pc != nil {
+		provider := pc.provider
+		if prod, ok := provider.(DependencyProvider); ok {
+			return prod.Provide(dc, options...)
+		}
+		return provider
 	}
 	return nil
 }

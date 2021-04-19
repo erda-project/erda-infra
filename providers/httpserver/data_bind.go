@@ -84,11 +84,17 @@ func (b *dataBinder) Bind(i interface{}, c echo.Context) (err error) {
 		if err = b.bindData(i, c.QueryParams(), "query"); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error()).SetInternal(err)
 		}
-		names := c.ParamNames()
-		values := c.ParamValues()
 		params := map[string][]string{}
-		for i, name := range names {
-			params[name] = []string{values[i]}
+		if ctx, ok := c.(*context); ok && len(ctx.vars) > 0 {
+			for k, v := range ctx.vars {
+				params[k] = []string{v}
+			}
+		} else {
+			names := c.ParamNames()
+			values := c.ParamValues()
+			for i, name := range names {
+				params[name] = []string{values[i]}
+			}
 		}
 		if err := b.bindData(i, params, "param"); err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error()).SetInternal(err)

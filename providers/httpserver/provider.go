@@ -121,12 +121,14 @@ func (p *provider) Close() error {
 // Provide .
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	interceptors := getInterceptors(args)
-	return Router(&router{
+	r := &router{
 		p:            p,
 		routeMap:     p.router.routeMap,
 		group:        ctx.Caller(),
 		interceptors: interceptors,
-	})
+	}
+	r.pathFormater = r.getPathFormater(args)
+	return Router(r)
 }
 
 func init() {

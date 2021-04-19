@@ -252,9 +252,13 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P(path, " = val")
 		}
 	case protoreflect.MessageKind:
-		g.P("if ", path, " == nil {")
-		g.P("	", path, " = &", subMsg.GoIdent, "{}")
-		g.P("}")
+		if desc.IsList() {
+			// TODO: support read message list from query string
+		} else {
+			g.P("if ", path, " == nil {")
+			g.P("	", path, " = &", subMsg.GoIdent, "{}")
+			g.P("}")
+		}
 	default:
 		return fmt.Errorf("not support type %q for query string", desc.Kind())
 	}
@@ -279,6 +283,9 @@ func createQueryParams(fields []*protogen.Field) []*queryParam {
 				rootField = field
 			}
 			if field.Desc.Kind() == protoreflect.MessageKind {
+				if field.Desc.IsList() {
+					continue
+				}
 				q := &queryParam{
 					Root:   rootField,
 					Field:  field,

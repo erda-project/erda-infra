@@ -15,6 +15,8 @@
 package transport
 
 import (
+	"context"
+
 	transgrpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
 	transhttp "github.com/erda-project/erda-infra/pkg/transport/http"
 	"github.com/erda-project/erda-infra/pkg/transport/interceptor"
@@ -79,6 +81,17 @@ type serviceInfoContextKey int8
 
 // ServiceInfoContextKey .
 const ServiceInfoContextKey = serviceInfoContextKey(0)
+
+// WithRequest .
+func WithServiceInfo(ctx context.Context, info ServiceInfo) context.Context {
+	return context.WithValue(ctx, ServiceInfoContextKey, info)
+}
+
+// ContextRequest .
+func ContextServiceInfo(ctx context.Context) ServiceInfo {
+	info, _ := ctx.Value(ServiceInfoContextKey).(ServiceInfo)
+	return info
+}
 
 type serviceInfo struct {
 	service  string

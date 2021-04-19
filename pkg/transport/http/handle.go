@@ -15,6 +15,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/erda-project/erda-infra/pkg/transport/interceptor"
@@ -93,3 +94,14 @@ type requestContextKey int8
 
 // RequestContextKey .
 const RequestContextKey = requestContextKey(0)
+
+// WithRequest .
+func WithRequest(ctx context.Context, req *http.Request) context.Context {
+	return context.WithValue(ctx, RequestContextKey, req)
+}
+
+// ContextRequest .
+func ContextRequest(ctx context.Context) *http.Request {
+	req, _ := ctx.Value(RequestContextKey).(*http.Request)
+	return req
+}
