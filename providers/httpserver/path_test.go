@@ -15,10 +15,12 @@
 package httpserver
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
+	"github.com/labstack/echo"
 )
 
 func Test_buildGoogleAPIsPath(t *testing.T) {
@@ -242,6 +244,50 @@ func Test_buildEchoPath(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			if got := buildEchoPath(tt.path); got != tt.want {
 				t.Errorf("buildEchoPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_googleAPIsPathParamsInterceptor(t *testing.T) {
+	handler := func(c echo.Context) error { return nil }
+	type args struct {
+		path    string
+		handler echo.HandlerFunc
+	}
+	tests := []struct {
+		name   string
+		args   args
+		static bool
+	}{
+		{
+			name: "static",
+			args: args{
+				path:    "/abc/def",
+				handler: handler,
+			},
+			static: true,
+		},
+		{
+			name: "params",
+			args: args{
+				path:    "/abc/{def}/g",
+				handler: handler,
+			},
+			static: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			handler := googleAPIsPathParamsInterceptor(tt.args.path)(tt.args.handler)
+			if tt.static {
+				if fmt.Sprint(handler) != fmt.Sprint(tt.args.handler) {
+					t.Errorf("googleAPIsPathParamsInterceptor()(handler) get non static handler")
+				}
+			} else {
+				if fmt.Sprint(handler) == fmt.Sprint(tt.args.handler) {
+					t.Errorf("googleAPIsPathParamsInterceptor()(handler) got wrapped handler")
+				}
 			}
 		})
 	}
