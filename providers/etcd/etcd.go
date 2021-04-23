@@ -26,6 +26,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"google.golang.org/grpc"
 )
 
 // Interface .
@@ -37,7 +38,7 @@ type Interface interface {
 
 type config struct {
 	Endpoints string        `file:"endpoints" env:"ETCD_ENDPOINTS"`
-	Timeout   time.Duration `file:"timeout" default:"10s"`
+	Timeout   time.Duration `file:"timeout" default:"5s"`
 	TLS       struct {
 		CertFile    string `file:"cert_file"`
 		CertKeyFile string `file:"cert_key_file"`
@@ -89,6 +90,7 @@ func (p *provider) Connect() (*clientv3.Client, error) {
 		Endpoints:   strings.Split(p.Cfg.Endpoints, ","),
 		DialTimeout: p.Cfg.Timeout,
 		TLS:         p.tlsConfig,
+		DialOptions: []grpc.DialOption{grpc.WithBlock()},
 	}
 	return clientv3.New(config)
 }
