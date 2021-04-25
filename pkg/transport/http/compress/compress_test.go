@@ -16,7 +16,10 @@ package compress
 
 import (
 	"bytes"
+	"fmt"
 	"io"
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -40,14 +43,45 @@ func TestCompressWithGzip(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := CompressWithGzip(tt.args.data)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("CompressWithGzip() error = %v, wantErr %v", err, tt.wantErr)
+			r, err := CompressWithGzip(tt.args.data)
+			if err != nil {
+				fmt.Printf("CompressWithGzip() error = %+v\n", err)
 				return
 			}
-			//if !reflect.DeepEqual(got, tt.want) {
-			//	t.Errorf("CompressWithGzip() got = %v, want %v", got, tt.want)
-			//}
+			fmt.Println(r.Read([]byte("abc")))
+		})
+	}
+}
+
+func TestCompressWithGzip2(t *testing.T) {
+	type args struct {
+		data io.Reader
+	}
+	r := strings.NewReader("this is a test")
+	tests := []struct {
+		name    string
+		args    args
+		want    io.Reader
+		wantErr bool
+	}{
+		{
+			name: "test_CompressWithGzip2",
+			args: args{
+				r,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CompressWithGzip2(tt.args.data)
+			if err != nil && err != io.EOF {
+				fmt.Println("the err is", err)
+				t.Errorf("CompressWithGzip2() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CompressWithGzip2() got = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

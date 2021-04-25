@@ -1,4 +1,4 @@
-elasticsearch:
+ elasticsearch:
     urls: "http://localhost:9200"
     security: false
     username: ""

@@ -16,7 +16,9 @@ package compress
 
 import (
 	"compress/gzip"
+	"fmt"
 	"io"
+	"sync"
 )
 
 // CompressWithGzip takes an io.Reader as input and pipes
@@ -37,4 +39,32 @@ func CompressWithGzip(data io.Reader) (io.Reader, error) {
 	}()
 
 	return pipeReader, err
+}
+
+type compressReader struct {
+	io.ReadCloser
+	mu     sync.Mutex
+	closed bool
+}
+
+func (c *compressReader) Close() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.closed {
+		return nil
+	}
+	c.closed = true
+	err := c.Close()
+	return err
+}
+
+func CompressWithGzip2(data io.Reader) (io.Reader, error) {
+	if data == nil {
+		return nil, fmt.Errorf("data must not be nil")
+	}
+	zipReader, err := gzip.NewReader()
+	if err != nil {
+		return nil, err
+	}
+	return zipReader, nil
 }
