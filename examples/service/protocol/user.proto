@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package erda.infra.example;
+import "google/api/annotations.proto";
+option go_package = "github.com/erda-project/erda-infra/examples/service/protocol/pb";
+
+// The user service definition.
+service UserService {
+
+  // get user
+  rpc GetUser (GetUserRequest) returns (GetUserResponse)  {
+    option (google.api.http) = {
+      get: "/api/user/{id}",
+    };
+  }
+
+  // update user
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse)  {
+    option (google.api.http) = {
+      put: "/api/user/{user.id}",
+    };
+  }
+
+}
+
+message User {
+  int64 id = 1;
+  string name = 2;
+  int32 age = 3;
+  repeated int64 books = 4;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  bool success = 1;
+  User data = 2;
+}
+
+message UpdateUserRequest {
+  User user = 1;
+}
+
+message UpdateUserResponse {
+  bool success = 1;
+}

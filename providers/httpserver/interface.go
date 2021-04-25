@@ -1,5 +1,16 @@
-// Author: recallsong
-// Email: songruiguo@qq.com
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package httpserver
 
@@ -49,34 +60,41 @@ type Context interface {
 // Interceptor .
 type Interceptor func(handler func(ctx Context) error) func(ctx Context) error
 
+var _ echo.Context = (*context)(nil)
+
 type context struct {
 	echo.Context
 	data map[string]interface{}
+	vars map[string]string
 }
 
-func (c context) SetAttribute(key string, val interface{}) {
+func (c *context) SetAttribute(key string, val interface{}) {
 	if c.data == nil {
 		c.data = make(map[string]interface{})
 	}
 	c.data[key] = val
 }
 
-func (c context) Attribute(key string) interface{} {
+func (c *context) Attribute(key string) interface{} {
 	if c.data == nil {
 		return nil
 	}
 	return c.data[key]
 }
 
-func (c context) Attributes() map[string]interface{} {
+func (c *context) Attributes() map[string]interface{} {
 	if c.data == nil {
 		c.data = make(map[string]interface{})
 	}
 	return c.data
 }
 
-func (c context) ResponseWriter() http.ResponseWriter {
+func (c *context) ResponseWriter() http.ResponseWriter {
 	return c.Context.Response()
+}
+
+func (c *context) Bind(i interface{}) error {
+	return c.Echo().Binder.Bind(i, c)
 }
 
 type routeKey struct {
@@ -97,6 +115,7 @@ func (r *route) String() string {
 
 type router struct {
 	p            *provider
+	pathFormater *pathFormater
 	routeMap     map[routeKey]*route
 	routes       []*route
 	group        string
@@ -110,6 +129,13 @@ func (r *router) Server() *echo.Echo {
 }
 
 func (r *router) Add(method, path string, handler interface{}, options ...interface{}) {
+	pathFormater := r.getPathFormater(options)
+	var pathParser echo.MiddlewareFunc
+	if pathFormater.parser != nil {
+		pathParser = pathFormater.parser(path)
+	}
+	path = pathFormater.format(path)
+
 	method = strings.ToUpper(method)
 	key := routeKey{
 		method: method,
@@ -137,7 +163,7 @@ func (r *router) Add(method, path string, handler interface{}, options ...interf
 	r.routes = append(r.routes, route)
 
 	if handler != nil {
-		r.add(method, path, handler, interceptors)
+		r.add(method, path, handler, interceptors, pathParser)
 	}
 }
 
@@ -166,6 +192,26 @@ func WithHide(hide bool) interface{} {
 // WithInterceptor for Router
 func WithInterceptor(fn func(handler func(ctx Context) error) func(ctx Context) error) interface{} {
 	return Interceptor(fn)
+}
+
+type PathFormat int32
+
+const (
+	PathFormatEcho       = 0
+	PathFormatGoogleAPIs = 1
+)
+
+// WithPathFormat .
+func WithPathFormat(format PathFormat) interface{} {
+	formater := &pathFormater{typ: format}
+	switch format {
+	case PathFormatGoogleAPIs:
+		formater.format = buildGoogleAPIsPath
+		formater.parser = googleAPIsPathParamsInterceptor
+	default:
+		formater.format = buildEchoPath
+	}
+	return formater
 }
 
 type routesSorter []*route

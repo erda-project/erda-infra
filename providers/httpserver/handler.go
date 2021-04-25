@@ -1,5 +1,16 @@
-// Author: recallsong
-// Email: songruiguo@qq.com
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package httpserver
 
@@ -49,7 +60,7 @@ func getInterceptors(options []interface{}) []echo.MiddlewareFunc {
 	return list
 }
 
-func (r *router) add(method, path string, handler interface{}, inters []echo.MiddlewareFunc) {
+func (r *router) add(method, path string, handler interface{}, inters []echo.MiddlewareFunc, outer echo.MiddlewareFunc) {
 	var echoHandler echo.HandlerFunc
 	switch fn := handler.(type) {
 	case echo.HandlerFunc:
@@ -87,7 +98,15 @@ func (r *router) add(method, path string, handler interface{}, inters []echo.Mid
 			panic(fmt.Errorf("%s %s: not support http server handler type: %v", method, path, handler))
 		}
 	}
-	inters = append(r.interceptors[0:len(r.interceptors):len(r.interceptors)], inters...)
+	if outer != nil {
+		list := make([]echo.MiddlewareFunc, 1+len(r.interceptors)+len(inters))
+		list[0] = outer
+		copy(list[1:], r.interceptors)
+		copy(list[1+len(r.interceptors):], inters)
+		inters = list
+	} else {
+		inters = append(r.interceptors[0:len(r.interceptors):len(r.interceptors)], inters...)
+	}
 	if len(inters) > 0 {
 		handler := echoHandler
 		for i := len(inters) - 1; i >= 0; i-- {

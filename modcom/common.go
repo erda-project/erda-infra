@@ -1,8 +1,23 @@
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package modcom
 
 import (
+	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -33,7 +48,7 @@ func GetEnv(key, def string) string {
 }
 
 func loadModuleEnvFile(dir string) {
-	path := path.Join(dir, ".env")
+	path := filepath.Join(dir, ".env")
 	config.LoadEnvFileWithPath(path, false)
 }
 
@@ -55,11 +70,17 @@ func RegisterInitializer(fn func()) {
 // Hub global variable
 var Hub *servicehub.Hub
 
-// Run .
-func Run(cfg string) {
-	prepare()
-	Hub := servicehub.New(servicehub.WithListener(&listener{}))
-	Hub.Run("", cfg, os.Args...)
+var listener = &servicehub.DefaultListener{
+	BeforeInitFunc: func(h *servicehub.Hub, config map[string]interface{}) error {
+		if _, ok := config["i18n"]; !ok {
+			config["i18n"] = nil // i18n is required
+		}
+		return nil
+	},
+	AfterInitFunc: func(h *servicehub.Hub) error {
+		api.I18n = h.Service("i18n").(i18n.I18n)
+		return nil
+	},
 }
 
 // RunWithCfgDir .
@@ -69,23 +90,33 @@ func RunWithCfgDir(dir, name string) {
 	dir = strings.TrimRight(dir, "/")
 	os.Setenv("CONFIG_PATH", dir)
 	loadModuleEnvFile(dir)
-	cfg := path.Join(dir, name+GetEnv("CONFIG_SUFFIX", ".yaml"))
+	cfg := filepath.Join(dir, name+GetEnv("CONFIG_SUFFIX", ".yaml"))
 
 	// create and run service hub
-	Hub := servicehub.New(servicehub.WithListener(&listener{}))
+	Hub := servicehub.New(servicehub.WithListener(listener))
 	Hub.Run("", cfg, os.Args...)
 }
 
-type listener struct{}
-
-func (l *listener) BeforeInitialization(h *servicehub.Hub, config map[string]interface{}) error {
-	if _, ok := config["i18n"]; !ok {
-		config["i18n"] = nil // i18n is required
+// Run .
+func Run(opts *servicehub.RunOptions) {
+	prepare()
+	opts.Name = GetEnv("CONFIG_NAME", opts.Name)
+	cfg := opts.ConfigFile
+	if len(cfg) <= 0 && len(opts.Name) > 0 {
+		cfg = opts.Name + GetEnv("CONFIG_SUFFIX", ".yaml")
 	}
-	return nil
-}
+	if len(cfg) > 0 {
+		dir := strings.TrimRight(filepath.Dir(cfg), "/")
+		os.Setenv("CONFIG_PATH", dir)
+		loadModuleEnvFile(dir)
+	}
+	if opts.Args == nil {
+		opts.Args = os.Args
+	}
 
-func (l *listener) AfterInitialization(h *servicehub.Hub) error {
-	api.I18n = h.Service("i18n").(i18n.I18n)
-	return nil
+	fmt.Println("CONFIG_PATH", os.Getenv("CONFIG_PATH"))
+
+	// create and run service hub
+	Hub := servicehub.New(servicehub.WithListener(listener))
+	Hub.RunWithOptions(opts)
 }

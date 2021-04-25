@@ -1,5 +1,16 @@
-// Author: recallsong
-// Email: songruiguo@qq.com
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package servicehub
 
@@ -11,6 +22,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -120,13 +132,14 @@ func (h *Hub) Init(config map[string]interface{}, flags *pflag.FlagSet, args []s
 		if err != nil {
 			return err
 		}
-		if len(ctx.Dependencies()) > 0 {
-			h.logger.Infof("provider %s (depends %v) initialized", ctx.name, ctx.Dependencies())
+		dependencies := ctx.dependencies()
+		if len(dependencies) > 0 {
+			h.logger.Infof("provider %s (depends %s) initialized", ctx.name, dependencies)
 		} else {
 			h.logger.Infof("provider %s initialized", ctx.name)
 		}
 	}
-	for i, l := 0, len(h.listeners); i < l; i++ {
+	for i := len(h.listeners) - 1; i >= 0; i-- {
 		err = h.listeners[i].AfterInitialization(h)
 		if err != nil {
 			return err
@@ -165,10 +178,10 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 	h.servicesTypes = types
 	var depGraph graph.Graph
 	for name, p := range providersMap {
-		depends := p[0].Dependencies()
 		providers := map[string]*providerContext{}
+		dependsServices, dependsProviders := p[0].Dependencies()
 	loop:
-		for _, service := range depends {
+		for _, service := range dependsServices {
 			name := service
 			var label string
 			idx := strings.Index(service, "@")
@@ -188,11 +201,16 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 					continue loop
 				}
 			}
-			return nil, fmt.Errorf("miss provider of service %s", service)
+			return nil, fmt.Errorf("provider %s depends on service %s, but it not found", p[0].name, service)
 		}
 		node := graph.NewNode(name)
 		for dep := range providers {
 			node.Deps = append(node.Deps, dep)
+		}
+		for _, dep := range dependsProviders {
+			if _, ok := providers[dep]; !ok {
+				node.Deps = append(node.Deps, dep)
+			}
 		}
 		depGraph = append(depGraph, node)
 	}
@@ -212,7 +230,7 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 // StartWithSignal .
 func (h *Hub) StartWithSignal() error {
 	sigs := []os.Signal{syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT}
-	h.logger.Info("signals to quit:", sigs)
+	h.logger.Infof("signals to quit: %v", sigs)
 	return h.Start(signalx.Notify(sigs...))
 }
 
@@ -231,7 +249,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				if key != name {
 					key = fmt.Sprintf("%s (%s)", key, name)
 				}
-				h.logger.Debugf("provider %s starting ...", key)
+				h.logger.Infof("provider %s starting ...", key)
 				err := provider.Start()
 				if err != nil {
 					h.logger.Errorf("fail to start provider %s: %s", key, err)
@@ -249,7 +267,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				if key != name {
 					key = fmt.Sprintf("%s (%s)", key, name)
 				}
-				h.logger.Debugf("provider %s running ...", key)
+				h.logger.Infof("provider %s running ...", key)
 				err := provider.Run(ctx)
 				if err != nil {
 					h.logger.Errorf("fail to run provider %s: %s", key, err)
@@ -264,6 +282,13 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.started = true
 	h.lock.Unlock()
 	runtime.Gosched()
+
+	for i, l := 0, len(h.listeners); i < l; i++ {
+		err = h.listeners[i].AfterStart(h)
+		if err != nil {
+			return err
+		}
+	}
 
 	closeCh, closed := make(chan struct{}), false
 	var elock sync.Mutex
@@ -305,7 +330,11 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 			}
 		}
 	}
-	return errs.MaybeUnwrap()
+	err = errs.MaybeUnwrap()
+	for i, l := 0, len(h.listeners); i < l; i++ {
+		err = h.listeners[i].BeforeExit(h, err)
+	}
+	return err
 }
 
 // Close .
@@ -332,13 +361,15 @@ func (h *Hub) Close() error {
 }
 
 type providerContext struct {
-	hub      *Hub
-	key      string
-	label    string
-	name     string
-	cfg      interface{}
-	provider Provider
-	define   ProviderDefine
+	hub         *Hub
+	key         string
+	label       string
+	name        string
+	cfg         interface{}
+	provider    Provider
+	structValue reflect.Value
+	structType  reflect.Type
+	define      ProviderDefine
 }
 
 var loggerType = reflect.TypeOf((*logs.Logger)(nil)).Elem()
@@ -346,37 +377,34 @@ var loggerType = reflect.TypeOf((*logs.Logger)(nil)).Elem()
 func (c *providerContext) BindConfig(flags *pflag.FlagSet) (err error) {
 	if creator, ok := c.define.(ConfigCreator); ok {
 		cfg := creator.Config()
-		err = unmarshal.BindDefault(cfg)
-		if err != nil {
-			return err
-		}
-		if c.cfg != nil {
-			err = config.ConvertData(c.cfg, cfg, "file")
+		if cfg != nil {
+			err = unmarshal.BindDefault(cfg)
 			if err != nil {
 				return err
 			}
+			if c.cfg != nil {
+				err = config.ConvertData(c.cfg, cfg, "file")
+				if err != nil {
+					return err
+				}
+			}
+			err = unmarshal.BindEnv(cfg)
+			if err != nil {
+				return err
+			}
+			err = unmarshalflag.BindFlag(flags, cfg)
+			if err != nil {
+				return err
+			}
+			c.cfg = cfg
 		}
-		err = unmarshal.BindEnv(cfg)
-		if err != nil {
-			return err
-		}
-		err = unmarshalflag.BindFlag(flags, cfg)
-		if err != nil {
-			return err
-		}
-		c.cfg = cfg
 	}
 	return nil
 }
 
 func (c *providerContext) Init() (err error) {
-	value := reflect.ValueOf(c.provider)
-	typ := value.Type()
-	if typ.Kind() == reflect.Ptr {
-		for typ.Kind() == reflect.Ptr {
-			value = value.Elem()
-			typ = value.Type()
-		}
+	if reflect.ValueOf(c.provider).Kind() == reflect.Ptr && c.structType != nil {
+		value, typ := c.structValue, c.structType
 		var (
 			cfgValue *reflect.Value
 			cfgType  reflect.Type
@@ -386,68 +414,50 @@ func (c *providerContext) Init() (err error) {
 			cfgValue = &value
 			cfgType = cfgValue.Type()
 		}
-		if typ.Kind() == reflect.Struct {
-			fields := typ.NumField()
-			for i := 0; i < fields; i++ {
-				if !value.Field(i).CanSet() {
-					continue
-				}
-				field := typ.Field(i)
-				if field.Type == loggerType {
-					logger := c.Logger()
-					value.Field(i).Set(reflect.ValueOf(logger))
-				}
-				if cfgValue != nil && field.Type == cfgType {
-					value.Field(i).Set(*cfgValue)
-				}
-				service := field.Tag.Get("service")
-				if len(service) <= 0 {
-					service = field.Tag.Get("autowired")
-				}
-				if service == "-" {
-					continue
-				}
-				dc := newDependencyContext(
-					service,
-					c.name,
-					field.Type,
-					field.Tag,
-				)
-				var instance interface{}
-				if len(service) > 0 {
-					instance = c.hub.getService(dc)
-					if instance == nil {
-						return fmt.Errorf("not found service %q", service)
-					}
-				} else {
-					var pc *providerContext
-					providers := c.hub.servicesTypes[field.Type]
-					for _, item := range providers {
-						if item.key == item.name {
-							pc = item
-							break
-						}
-					}
-					if pc == nil && len(providers) > 0 {
-						pc = providers[0]
-					}
-					if pc != nil {
-						provider := pc.provider
-						if prod, ok := provider.(DependencyProvider); ok {
-							instance = prod.Provide(dc)
-						} else {
-							instance = provider
-						}
-					}
-				}
-				if instance == nil {
-					continue
-				}
-				if !reflect.TypeOf(instance).AssignableTo(field.Type) {
-					return fmt.Errorf("service %q not implement %s", service, field.Type)
-				}
-				value.Field(i).Set(reflect.ValueOf(instance))
+		fields := typ.NumField()
+		for i := 0; i < fields; i++ {
+			if !value.Field(i).CanSet() {
+				continue
 			}
+			field := typ.Field(i)
+			if field.Type == loggerType {
+				logger := c.Logger()
+				value.Field(i).Set(reflect.ValueOf(logger))
+			}
+			if cfgValue != nil && field.Type == cfgType {
+				value.Field(i).Set(*cfgValue)
+			}
+			service := field.Tag.Get("service")
+			if len(service) <= 0 {
+				service = field.Tag.Get("autowired")
+			}
+			if service == "-" {
+				continue
+			}
+			dc := newDependencyContext(
+				service,
+				c.name,
+				field.Type,
+				field.Tag,
+			)
+			instance := c.hub.getService(dc)
+			if len(service) > 0 && instance == nil {
+				opt, err := boolTagValue(field.Tag, "optional", false)
+				if err != nil {
+					return fmt.Errorf("invalid optional tag value in %s.%s: %s", typ.String(), field.Name, err)
+				}
+				if opt {
+					continue
+				}
+				return fmt.Errorf("not found service %q", service)
+			}
+			if instance == nil {
+				continue
+			}
+			if !reflect.TypeOf(instance).AssignableTo(field.Type) {
+				return fmt.Errorf("service %q not implement %s", service, field.Type)
+			}
+			value.Field(i).Set(reflect.ValueOf(instance))
 		}
 	}
 	if c.cfg != nil {
@@ -475,12 +485,86 @@ func (c *providerContext) Define() ProviderDefine {
 	return c.define
 }
 
-// Define .
-func (c *providerContext) Dependencies() []string {
-	if deps, ok := c.define.(ServiceDependencies); ok {
-		return deps.Dependencies()
+func (c *providerContext) dependencies() string {
+	services, providers := c.Dependencies()
+	if len(services) > 0 && len(providers) > 0 {
+		return fmt.Sprintf("services: %v, providers: %v", services, providers)
+	} else if len(services) > 0 {
+		return fmt.Sprintf("services: %v", services)
+	} else if len(providers) > 0 {
+		return fmt.Sprintf("providers: %v", providers)
 	}
-	return nil
+	return ""
+}
+
+func boolTagValue(tag reflect.StructTag, key string, defval bool) (bool, error) {
+	opt, ok := tag.Lookup(key)
+	if ok {
+		if len(opt) > 0 {
+			b, err := strconv.ParseBool(opt)
+			if err != nil {
+				return defval, err
+			}
+			return b, nil
+		}
+	}
+	return defval, nil
+}
+
+// Dependencies .
+func (c *providerContext) Dependencies() (services []string, providers []string) {
+	srvset, provset := make(map[string]bool), make(map[reflect.Type]bool)
+	if deps, ok := c.define.(ServiceDependencies); ok {
+		for _, service := range deps.Dependencies() {
+			if !srvset[service] {
+				services = append(services, service)
+				srvset[service] = true
+			}
+		}
+	}
+	if deps, ok := c.define.(OptionalServiceDependencies); ok {
+		for _, service := range deps.OptionalDependencies() {
+			if len(c.hub.servicesMap[service]) > 0 && !srvset[service] {
+				services = append(services, service)
+				srvset[service] = true
+			}
+		}
+	}
+	if c.structType != nil {
+		fields := c.structType.NumField()
+		for i := 0; i < fields; i++ {
+			field := c.structType.Field(i)
+			service := field.Tag.Get("service")
+			if len(service) <= 0 {
+				service = field.Tag.Get("autowired")
+			}
+			if service == "-" {
+				continue
+			}
+			if len(service) > 0 {
+				opt, _ := boolTagValue(field.Tag, "optional", false)
+				if opt {
+					if len(c.hub.servicesMap[service]) > 0 && !srvset[service] {
+						services = append(services, service)
+						srvset[service] = true
+					}
+				} else if !srvset[service] {
+					services = append(services, service)
+					srvset[service] = true
+				}
+				continue
+			}
+			if !c.structValue.Field(i).CanSet() {
+				continue
+			}
+			plist := c.hub.servicesTypes[field.Type]
+			if len(plist) > 0 && !provset[field.Type] {
+				provset[field.Type] = true
+				providers = append(providers, plist[0].name)
+			}
+		}
+	}
+	return
 }
 
 // Hub .
@@ -554,37 +638,70 @@ func (h *Hub) Service(name string, options ...interface{}) interface{} {
 	), options...)
 }
 
-func (h *Hub) getService(dc DependencyContext, options ...interface{}) interface{} {
-	if providers, ok := h.servicesMap[dc.Service()]; ok {
-		if len(providers) > 0 {
-			var pc *providerContext
-			if len(dc.Label()) > 0 {
-				for _, item := range providers {
-					if item.label == dc.Label() {
-						pc = item
-						break
+func (h *Hub) getService(dc DependencyContext, options ...interface{}) (instance interface{}) {
+	var pc *providerContext
+	if len(dc.Service()) > 0 {
+		if providers, ok := h.servicesMap[dc.Service()]; ok {
+			if len(providers) > 0 {
+				if len(dc.Label()) > 0 {
+					for _, item := range providers {
+						if item.label == dc.Label() {
+							pc = item
+							break
+						}
+					}
+				} else {
+					for _, item := range providers {
+						if item.key == item.name {
+							pc = item
+							break
+						}
+					}
+					if pc == nil && len(providers) > 0 {
+						pc = providers[0]
 					}
 				}
-			} else {
-				for _, item := range providers {
-					if item.key == item.name {
-						pc = item
-						break
-					}
-				}
-				if pc == nil && len(providers) > 0 {
-					pc = providers[0]
-				}
 			}
-			if pc == nil {
-				return nil
-			}
-			provider := pc.provider
-			if prod, ok := provider.(DependencyProvider); ok {
-				return prod.Provide(dc, options...)
-			}
-			return provider
 		}
+	} else if dc.Type() != nil {
+		providers := h.servicesTypes[dc.Type()]
+		for _, item := range providers {
+			if item.key == item.name {
+				pc = item
+				break
+			}
+		}
+		if pc == nil && len(providers) > 0 {
+			pc = providers[0]
+		}
+	}
+	if pc != nil {
+		provider := pc.provider
+		if prod, ok := provider.(DependencyProvider); ok {
+			return prod.Provide(dc, options...)
+		}
+		return provider
+	}
+	return nil
+}
+
+// Provider .
+func (h *Hub) Provider(name string) interface{} {
+	var label string
+	idx := strings.Index(name, "@")
+	if idx > 0 {
+		label = name[idx+1:]
+		name = name[0:idx]
+	}
+	ps := h.providersMap[name]
+	if len(label) > 0 {
+		for _, p := range ps {
+			if p.label == label {
+				return p.provider
+			}
+		}
+	} else if len(ps) > 0 {
+		return ps[0].provider
 	}
 	return nil
 }
@@ -607,7 +724,13 @@ func (h *Hub) RunWithOptions(opts *RunOptions) {
 	config.LoadEnvFile()
 
 	var err error
+	var start bool
 	defer func() {
+		if !start {
+			for i, l := 0, len(h.listeners); i < l; i++ {
+				err = h.listeners[i].BeforeExit(h, err)
+			}
+		}
 		if err != nil {
 			os.Exit(1)
 		}
@@ -657,6 +780,7 @@ func (h *Hub) RunWithOptions(opts *RunOptions) {
 		return
 	}
 	defer h.Close()
+	start = true
 	err = h.StartWithSignal()
 	if err != nil {
 		return

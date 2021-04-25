@@ -1,5 +1,16 @@
-// Author: recallsong
-// Email: songruiguo@qq.com
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package servicehub
 
@@ -145,6 +156,27 @@ func (h *Hub) addProvider(key string, cfg interface{}) error {
 		return fmt.Errorf("provider %s not exist", name)
 	}
 	provider := define.Creator()()
-	h.providersMap[name] = append(h.providersMap[name], &providerContext{h, key, label, name, cfg, provider, define})
+	pctx := &providerContext{
+		hub:      h,
+		key:      key,
+		label:    label,
+		name:     name,
+		cfg:      cfg,
+		provider: provider,
+		define:   define,
+	}
+	if provider != nil {
+		value := reflect.ValueOf(provider)
+		typ := value.Type()
+		for typ.Kind() == reflect.Ptr {
+			value = value.Elem()
+			typ = value.Type()
+		}
+		if typ.Kind() == reflect.Struct {
+			pctx.structValue = value
+			pctx.structType = typ
+		}
+	}
+	h.providersMap[name] = append(h.providersMap[name], pctx)
 	return nil
 }

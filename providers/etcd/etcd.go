@@ -1,5 +1,16 @@
-// Author: recallsong
-// Email: songruiguo@qq.com
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package etcd
 
@@ -15,6 +26,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"google.golang.org/grpc"
 )
 
 // Interface .
@@ -26,7 +38,7 @@ type Interface interface {
 
 type config struct {
 	Endpoints string        `file:"endpoints" env:"ETCD_ENDPOINTS"`
-	Timeout   time.Duration `file:"timeout" default:"10s"`
+	Timeout   time.Duration `file:"timeout" default:"5s"`
 	TLS       struct {
 		CertFile    string `file:"cert_file"`
 		CertKeyFile string `file:"cert_key_file"`
@@ -78,6 +90,7 @@ func (p *provider) Connect() (*clientv3.Client, error) {
 		Endpoints:   strings.Split(p.Cfg.Endpoints, ","),
 		DialTimeout: p.Cfg.Timeout,
 		TLS:         p.tlsConfig,
+		DialOptions: []grpc.DialOption{grpc.WithBlock()},
 	}
 	return clientv3.New(config)
 }
