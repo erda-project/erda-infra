@@ -1,0 +1,5 @@
+http-server@admin:
+    addr: ":8081"
+expvar:
+    publish: 
+        - envs
