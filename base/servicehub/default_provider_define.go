@@ -80,7 +80,7 @@ func (d *specDefine) Dependencies(h *Hub) []string {
 		}
 	}
 	if d.s.DependenciesFunc != nil {
-		list = append(list, d.Dependencies(h)...)
+		list = append(list, d.s.DependenciesFunc(h)...)
 	}
 	if len(list) > 0 {
 		return list

@@ -1,5 +1,6 @@
 # Erda Infra
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/erda-project/erda-infra.svg)](https://pkg.go.dev/github.com/erda-project/erda-infra)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![codecov](https://codecov.io/gh/erda-project/erda-infra/branch/develop/graph/badge.svg?token=SVROJLY8UK)](https://codecov.io/gh/erda-project/erda-infra)
 
