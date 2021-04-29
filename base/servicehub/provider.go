@@ -31,7 +31,7 @@ type ProviderDefine interface {
 	Creator() Creator
 }
 
-// ProviderService deprecated, use ProviderServices
+// ProviderService deprecated, use ProviderServices instead.
 type ProviderService interface {
 	Service() []string
 }
@@ -56,14 +56,19 @@ type ProviderUsage interface {
 	Description() string
 }
 
-// ServiceDependencies .
-type ServiceDependencies interface {
+// FixedServiceDependencies deprecated, use ServiceDependencies instead.
+type FixedServiceDependencies interface {
 	Dependencies() []string
 }
 
-// OptionalServiceDependencies .
+// OptionalServiceDependencies deprecated, use ServiceDependencies instead.
 type OptionalServiceDependencies interface {
-	OptionalDependencies() []string
+	OptionalDependencies(h *Hub) []string
+}
+
+// ServiceDependencies .
+type ServiceDependencies interface {
+	Dependencies(*Hub) []string
 }
 
 // ConfigCreator .

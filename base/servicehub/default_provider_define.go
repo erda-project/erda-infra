@@ -18,14 +18,16 @@ import "reflect"
 
 // Spec define provider and register with Register function
 type Spec struct {
-	Services             []string           // optional
-	Dependencies         []string           // optional
-	OptionalDependencies []string           // optional
-	Summary              string             // optional
-	Description          string             // optional
-	ConfigFunc           func() interface{} // optional
-	Types                []reflect.Type     // optional
-	Creator              Creator            // required
+	Define               interface{}           // optional
+	Services             []string              // optional
+	Dependencies         []string              // optional
+	OptionalDependencies []string              // optional
+	DependenciesFunc     func(h *Hub) []string // optional
+	Summary              string                // optional
+	Description          string                // optional
+	ConfigFunc           func() interface{}    // optional
+	Types                []reflect.Type        // optional
+	Creator              Creator               // required
 }
 
 // Register .
@@ -36,15 +38,14 @@ func Register(name string, spec *Spec) {
 // ensure specDefine implements some interface
 var (
 	// _ ProviderDefine       = (*specDefine)(nil) // through RegisterProvider to ensure
-	_ ProviderServices            = (*specDefine)(nil)
-	_ ServiceTypes                = (*specDefine)(nil)
-	_ ProviderUsageSummary        = (*specDefine)(nil)
-	_ ProviderUsage               = (*specDefine)(nil)
-	_ ProviderUsage               = (*specDefine)(nil)
-	_ ServiceDependencies         = (*specDefine)(nil)
-	_ OptionalServiceDependencies = (*specDefine)(nil)
-	_ ConfigCreator               = (*specDefine)(nil)
-	_ ConfigCreator               = (*specDefine)(nil)
+	_ ProviderServices     = (*specDefine)(nil)
+	_ ServiceTypes         = (*specDefine)(nil)
+	_ ProviderUsageSummary = (*specDefine)(nil)
+	_ ProviderUsage        = (*specDefine)(nil)
+	_ ProviderUsage        = (*specDefine)(nil)
+	_ ServiceDependencies  = (*specDefine)(nil)
+	_ ConfigCreator        = (*specDefine)(nil)
+	_ ConfigCreator        = (*specDefine)(nil)
 )
 
 type specDefine struct {
@@ -52,36 +53,80 @@ type specDefine struct {
 }
 
 func (d *specDefine) Services() []string {
-	return d.s.Services
+	if len(d.s.Services) > 0 {
+		return d.s.Services
+	}
+	if d, ok := d.s.Define.(ProviderServices); ok {
+		return d.Services()
+	}
+	return nil
 }
 
 func (d *specDefine) Types() []reflect.Type {
-	return d.s.Types
+	if len(d.s.Types) > 0 {
+		return d.s.Types
+	}
+	if d, ok := d.s.Define.(ServiceTypes); ok {
+		return d.Types()
+	}
+	return nil
 }
 
-func (d *specDefine) Dependencies() []string {
-	return d.s.Dependencies
-}
-
-func (d *specDefine) OptionalDependencies() []string {
-	return d.s.OptionalDependencies
+func (d *specDefine) Dependencies(h *Hub) []string {
+	var list = d.s.Dependencies
+	for _, svr := range d.s.OptionalDependencies {
+		if h.IsServiceExist(svr) {
+			list = append(list, svr)
+		}
+	}
+	if d.s.DependenciesFunc != nil {
+		list = append(list, d.Dependencies(h)...)
+	}
+	if len(list) > 0 {
+		return list
+	}
+	if d, ok := d.s.Define.(ServiceDependencies); ok {
+		return d.Dependencies(h)
+	}
+	return nil
 }
 
 func (d *specDefine) Summary() string {
-	return d.s.Summary
+	if len(d.s.Summary) > 0 {
+		return d.s.Summary
+	}
+	if d, ok := d.s.Define.(ProviderUsageSummary); ok {
+		return d.Summary()
+	}
+	return ""
 }
 
 func (d *specDefine) Description() string {
-	return d.s.Description
+	if len(d.s.Description) > 0 {
+		return d.s.Description
+	}
+	if d, ok := d.s.Define.(ProviderUsage); ok {
+		return d.Description()
+	}
+	return ""
 }
 
 func (d *specDefine) Config() interface{} {
 	if d.s.ConfigFunc != nil {
 		return d.s.ConfigFunc()
 	}
+	if d, ok := d.s.Define.(ConfigCreator); ok {
+		return d.Config()
+	}
 	return nil
 }
 
 func (d *specDefine) Creator() Creator {
-	return d.s.Creator
+	if d.s.Creator != nil {
+		return d.s.Creator
+	}
+	if d, ok := d.s.Define.(ProviderDefine); ok {
+		return d.Creator()
+	}
+	return nil // panic
 }

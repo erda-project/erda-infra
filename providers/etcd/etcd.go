@@ -44,6 +44,9 @@ type config struct {
 		CertKeyFile string `file:"cert_key_file"`
 		CaFile      string `file:"ca_file"`
 	} `file:"tls"`
+	SyncConnect bool   `file:"sync_connect" default:"true"`
+	Username    string `file:"username"`
+	Password    string `file:"password"`
 }
 
 var clientType = reflect.TypeOf((*clientv3.Client)(nil))
@@ -90,7 +93,11 @@ func (p *provider) Connect() (*clientv3.Client, error) {
 		Endpoints:   strings.Split(p.Cfg.Endpoints, ","),
 		DialTimeout: p.Cfg.Timeout,
 		TLS:         p.tlsConfig,
-		DialOptions: []grpc.DialOption{grpc.WithBlock()},
+		Username:    p.Cfg.Username,
+		Password:    p.Cfg.Password,
+	}
+	if p.Cfg.SyncConnect {
+		config.DialOptions = append(config.DialOptions, grpc.WithBlock())
 	}
 	return clientv3.New(config)
 }
