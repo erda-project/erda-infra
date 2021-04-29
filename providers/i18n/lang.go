@@ -87,7 +87,7 @@ func ParseLanguageCode(text string) (list LanguageCodes, err error) {
 		if len(parts) > 1 {
 			q := strings.TrimSpace(parts[1])
 			if len(q) > 0 {
-				kv := strings.Split("=", q)
+				kv := strings.Split(q, "=")
 				if len(kv) == 2 && kv[0] == "q" {
 					q, err := strconv.ParseFloat(kv[1], 32)
 					if err != nil {
