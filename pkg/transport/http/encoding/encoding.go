@@ -135,18 +135,20 @@ func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out in
 			w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 			return true, m.MarshalURLValues("", vals)
 		}
-	case "application/json":
-		if msg, ok := out.(proto.Message); ok {
-			byts, err := protojson.Marshal(msg)
-			if err != nil {
-				return false, err
+	default:
+		if mtype == "application/json" || (strings.HasPrefix(mtype, "application/vnd.") && strings.HasSuffix(mtype, "+json")) {
+			if msg, ok := out.(proto.Message); ok {
+				byts, err := protojson.Marshal(msg)
+				if err != nil {
+					return false, err
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, err = w.Write(byts)
+				return true, err
 			}
 			w.Header().Set("Content-Type", "application/json")
-			_, err = w.Write(byts)
-			return true, err
+			return true, json.NewEncoder(w).Encode(out)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		return true, json.NewEncoder(w).Encode(out)
 	}
 	return false, nil
 }
