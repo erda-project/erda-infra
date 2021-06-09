@@ -116,6 +116,13 @@ func TestCompile(t *testing.T) {
 		},
 		{
 			args: args{
+				path: "/abc/{_}/d",
+				url:  "/abc/123/d",
+			},
+			want: want{params: map[string]string{"_": "123"}},
+		},
+		{
+			args: args{
 				path: "invalid/path",
 			},
 			want: want{err: ErrInvalidPattern},

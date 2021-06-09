@@ -60,19 +60,19 @@ func genMessage(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P()
 	g.P("// ", message.GoIdent.GoName, " implement ", urlencPackage.Ident("URLValuesUnmarshaler"), ".")
 	g.P("func (m *", message.GoIdent.GoName, ") UnmarshalURLValues(prefix string, values ", urlPackage.Ident("Values"), ") error {")
-	g.P("	for key, vals := range values {")
-	g.P("		if len(vals) > 0 {")
 	params := createQueryParams(message.Fields)
 	if len(params) > 0 {
+		g.P("	for key, vals := range values {")
+		g.P("		if len(vals) > 0 {")
 		g.P("		switch prefix+key {")
 		for _, param := range params {
 			g.P("	case ", strconv.Quote(param.Name), ":")
 			genQueryString(g, "m", strings.Split(param.Name, "."), param.Root.GoName, param.Root.Desc, param.Root.Message)
 		}
 		g.P("		}")
+		g.P("		}")
+		g.P("	}")
 	}
-	g.P("		}")
-	g.P("	}")
 	g.P("	return nil")
 	g.P("}")
 	return nil
@@ -86,6 +86,9 @@ func genQueryString(g *protogen.GeneratedFile, prefix string, names []string, go
 		return genQueryStringValue(g, prefix+"."+goName, desc, subMsg)
 	}
 	if subMsg != nil {
+		if desc.IsList() || desc.IsMap() || desc.IsExtension() || desc.IsWeak() || desc.IsPacked() || desc.IsPlaceholder() {
+			return nil
+		}
 		name := prefix + "." + goName
 		g.P("if ", name, " == nil {")
 		g.P("	", name, " = &", subMsg.GoIdent, "{}")
@@ -278,14 +281,14 @@ func createQueryParams(fields []*protogen.Field) []*queryParam {
 	var fn func(parent *queryParam, fields []*protogen.Field, root *protogen.Field)
 	fn = func(parent *queryParam, fields []*protogen.Field, root *protogen.Field) {
 		for _, field := range fields {
+			if field.Desc.IsList() || field.Desc.IsMap() || field.Desc.IsExtension() || field.Desc.IsWeak() || field.Desc.IsPacked() || field.Desc.IsPlaceholder() {
+				continue
+			}
 			rootField := root
 			if rootField == nil {
 				rootField = field
 			}
 			if field.Desc.Kind() == protoreflect.MessageKind {
-				if field.Desc.IsList() {
-					continue
-				}
 				q := &queryParam{
 					Root:   rootField,
 					Field:  field,
