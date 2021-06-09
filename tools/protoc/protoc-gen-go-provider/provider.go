@@ -92,10 +92,14 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 	g.P("func (p *provider) Init(ctx ", servicehubPackage.Ident("Context"), ") error {")
 	g.P("	// TODO initialize something ...")
 	g.P()
-	g.P("	if p.Register != nil {")
 	for _, file := range files {
 		for _, ser := range file.Services {
 			g.P("p.", lowerCaptain(ser.GoName), " = &", lowerCaptain(ser.GoName), "{p}")
+		}
+	}
+	g.P("	if p.Register != nil {")
+	for i, file := range files {
+		for _, ser := range file.Services {
 			if *genHTTP && *genGRPC {
 				g.P(root.GoImportPath.Ident("Register"+ser.GoName+"Imp"), "(p.Register, p.", lowerCaptain(ser.GoName), ")")
 			} else if *genGRPC {
@@ -103,7 +107,9 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 			} else if *genHTTP {
 				g.P(root.GoImportPath.Ident("Register"+ser.GoName+"Handler"), "(p.Register, p.", lowerCaptain(ser.GoName), ")")
 			}
-			g.P()
+			if i < len(files)-1 {
+				g.P()
+			}
 		}
 	}
 	g.P("	}")
