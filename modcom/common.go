@@ -22,8 +22,6 @@ import (
 
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/base/version"
-	"github.com/erda-project/erda-infra/modcom/api"
-	"github.com/erda-project/erda-infra/providers/i18n"
 	"github.com/recallsong/go-utils/config"
 	uuid "github.com/satori/go.uuid"
 )
@@ -70,17 +68,19 @@ func RegisterInitializer(fn func()) {
 // Hub global variable
 var Hub *servicehub.Hub
 
-var listener = &servicehub.DefaultListener{
-	BeforeInitFunc: func(h *servicehub.Hub, config map[string]interface{}) error {
-		if _, ok := config["i18n"]; !ok {
-			config["i18n"] = nil // i18n is required
-		}
-		return nil
-	},
-	AfterInitFunc: func(h *servicehub.Hub) error {
-		api.I18n = h.Service("i18n").(i18n.I18n)
-		return nil
-	},
+var listeners = []servicehub.Listener{}
+
+// RegisterInitializer .
+func RegisterHubListener(l servicehub.Listener) {
+	listeners = append(listeners, l)
+}
+
+func newHub() *servicehub.Hub {
+	var opts []interface{}
+	for _, listener := range listeners {
+		opts = append(opts, servicehub.WithListener(listener))
+	}
+	return servicehub.New(opts...)
 }
 
 // RunWithCfgDir .
@@ -93,7 +93,7 @@ func RunWithCfgDir(dir, name string) {
 	cfg := filepath.Join(dir, name+GetEnv("CONFIG_SUFFIX", ".yaml"))
 
 	// create and run service hub
-	Hub := servicehub.New(servicehub.WithListener(listener))
+	Hub := newHub()
 	Hub.Run("", cfg, os.Args...)
 }
 
@@ -117,6 +117,6 @@ func Run(opts *servicehub.RunOptions) {
 	fmt.Println("CONFIG_PATH", os.Getenv("CONFIG_PATH"))
 
 	// create and run service hub
-	Hub := servicehub.New(servicehub.WithListener(listener))
+	Hub := newHub()
 	Hub.RunWithOptions(opts)
 }

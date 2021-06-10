@@ -29,6 +29,11 @@ import (
 	"github.com/recallsong/go-utils/reflectx"
 )
 
+// Internationalizable .
+type Internationalizable interface {
+	Translate(t Translator, langs LanguageCodes) string
+}
+
 // Translator .
 type Translator interface {
 	Get(lang LanguageCodes, key, def string) string
