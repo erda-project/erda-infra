@@ -1,0 +1,4 @@
+kubernetes:
+    config_path: "config"
+
+examples:

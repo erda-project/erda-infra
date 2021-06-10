@@ -4,54 +4,55 @@
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![codecov](https://codecov.io/gh/erda-project/erda-infra/branch/develop/graph/badge.svg?token=SVROJLY8UK)](https://codecov.io/gh/erda-project/erda-infra)
 
-Translations: [English](README.md) | [简体中文](README_zh.md)
+翻译: [English](README.md) | [简体中文](README_zh.md)
 
-Erda Infra is a lightweight microservices framework implements by golang, which offers many useful modules and tools to help you quickly build a module-driven application.
+Erda Infra 一套轻量级 Go 微服务框架，包含大量现成的模块和工具，能够快速构建起以模块化驱动的应用程序。
 
-Many Go projects are built using Erda Infra including:
+一些 Go 项目基于该框架进行构建:
 * [Erda](https://github.com/erda-project/erda)
 
-## Features
-* modular design to drive the implementation of the application system, and each module is pluggable.
-* each module is configurable, supports setting defaults、reading from files (YAML, HCL,、JSON、TOML、.env file)、environment、flags.
-* manage the lifecycle of the module, includes initialization, startup, and shutdown.
-* manage dependencies between modules.
-* support Dependency Injection between modules.
-* offers many commonly modules that can be used directly.
-* support define APIs and models in protobuf file to expose both gRPC and HTTP APIs.
-* offers tools to help you quickly build a module.
-* etc.
+## 特性
+* 以模块化设计方式来驱动应用系统实现，支持模块可插拔
+* 统一配置读取，支持默认值、支持从文件、环境变量、命令行参数读取
+* 统一模块的初始化、启动、关闭
+* 统一管理模块间的依赖关系
+* 支持模块间的依赖注入
+* 包含大量现成的微模块
+* 支持统一 gRPC 和 HTTP 接口设计、以及拦截器
+* 提供快速构建模块的脚本
+* 等等
 
-## Concept
-* Service, represents a function.
-* Provider, service provider, equivalent to module, provide some services. It can also depend on other services, witch provide by other provider.
-* ProviderDefine, describe a provider, includes provider's name, constructor function of provider, services, etc. Register it by *servicehub.RegisterProvider* function.
-* Hub, is a container for all providers, and manage the life cycle of all loaded providers.
+## 概念 
+* Service，服务，表示某个具体的功能
+* Provider，服务的提供者，提供0个或多个 Service，也可以依赖0个或多个其他 Service，被依赖的 Service 由其他 Provider 提供
+* ProviderDefine，提供 Provider 相关的元信息，比如：提供 Provider 的构造函数。通过 *servicehub.RegisterProvider* 来注册 Provider
+* Hub，是所有 Provider 的容器，管理所有已加载的 Provider 的生命周期
 
-A configuration is used to determine whether all registered Providers are loaded, and the Hub initializes, starts, and closes the loaded Providers.
+所有已注册的 Provider 通过 一份配置来确定是否 加载，由 Hub 对已加载的 Provider 的进行初始化、启动、关闭等。
 
 ![servicehub](./docs/servicehub.jpg)
 
-## Define Provider
-Define a provider by implementing the *servicehub.ProviderDefine* interface, and register it through the *servicehub.RegisterProvider* function.
+## Provider 定义
+通过实现 *servicehub.ProviderDefine* 接口来定义一个模块，并 通过 *servicehub.RegisterProvider* 函数进行注册。
 
-But, it is simpler to describe a provider through *servicehub.Spec* and register it through the *servicehub.Register* function.
+但更简单的是通过 *servicehub.Spec* 来描述一个模块，并 通过 *servicehub.Register* 函数进行注册。
 
-[Examples](./base/servicehub/examples)
+[例子](./base/servicehub/examples)
 
 ## Quick Start
-### Create a Provider
-**Step 1**, Create a Provider
+### 快速创建一个模块
+**第一步**，创建模块
 ```sh
 ➜ gohub init -o helloworld
 Input Service Provider Name: helloworld
+➜ # 以上命令创建了一个模块的模版代码，文件如下：
 ➜ tree helloworld
 helloworld
 ├── provider.go
 └── provider_test.go
 ```
 
-**Step 2**, Create *main.go*
+**第二步**，创建 main.go
 ```go
 package main
 
@@ -69,7 +70,7 @@ helloworld:
 }
 ```
 
-**Step 3**, Run
+**第三步**，运行程序
 ```sh
 ➜ go run main.go
 INFO[2021-04-13 13:17:36.416] message: hi                                   module=helloworld
@@ -80,10 +81,10 @@ INFO[2021-04-13 13:17:39.429] do something...                               modu
 ```
 [Hello World](./examples/example) \( [helloworld/](./examples/example/helloworld) | [main.go](./examples/example/main.go) \)
 
-### Create HTTP/gRPC Service
-These services can be called either remote or local Provider.
+### 创建 HTTP/gRPC 服务
+这些服务既可以被远程调用，也可以被本地模块调用。
 
-**Step 1**, Define the protocol, in the *.proto files, includes Message and Interface.
+**第一步**，在 *.proto 文件中定义协议 (消息结构 和 接口)
 ```protobuf
 syntax = "proto3";
 
@@ -111,7 +112,7 @@ message HelloResponse {
 }
 ```
 
-**Step 2**, build protocol to codes 
+**第二步**，编译生成接口 和 客户端代码
 ```sh
 ➜ gohub protoc protocol *.proto 
 ➜ tree 
@@ -128,7 +129,7 @@ message HelloResponse {
     └── register.services.pb.go
 ```
 
-**Step 3**, implement the interface
+**第三步**，实现协议接口
 ```sh
 ➜ gohub protoc imp *.proto --imp_out=../server/helloworld
 ➜ tree ../server/helloworld
@@ -138,7 +139,7 @@ message HelloResponse {
 └── provider.go
 ```
 
-**Step 4**, Create *main.go* and run it
+**第四步**，创建 main.go 启动程序
 
 *main.go*
 ```
@@ -174,36 +175,37 @@ erda.infra.example:
 
 [Service](./examples/service) \( [Protocol](./examples/service/protocol) | [Implementation](./examples/service/server/helloworld) | [Server](./examples/service/server) | [Caller](./examples/service/caller) | [Client](./examples/service/client)  \)
 
-## Useful Providers
-Many available providers have been packaged in this project, it can be found in the [providers/](./providers) directory.
 
-Under each module, there is an examples directory, which contains examples of the use of the module.
+## 微模块
+该项目中已经封装了许多可用的模块，在 [providers/](./providers) 目录下可以找到。
 
-* elasticsearch, provide elasticsearch client APIs, and it easy to write batch data.
-* etcd, provide etcd client APIs.
-* etcd-mutex, distributed lock implemented by etcd.
-* grpcserver, start a grpc server.
-* grpcclient, provide gRPC client, and manage client's connection.
-* health, provide health check API, and can register some health check function into this provider.
-* httpserver, provide an HTTP server, support any form of handle function, interceptor, parameter binding, parameter verification, etc.
-* i18n, provide internationalization support, manage i18n files, support templates.
-* kafka, provide kafka sdk, and easy to produce and consume messages.
-* kubernetes, provide kubernetes client APIs.
-* mysql, provide mysql client APIs.
-* pprof, expose pprof HTTP APIs By httpserver.
-* redis, provide redis client APIs.
-* zk-master-election, provide interface about master-slave election, it is implemented by zookeeper.
-* zookeeper, provide zookeeper client.
-* cassandra, provide cassandra APIs, and easy to write batch data
-* serviceregister, use it to register services to expose gRPC and HTTP APIs.
+每一个模块下面，都有一个 examples 目录，包含了该模块的使用例子。
 
-# Tools
-*gohub* is a CLI tool, which to help you quickly build a Provider. It can be installed as follows:
+* elasticsearch，对 elasticsearch 客户端的封装，更方便的进行批量数据的写入
+* etcd，对 etcd 客户端的封装
+* etcd-mutex，利用 etcd 实现的分布式锁
+* grpcserver，启动一个 gRPC server
+* grpcclient，统一管理 gRPC 客户端
+* health，通过 httpserver 注册一个健康检查的接口
+* httpserver，提供一个 HTTP server, 支持任意形式的处理函数、拦截器、参数绑定、参数校验等
+* i18n，提供了国际化的支持，可以统一管理国际化文件、支持模版
+* kafka，提供了访问 kafka 相关的能力，更方便地去批量消费和推送消息
+* kubernetes，对 kubernetes 客户端的封装
+* mysql，对 mysql 客户端的封装
+* pprof，通过 httpserver 注册一些 pprof 相关的接口
+* redis，对 redis 客户端的封装
+* zk-master-election，通过 zookeeper 实现主从选举
+* zookeeper，对 zookeeper 客户端的封装
+* cassandra，对 Cassandra 客户端的封装
+* serviceregister，封装提供统一注册 gRPC 和 HTTP 接口的能力
+
+# 工具
+*gohub* 是一个能够帮助您快速构建模块的命令行工具，可以通过如下方式安装： 
 ```sh
 go get -u github.com/erda-project/erda-infra/tools/gohub
 ```
 
-You can also use *gohub* through a Docker container.
+也可以通过 Docker 容器来使用以下工具:
 ```sh
 ➜ docker run --rm -ti -v $(pwd):/go \
     registry.cn-hangzhou.aliyuncs.com/dice/erda-tools:1.0 gohub                                                                

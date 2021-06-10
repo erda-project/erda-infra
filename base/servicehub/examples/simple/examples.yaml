@@ -1,0 +1,4 @@
+hello-provider:
+    message: "hello world"
+    sub:
+        name: "recallsong"
