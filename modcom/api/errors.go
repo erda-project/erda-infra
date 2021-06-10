@@ -18,12 +18,29 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/modcom"
 	"github.com/erda-project/erda-infra/providers/httpserver"
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
 
 // I18n set by common package
 var I18n i18n.I18n
+
+func init() {
+	modcom.RegisterHubListener(&servicehub.DefaultListener{
+		BeforeInitFunc: func(h *servicehub.Hub, config map[string]interface{}) error {
+			if _, ok := config["i18n"]; !ok {
+				config["i18n"] = nil // i18n is required
+			}
+			return nil
+		},
+		AfterInitFunc: func(h *servicehub.Hub) error {
+			I18n = h.Service("i18n").(i18n.I18n)
+			return nil
+		},
+	})
+}
 
 // ErrorCode .
 type ErrorCode interface {
