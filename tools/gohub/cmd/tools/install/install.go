@@ -18,7 +18,9 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -30,11 +32,14 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-// IncludeDir .
-func IncludeDir() string {
+// IncludeDirs .
+func IncludeDirs() []string {
 	home := homeDir()
 	repo := filepath.Base(cmd.PackagePath)
-	return filepath.Join(home, "."+cmd.Name, repo, "tools/protoc/include")
+	return []string{
+		filepath.Join(home, "."+cmd.Name, repo, "tools/protoc/include"),
+		filepath.Join(home, "."+cmd.Name),
+	}
 }
 
 // Download .
@@ -53,6 +58,57 @@ func Download(override, verbose bool) {
 		cmd.CheckError(err)
 		err = os.Remove(file)
 		cmd.CheckError(err)
+	}
+
+	// install plugins
+	for _, p := range []struct {
+		Name string
+		URL  string
+		Path string
+	}{
+		{
+			Name: "protoc-gen-go",
+			URL:  "https://github.com/golang/protobuf",
+			Path: "protoc-gen-go",
+		},
+		{
+			Name: "protoc-gen-govalidators",
+			URL:  "https://github.com/mwitkow/go-proto-validators",
+			Path: "protoc-gen-govalidators",
+		},
+	} {
+		if !cmd.IsFileExist(filepath.Join(dir, p.Name)) || (!*localInstall && override) {
+			u, err := url.Parse(p.URL)
+			cmd.CheckError(err)
+			host, _, err := net.SplitHostPort(u.Host)
+			if err != nil {
+				host = u.Host
+			}
+			repodir := filepath.Join(dir, host, u.Path)
+			tmpdir := repodir + ".tmp"
+			// create tmpdir
+			err = os.RemoveAll(tmpdir)
+			cmd.CheckError(err)
+			err = os.MkdirAll(tmpdir, os.ModePerm)
+			cmd.CheckError(err)
+			// clone
+			runCommand(dir, "git", "clone", p.URL, tmpdir)
+			// rename
+			err = os.RemoveAll(repodir)
+			cmd.CheckError(err)
+			err = os.Rename(tmpdir, repodir)
+			cmd.CheckError(err)
+			// build
+			fmt.Printf("building %s ...\n", p.Name)
+			command := exec.Command("go", "build", "-o", filepath.Join(dir, p.Name))
+			command.Dir = repodir
+			if len(p.Path) > 0 {
+				command.Dir = filepath.Join(repodir, p.Path)
+			}
+			err = command.Run()
+			cmd.CheckError(err)
+			fmt.Printf("build %s successfully !\n", p.Name)
+		}
 	}
 
 	plugins := []string{

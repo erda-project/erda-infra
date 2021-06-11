@@ -66,6 +66,10 @@ func DefaultHandleOptions() *HandleOptions {
 // WithInterceptor .
 func WithInterceptor(o interceptor.Interceptor) HandleOption {
 	return func(opts *HandleOptions) {
-		opts.Interceptor = o
+		if opts.Interceptor != nil {
+			opts.Interceptor = interceptor.Chain(o, opts.Interceptor)
+		} else {
+			opts.Interceptor = o
+		}
 	}
 }

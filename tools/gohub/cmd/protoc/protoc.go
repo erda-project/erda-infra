@@ -30,10 +30,12 @@ import (
 
 func init() {
 	messageCmd.Flags().String("msg_out", ".", "output directory of Message files")
+	messageCmd.Flags().Bool("validate", false, "generate Validate function")
 	protoCmd.AddCommand(messageCmd)
 
 	protocolCmd.Flags().Bool("grpc", true, "support expose gRPC APIs")
 	protocolCmd.Flags().Bool("http", true, "support expose HTTP APIs")
+	protocolCmd.Flags().Bool("validate", false, "generate Validate function")
 	protocolCmd.Flags().String("client_out", "./client", "output directory of gRPC Client files")
 	protocolCmd.Flags().String("msg_out", "./pb", "output directory of Message files")
 	protocolCmd.Flags().String("service_out", "./pb", "output directory of Service files")
@@ -67,6 +69,7 @@ var messageCmd = &cobra.Command{
 		dirs := protoDirs(files)
 		createMessage(command, args, files, dirs)
 		fmt.Println("build successfully !")
+
 	},
 }
 
@@ -175,9 +178,11 @@ func execProtoc(files, dirs []string, params ...string) {
 		params = append(params, fmt.Sprintf("-I=%s", d))
 	}
 
-	include := install.IncludeDir()
-	if len(include) > 0 {
-		params = append(params, fmt.Sprintf("-I=%s", include))
+	includes := install.IncludeDirs()
+	for _, include := range includes {
+		if len(include) > 0 {
+			params = append(params, fmt.Sprintf("-I=%s", include))
+		}
 	}
 
 	params = append(params, fmt.Sprintf("-I=%s", "/usr/local/include/"))
@@ -196,6 +201,13 @@ func createMessage(command *cobra.Command, args, files, dirs []string) {
 	execProtoc(files, dirs,
 		fmt.Sprintf("--go_out=%s", output), "--go_opt=paths=source_relative",
 	)
+	valid, err := command.Flags().GetBool("validate")
+	cmd.CheckError(err)
+	if valid {
+		execProtoc(files, dirs,
+			fmt.Sprintf("--govalidators_out=%s", output), "--govalidators_opt=paths=source_relative",
+		)
+	}
 }
 
 func createService(command *cobra.Command, args, files, dirs []string) {
