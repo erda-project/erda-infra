@@ -288,34 +288,23 @@ func (t *translator) getText(langs LanguageCodes, key string) string {
 	return ""
 }
 
-var regExp = regexp.MustCompile(`\$\{(\w+)(:[^}]*)?\}|\$\{([^}]*)?\}`)
+var regExp = regexp.MustCompile(`\$\{(\w*)(:[^}]*)?\}`)
 
 func (t *translator) escape(lang LanguageCodes, text string) string {
 	contents := reflectx.StringToBytes(text)
 	params := regExp.FindAllSubmatch(contents, -1)
 	for _, param := range params {
-		if len(param) != 4 {
+		if len(param) != 3 {
 			continue
 		}
-		var key, defval []byte
-		if len(param[1]) > 0 {
-			key = param[1]
-			if len(param[2]) > 0 {
-				defval = param[2][1:]
-			}
-		} else if len(param[3]) > 0 {
-			key = param[3]
-		} else {
-			continue
+		var defval, key []byte = param[1], nil
+		if len(param[2]) > 0 {
+			defval = param[2][1:]
 		}
 		k := reflectx.BytesToString(key)
 		val := t.getText(lang, k)
 		if len(val) <= 0 {
-			if len(param[3]) > 0 {
-				val = k
-			} else {
-				val = strings.Trim(reflectx.BytesToString(defval), `"`)
-			}
+			val = strings.Trim(reflectx.BytesToString(defval), `"`)
 		}
 		contents = bytes.Replace(contents, param[0], reflectx.StringToBytes(val), 1)
 	}

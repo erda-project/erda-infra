@@ -93,6 +93,15 @@ func ContextServiceInfo(ctx context.Context) ServiceInfo {
 	return info
 }
 
+// GetFullMethodName .
+func GetFullMethodName(ctx context.Context) string {
+	info, _ := ctx.Value(ServiceInfoContextKey).(ServiceInfo)
+	if info != nil {
+		return info.Service() + "/" + info.Method()
+	}
+	return ""
+}
+
 type serviceInfo struct {
 	service  string
 	method   string
