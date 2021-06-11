@@ -149,6 +149,8 @@ func runCommand(wd string, exe string, params ...string) {
 func downloadProtoc(dir string, verbose bool) string {
 	var url string
 	switch {
+	case runtime.GOOS == "darwin" && runtime.GOARCH == "arm64":
+		url = "https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-osx-x86_64.zip"
 	case runtime.GOOS == "darwin" && runtime.GOARCH == "amd64":
 		url = "https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-osx-x86_64.zip"
 	case runtime.GOOS == "linux" && runtime.GOARCH == "amd64":
