@@ -75,6 +75,25 @@ func (c *providerContext) BindConfig(flags *pflag.FlagSet) (err error) {
 	return nil
 }
 
+func BindConfig(src, dst interface{}) error {
+	if src == nil {
+		return nil
+	}
+	err := unmarshal.BindDefault(dst)
+	if err != nil {
+		return err
+	}
+	err = config.ConvertData(src, dst, "file")
+	if err != nil {
+		return err
+	}
+	err = unmarshal.BindEnv(dst)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *providerContext) Init() (err error) {
 	if reflect.ValueOf(c.provider).Kind() == reflect.Ptr && c.structType != nil {
 		value, typ := c.structValue, c.structType

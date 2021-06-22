@@ -15,6 +15,7 @@
 package servicehub
 
 import (
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -109,6 +110,76 @@ func Test_providerContext_BindConfig(t *testing.T) {
 			}
 			if !reflect.DeepEqual(tt.pc.cfg, tt.want) {
 				t.Errorf("providerContext.cfg = %v, want %v", tt.pc.cfg, tt.want)
+			}
+		})
+	}
+}
+
+func TestBindConfig(t *testing.T) {
+	type testConfig struct {
+		Name string `file:"name" default:"xxx"`
+	}
+
+	os.Setenv("TEST_NAME", "zzz")
+	type testConfigEnv struct {
+		Name string `file:"name" default:"xxx" env:"TEST_NAME"`
+	}
+
+	type testConfigEmpty struct {
+		Name string `file:"name"`
+	}
+
+	type args struct {
+		src interface{}
+		dst interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want interface{}
+	}{
+		{
+			"test BindConfig",
+			args{
+				src: map[string]interface{}{
+					"name": "yyy",
+				},
+				dst: &testConfig{},
+			},
+			&testConfig{Name: "yyy"},
+		},
+		{
+			"test default value",
+			args{
+				src: map[string]interface{}{},
+				dst: &testConfig{},
+			},
+			&testConfig{Name: "xxx"},
+		},
+		{
+			"test env value",
+			args{
+				src: map[string]interface{}{},
+				dst: &testConfigEnv{},
+			},
+			&testConfigEnv{Name: "zzz"},
+		},
+		{
+			"test empty value",
+			args{
+				src: map[string]interface{}{},
+				dst: &testConfigEmpty{},
+			},
+			&testConfigEmpty{Name: ""},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := BindConfig(tt.args.src, tt.args.dst); err != nil {
+				t.Errorf("BindConfig() error = %v", err)
+			}
+			if !reflect.DeepEqual(tt.args.dst, tt.want) {
+				t.Errorf("BindConfig() got dst %v, excepted %v", tt.args.dst, tt.want)
 			}
 		})
 	}
