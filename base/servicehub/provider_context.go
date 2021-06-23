@@ -47,25 +47,9 @@ func (c *providerContext) BindConfig(flags *pflag.FlagSet) (err error) {
 	if creator, ok := c.define.(ConfigCreator); ok {
 		cfg := creator.Config()
 		if cfg != nil {
-			err = unmarshal.BindDefault(cfg)
+			err := BindConfig(c.cfg, cfg, flags)
 			if err != nil {
 				return err
-			}
-			if c.cfg != nil {
-				err = config.ConvertData(c.cfg, cfg, "file")
-				if err != nil {
-					return err
-				}
-			}
-			err = unmarshal.BindEnv(cfg)
-			if err != nil {
-				return err
-			}
-			if flags != nil {
-				err = unmarshalflag.BindFlag(flags, cfg)
-				if err != nil {
-					return err
-				}
 			}
 			c.cfg = cfg
 			return nil
@@ -75,21 +59,26 @@ func (c *providerContext) BindConfig(flags *pflag.FlagSet) (err error) {
 	return nil
 }
 
-func BindConfig(src, dst interface{}) error {
-	if src == nil {
-		return nil
-	}
+func BindConfig(src, dst interface{}, flags *pflag.FlagSet) error {
 	err := unmarshal.BindDefault(dst)
 	if err != nil {
 		return err
 	}
-	err = config.ConvertData(src, dst, "file")
-	if err != nil {
-		return err
+	if src != nil {
+		err = config.ConvertData(src, dst, "file")
+		if err != nil {
+			return err
+		}
 	}
 	err = unmarshal.BindEnv(dst)
 	if err != nil {
 		return err
+	}
+	if flags != nil {
+		err = unmarshalflag.BindFlag(flags, dst)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -130,8 +130,9 @@ func TestBindConfig(t *testing.T) {
 	}
 
 	type args struct {
-		src interface{}
-		dst interface{}
+		src   interface{}
+		dst   interface{}
+		flags *pflag.FlagSet
 	}
 	tests := []struct {
 		name string
@@ -175,7 +176,7 @@ func TestBindConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := BindConfig(tt.args.src, tt.args.dst); err != nil {
+			if err := BindConfig(tt.args.src, tt.args.dst, tt.args.flags); err != nil {
 				t.Errorf("BindConfig() error = %v", err)
 			}
 			if !reflect.DeepEqual(tt.args.dst, tt.want) {
