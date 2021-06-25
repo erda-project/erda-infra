@@ -126,6 +126,7 @@ func init() {
 		Services:     []string{"health", "health-checker"},
 		Types:        []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()},
 		Dependencies: []string{"http-server"},
+		Description:  "http health check",
 		ConfigFunc:   func() interface{} { return &config{} },
 		Creator: func() servicehub.Provider {
 			return &provider{
