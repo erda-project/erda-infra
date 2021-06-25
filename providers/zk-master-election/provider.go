@@ -46,24 +46,6 @@ type Interface interface {
 	Watch(Listener)
 }
 
-type define struct{}
-
-func (d *define) Services() []string     { return []string{"zk-master-election"} }
-func (d *define) Dependencies() []string { return []string{"zookeeper"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
-}
-func (d *define) Description() string { return "master election implemented by zookeeper" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{
-			closeCh:  make(chan struct{}),
-			watchers: make(map[string][]Listener),
-		}
-	}
-}
-
 type config struct {
 	RootPath   string `file:"root_path"`
 	MasterNode string `file:"master_node" default:"master-node-key"`
@@ -304,5 +286,17 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.RegisterProvider("zk-master-election", &define{})
+	servicehub.Register("zk-master-election", &servicehub.Spec{
+		Services:     []string{"zk-master-election"},
+		Dependencies: []string{"zookeeper"},
+		Types:        []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()},
+		Description:  "master election implemented by zookeeper",
+		ConfigFunc:   func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{
+				closeCh:  make(chan struct{}),
+				watchers: make(map[string][]Listener),
+			}
+		},
+	})
 }

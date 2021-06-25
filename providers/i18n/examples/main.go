@@ -22,17 +22,6 @@ import (
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
 
-type define struct{}
-
-func (d *define) Services() []string     { return []string{"hello"} }
-func (d *define) Dependencies() []string { return []string{"i18n"} }
-func (d *define) Description() string    { return "hello for example" }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type provider struct {
 	Log  logs.Logger
 	Tran i18n.Translator `translator:"hello"`
@@ -53,7 +42,14 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("hello", &define{})
+	servicehub.Register("hello", &servicehub.Spec{
+		Services:     []string{"hello"},
+		Dependencies: []string{"i18n"},
+		Description:  "hello for example",
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {

@@ -55,23 +55,6 @@ func (c *config) url() string {
 		c.MySQLUsername, c.MySQLPassword, c.MySQLHost, c.MySQLPort, c.MySQLDatabase)
 }
 
-type define struct{}
-
-func (d *define) Services() []string { return []string{"mysql", "mysql-client"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		interfaceType, gormType,
-	}
-}
-func (d *define) Summary() string     { return "mysql" }
-func (d *define) Description() string { return d.Summary() }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 // provider .
 type provider struct {
 	Cfg *config
@@ -104,5 +87,15 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.RegisterProvider("mysql", &define{})
+	servicehub.Register("mysql", &servicehub.Spec{
+		Services: []string{"mysql", "mysql-client"},
+		Types: []reflect.Type{
+			interfaceType, gormType,
+		},
+		Description: "mysql",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

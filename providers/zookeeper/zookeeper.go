@@ -34,20 +34,6 @@ type config struct {
 	SessionTimeout time.Duration `file:"session_timeout" default:"3s"`
 }
 
-type define struct{}
-
-func (d *define) Services() []string { return []string{"zookeeper"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
-}
-func (d *define) Description() string { return "zookeeper" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type provider struct {
 	Cfg *config
 }
@@ -59,5 +45,13 @@ func (p *provider) Connect(options ...func(*zk.Conn)) (*zk.Conn, <-chan zk.Event
 func (p *provider) SessionTimeout() time.Duration { return p.Cfg.SessionTimeout }
 
 func init() {
-	servicehub.RegisterProvider("zookeeper", &define{})
+	servicehub.Register("zookeeper", &servicehub.Spec{
+		Services:    []string{"zookeeper"},
+		Types:       []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()},
+		Description: "zookeeper",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

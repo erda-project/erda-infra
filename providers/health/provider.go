@@ -43,23 +43,6 @@ type config struct {
 	AbortOnError   bool     `file:"abort_on_error"`
 }
 
-type define struct{}
-
-func (d *define) Services() []string { return []string{"health", "health-checker"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
-}
-func (d *define) Dependencies() []string { return []string{"http-server"} }
-func (d *define) Description() string    { return "http health check" }
-func (d *define) Config() interface{}    { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{
-			checkers: make(map[string][]Checker),
-		}
-	}
-}
-
 type provider struct {
 	Cfg          *config
 	names        []string
@@ -139,5 +122,15 @@ func (s *service) Register(c Checker) {
 }
 
 func init() {
-	servicehub.RegisterProvider("health", &define{})
+	servicehub.Register("health", &servicehub.Spec{
+		Services:     []string{"health", "health-checker"},
+		Types:        []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()},
+		Dependencies: []string{"http-server"},
+		ConfigFunc:   func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{
+				checkers: make(map[string][]Checker),
+			}
+		},
+	})
 }
