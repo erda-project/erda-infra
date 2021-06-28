@@ -70,22 +70,6 @@ type config struct {
 	Timeout  time.Duration `file:"timeout" env:"CASSANDRA_TIMEOUT" default:"3s" desc:"session timeout"`
 }
 
-type define struct{}
-
-func (d *define) Services() []string  { return []string{"cassandra"} }
-func (d *define) Description() string { return "cassandra" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*Interface)(nil)).Elem(),
-	}
-}
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 // provider .
 type provider struct {
 	Cfg   *config
@@ -188,5 +172,15 @@ func (s *service) batchWriteError(err error) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("cassandra", &define{})
+	servicehub.Register("cassandra", &servicehub.Spec{
+		Services:    []string{"cassandra"},
+		Description: "cassandra",
+		Types: []reflect.Type{
+			reflect.TypeOf((*Interface)(nil)).Elem(),
+		},
+		ConfigFunc: func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

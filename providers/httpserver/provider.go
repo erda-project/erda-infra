@@ -32,29 +32,6 @@ type config struct {
 	AllowCORS   bool   `file:"allow_cors" default:"false" desc:"allow cors"`
 }
 
-type define struct{}
-
-func (d *define) Services() []string {
-	return []string{"http-server", "http-routes", "http-router"}
-}
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{reflect.TypeOf((*Router)(nil)).Elem()}
-}
-func (d *define) Summary() string     { return "http server" }
-func (d *define) Description() string { return d.Summary() }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		p := &provider{
-			router: &router{
-				routeMap: make(map[routeKey]*route),
-			},
-		}
-		p.router.p = p
-		return p
-	}
-}
-
 type provider struct {
 	Cfg    *config
 	Log    logs.Logger
@@ -132,5 +109,19 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.RegisterProvider("http-server", &define{})
+	servicehub.Register("http-server", &servicehub.Spec{
+		Services:    []string{"http-server", "http-routes", "http-router"},
+		Types:       []reflect.Type{reflect.TypeOf((*Router)(nil)).Elem()},
+		Description: "http server",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			p := &provider{
+				router: &router{
+					routeMap: make(map[routeKey]*route),
+				},
+			}
+			p.router.p = p
+			return p
+		},
+	})
 }

@@ -51,23 +51,6 @@ type config struct {
 
 var clientType = reflect.TypeOf((*clientv3.Client)(nil))
 
-type define struct{}
-
-func (d *define) Services() []string { return []string{"etcd", "etcd-client"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*Interface)(nil)).Elem(),
-		clientType,
-	}
-}
-func (d *define) Description() string { return "etcd" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type provider struct {
 	Cfg       *config
 	Log       logs.Logger
@@ -147,5 +130,16 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.RegisterProvider("etcd", &define{})
+	servicehub.Register("etcd", &servicehub.Spec{
+		Services: []string{"etcd", "etcd-client"},
+		Types: []reflect.Type{
+			reflect.TypeOf((*Interface)(nil)).Elem(),
+			clientType,
+		},
+		Description: "etcd",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

@@ -25,17 +25,6 @@ import (
 	"github.com/erda-project/erda-infra/providers/kafka"
 )
 
-type define struct{}
-
-func (d *define) Services() []string     { return []string{"hello"} }
-func (d *define) Dependencies() []string { return []string{"kafka"} }
-func (d *define) Config() interface{}    { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type config struct {
 	Input kafka.ConsumerConfig `file:"input"`
 }
@@ -62,7 +51,14 @@ func (p *provider) invoke(key []byte, value []byte, topic *string, timestamp tim
 }
 
 func init() {
-	servicehub.RegisterProvider("examples", &define{})
+	servicehub.Register("examples", &servicehub.Spec{
+		Services:     []string{"hello"},
+		Dependencies: []string{"kafka"},
+		ConfigFunc:   func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {

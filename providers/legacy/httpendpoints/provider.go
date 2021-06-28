@@ -25,25 +25,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type define struct{}
-
-func (d *define) Services() []string { return []string{"http-endpoints"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()}
-}
-func (d *define) Dependencies() []string { return []string{"i18n"} }
-func (d *define) Description() string    { return "http endpoints" }
-func (d *define) Config() interface{} {
-	return &config{}
-}
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{
-			router: mux.NewRouter(),
-		}
-	}
-}
-
 // config .
 type config struct {
 	Addr string `file:"addr" default:":8090" desc:"http address to listen"`
@@ -87,5 +68,16 @@ func (p *provider) Close() error {
 }
 
 func init() {
-	servicehub.RegisterProvider("http-endpoints", &define{})
+	servicehub.Register("http-endpoints", &servicehub.Spec{
+		Services:     []string{"http-endpoints"},
+		Types:        []reflect.Type{reflect.TypeOf((*Interface)(nil)).Elem()},
+		Dependencies: []string{"i18n"},
+		Description:  "http endpoints",
+		ConfigFunc:   func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{
+				router: mux.NewRouter(),
+			}
+		},
+	})
 }
