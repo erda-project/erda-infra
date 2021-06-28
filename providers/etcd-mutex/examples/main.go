@@ -25,25 +25,6 @@ import (
 	mutex "github.com/erda-project/erda-infra/providers/etcd-mutex"
 )
 
-// define Represents the definition of provider and provides some information
-type define struct{}
-
-// Declare what services the provider provides
-func (d *define) Services() []string { return []string{"example"} }
-
-// Declare which services the provider depends on
-func (d *define) Dependencies() []string { return []string{"etcd-mutex"} }
-
-// Describe information about this provider
-func (d *define) Description() string { return "example" }
-
-// Return a provider creator
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type provider struct {
 	Mutex mutex.Interface // autowired
 	Lock  mutex.Mutex     `mutex-key:"test-key"` // autowired
@@ -72,7 +53,14 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("example", &define{})
+	servicehub.Register("example", &servicehub.Spec{
+		Services:     []string{"example"},
+		Dependencies: []string{"etcd-mutex"},
+		Description:  "example",
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {

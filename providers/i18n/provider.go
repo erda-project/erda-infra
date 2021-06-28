@@ -65,23 +65,6 @@ func (t *NopTranslator) Sprintf(lang LanguageCodes, key string, args ...interfac
 	return fmt.Sprintf(key, args...)
 }
 
-type define struct{}
-
-func (d *define) Services() []string { return []string{"i18n"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{i18nType, translatorType}
-}
-func (d *define) Description() string { return "i18n" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{
-			common: make(map[string]map[string]string),
-			dic:    make(map[string]map[string]map[string]string),
-		}
-	}
-}
-
 type config struct {
 	Files  []string `file:"files"`
 	Common []string `file:"common"`
@@ -312,5 +295,16 @@ func (t *translator) escape(lang LanguageCodes, text string) string {
 }
 
 func init() {
-	servicehub.RegisterProvider("i18n", &define{})
+	servicehub.Register("i18n", &servicehub.Spec{
+		Services:    []string{"i18n"},
+		Types:       []reflect.Type{i18nType, translatorType},
+		Description: "i18n",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{
+				common: make(map[string]map[string]string),
+				dic:    make(map[string]map[string]map[string]string),
+			}
+		},
+	})
 }

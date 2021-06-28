@@ -32,25 +32,6 @@ type Interface interface {
 
 var clientType = reflect.TypeOf((*kubernetes.Clientset)(nil))
 
-type define struct{}
-
-func (d *define) Services() []string {
-	return []string{"kubernetes", "kubernetes-client", "kube-client"}
-}
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*Interface)(nil)).Elem(),
-		clientType,
-	}
-}
-func (d *define) Description() string { return "kubernetes" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type config struct {
 	ConfigPath string `file:"config_path"`
 	MasterURL  string `file:"master_url"`
@@ -104,5 +85,16 @@ func homeDir() string {
 }
 
 func init() {
-	servicehub.RegisterProvider("kubernetes", &define{})
+	servicehub.Register("kubernetes", &servicehub.Spec{
+		Services: []string{"kubernetes", "kubernetes-client", "kube-client"},
+		Types: []reflect.Type{
+			reflect.TypeOf((*Interface)(nil)).Elem(),
+			clientType,
+		},
+		Description: "kubernetes",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
