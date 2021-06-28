@@ -38,6 +38,12 @@ func (p *provider) Init(ctx servicehub.Context) error {
 
 	text = p.Tran.Text(langs, "name")
 	p.Log.Info(text)
+
+	text = p.Tran.Text(langs, "other")
+	p.Log.Info(text)
+
+	text = p.Tran.Sprintf(langs, "${param name}")
+	p.Log.Info(text)
 	return nil
 }
 
@@ -56,3 +62,13 @@ func main() {
 	hub := servicehub.New()
 	hub.Run("examples", "", os.Args...)
 }
+
+// OUTPUT:
+// INFO[2021-06-28 12:46:55.075] load i18n files: [], [hello.yaml]             module=i18n
+// INFO[2021-06-28 12:46:55.075] provider i18n initialized
+// INFO[2021-06-28 12:46:55.075] 名字                                            module=hello
+// INFO[2021-06-28 12:46:55.075] 名字                                            module=hello
+// INFO[2021-06-28 12:46:55.075] other                                         module=hello
+// INFO[2021-06-28 12:46:55.075] param name                                    module=hello
+// INFO[2021-06-28 12:46:55.075] provider hello (depends services: [i18n], providers: [i18n]) initialized
+// INFO[2021-06-28 12:46:55.075] signals to quit: [hangup interrupt terminated quit]
