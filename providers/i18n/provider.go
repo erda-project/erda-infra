@@ -271,7 +271,7 @@ func (t *translator) getText(langs LanguageCodes, key string) string {
 	return ""
 }
 
-var regExp = regexp.MustCompile(`\$\{(\w*)(:[^}]*)?\}`)
+var regExp = regexp.MustCompile(`\$\{([^:}]*)(:[^}]*)?\}`)
 
 func (t *translator) escape(lang LanguageCodes, text string) string {
 	contents := reflectx.StringToBytes(text)
