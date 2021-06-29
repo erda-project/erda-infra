@@ -16,10 +16,13 @@ package transport
 
 import (
 	"context"
+	"net/http"
+	"strings"
 
 	transgrpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
 	transhttp "github.com/erda-project/erda-infra/pkg/transport/http"
 	"github.com/erda-project/erda-infra/pkg/transport/interceptor"
+	"google.golang.org/grpc/metadata"
 )
 
 // Register .
@@ -111,3 +114,33 @@ type serviceInfo struct {
 func (si *serviceInfo) Service() string       { return si.service }
 func (si *serviceInfo) Method() string        { return si.method }
 func (si *serviceInfo) Instance() interface{} { return si.instance }
+
+// Header .
+type Header = metadata.MD
+
+// WithHeader setup header for caller
+func WithHeader(ctx context.Context, header Header) context.Context {
+	if len(header) <= 0 {
+		return ctx
+	}
+	return metadata.NewOutgoingContext(ctx, header)
+}
+
+// ContextHeader get header in server
+func ContextHeader(ctx context.Context) Header {
+	md, _ := metadata.FromIncomingContext(ctx)
+	return md
+}
+
+// WithHTTPHeaderForServer setup header for http server
+func WithHTTPHeaderForServer(ctx context.Context, header http.Header) context.Context {
+	if len(header) <= 0 {
+		return ctx
+	}
+	md := metadata.MD{}
+	for key, values := range header {
+		key = strings.ToLower(key)
+		md[key] = values
+	}
+	return metadata.NewIncomingContext(ctx, md)
+}

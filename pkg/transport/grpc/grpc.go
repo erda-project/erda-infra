@@ -19,6 +19,7 @@ import (
 
 	"github.com/erda-project/erda-infra/pkg/transport/interceptor"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 // ServiceRegistrar wraps a single method that supports service registration. It
@@ -72,4 +73,13 @@ func WithInterceptor(o interceptor.Interceptor) HandleOption {
 			opts.Interceptor = o
 		}
 	}
+}
+
+// CallOptionFromContext for client
+func CallOptionFromContext(ctx context.Context) []grpc.CallOption {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if ok && md != nil {
+		return []grpc.CallOption{grpc.Header(&md)}
+	}
+	return nil
 }

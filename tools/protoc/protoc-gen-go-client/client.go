@@ -121,7 +121,7 @@ func genClient(gen *protogen.Plugin, files []*protogen.File, root *protogen.File
 			g.P()
 			for _, m := range ser.Methods {
 				g.P("func (s *", typeName, ") ", m.GoName, "(ctx ", contextPackage.Ident("Context"), ",req *", m.Input.GoIdent, ") (*", m.Output.GoIdent, ", error) {")
-				g.P("	return s.client.", m.GoName, "(ctx, req, s.opts...)")
+				g.P("	return s.client.", m.GoName, "(ctx, req, append(", transgrpcPackage.Ident("CallOptionFromContext"), "(ctx), s.opts...)...)")
 				g.P("}")
 				g.P()
 			}

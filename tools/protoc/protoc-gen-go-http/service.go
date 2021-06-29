@@ -188,7 +188,8 @@ func (s *serviceDesc) execute(g *protogen.GeneratedFile) error {
 				g.P("		}")
 				g.P("	}")
 			}
-			g.P("		ctx := ", contextPackage.Ident("WithValue"), "(r.Context(), ", transhttpPackage.Ident("RequestContextKey"), ", r)")
+			g.P("		ctx := ", transhttpPackage.Ident("WithRequest"), "(r.Context(), r)")
+			g.P("		ctx = ", transportPackage.Ident("WithHTTPHeaderForServer"), "(ctx, r.Header)")
 			g.P("		if h.Interceptor != nil {")
 			g.P("			ctx = ", contextPackage.Ident("WithValue"), "(ctx, ", transportPackage.Ident("ServiceInfoContextKey"), ", ", infoVar, ")")
 			g.P("		}")
