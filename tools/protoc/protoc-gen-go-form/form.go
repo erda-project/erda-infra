@@ -86,8 +86,10 @@ func genQueryString(g *protogen.GeneratedFile, prefix string, names []string, go
 		return genQueryStringValue(g, prefix+"."+goName, desc, subMsg)
 	}
 	if subMsg != nil {
-		if desc.IsList() || desc.IsMap() || desc.IsExtension() || desc.IsWeak() || desc.IsPacked() || desc.IsPlaceholder() {
-			return nil
+		if desc.Kind() == protoreflect.MessageKind {
+			if desc.IsList() || desc.IsMap() || desc.IsExtension() || desc.IsWeak() || desc.IsPacked() || desc.IsPlaceholder() {
+				return nil
+			}
 		}
 		name := prefix + "." + goName
 		g.P("if ", name, " == nil {")
@@ -281,8 +283,10 @@ func createQueryParams(fields []*protogen.Field) []*queryParam {
 	var fn func(parent *queryParam, fields []*protogen.Field, root *protogen.Field)
 	fn = func(parent *queryParam, fields []*protogen.Field, root *protogen.Field) {
 		for _, field := range fields {
-			if field.Desc.IsList() || field.Desc.IsMap() || field.Desc.IsExtension() || field.Desc.IsWeak() || field.Desc.IsPacked() || field.Desc.IsPlaceholder() {
-				continue
+			if field.Desc.Kind() == protoreflect.MessageKind {
+				if field.Desc.IsList() || field.Desc.IsMap() || field.Desc.IsExtension() || field.Desc.IsWeak() || field.Desc.IsPacked() || field.Desc.IsPlaceholder() {
+					continue
+				}
 			}
 			rootField := root
 			if rootField == nil {

@@ -21,6 +21,7 @@ import (
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/examples/service/protocol/pb"
+	"github.com/erda-project/erda-infra/pkg/transport"
 )
 
 type config struct {
@@ -41,7 +42,9 @@ func (p *provider) Run(ctx context.Context) error {
 	for {
 		select {
 		case <-tick.C:
-			resp, err := p.Greeter.SayHello(context.TODO(), &pb.HelloRequest{
+			header := transport.Header{}
+			header.Set("Custom-Header", "Custom-Header-Value")
+			resp, err := p.Greeter.SayHello(transport.WithHeader(context.Background(), header), &pb.HelloRequest{
 				Name: p.Cfg.Name,
 			})
 			if err != nil {
