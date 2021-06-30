@@ -24,12 +24,13 @@ import (
 )
 
 const (
-	urlPackage     = protogen.GoImportPath("net/url")
-	urlencPackage  = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/urlenc")
-	stringsPackage = protogen.GoImportPath("strings")
-
-	base64Package  = protogen.GoImportPath("encoding/base64")
-	strconvPackage = protogen.GoImportPath("strconv")
+	urlPackage      = protogen.GoImportPath("net/url")
+	urlencPackage   = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/urlenc")
+	stringsPackage  = protogen.GoImportPath("strings")
+	structpbPackage = protogen.GoImportPath("google.golang.org/protobuf/types/known/structpb")
+	base64Package   = protogen.GoImportPath("encoding/base64")
+	jsonPackage     = protogen.GoImportPath("encoding/json")
+	strconvPackage  = protogen.GoImportPath("strconv")
 )
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) (*protogen.GeneratedFile, error) {
@@ -86,6 +87,9 @@ func genQueryString(g *protogen.GeneratedFile, prefix string, names []string, go
 		return genQueryStringValue(g, prefix+"."+goName, desc, subMsg)
 	}
 	if subMsg != nil {
+		if subMsg.Desc.FullName() == "google.protobuf.Value" {
+			return genQueryStringValue(g, prefix+"."+goName, desc, subMsg)
+		}
 		if desc.Kind() == protoreflect.MessageKind {
 			if desc.IsList() || desc.IsMap() || desc.IsExtension() || desc.IsWeak() || desc.IsPacked() || desc.IsPlaceholder() {
 				return nil
@@ -258,11 +262,50 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 		}
 	case protoreflect.MessageKind:
 		if desc.IsList() {
-			// TODO: support read message list from query string
+			if subMsg.Desc.FullName() == "google.protobuf.Value" {
+				g.P("var list []interface{}")
+				g.P("for _, text := range vals {")
+				g.P("	var v interface{}")
+				g.P("	err := ", jsonPackage.Ident("NewDecoder"), "(", stringsPackage.Ident("NewReader"), "(text)).Decode(&v)")
+				g.P("	if err != nil {")
+				g.P("		list = append(list, v)")
+				g.P("	} else {")
+				g.P("		list = append(list, text)")
+				g.P("	}")
+				g.P("}")
+				g.P("val, _ := ", structpbPackage.Ident("NewList(list)"))
+				g.P("", path, " = ", structpbPackage.Ident("NewListValue"), "(val)")
+			}
 		} else {
-			g.P("if ", path, " == nil {")
-			g.P("	", path, " = &", subMsg.GoIdent, "{}")
-			g.P("}")
+			if subMsg.Desc.FullName() == "google.protobuf.Value" {
+				g.P("if len(vals) > 1 {")
+				g.P("	var list []interface{}")
+				g.P("	for _, text := range vals {")
+				g.P("		var v interface{}")
+				g.P("		err := ", jsonPackage.Ident("NewDecoder"), "(", stringsPackage.Ident("NewReader"), "(text)).Decode(&v)")
+				g.P("		if err != nil {")
+				g.P("			list = append(list, v)")
+				g.P("		} else {")
+				g.P("			list = append(list, text)")
+				g.P("		}")
+				g.P("	}")
+				g.P("	val, _ := ", structpbPackage.Ident("NewList(list)"))
+				g.P("	", path, " = ", structpbPackage.Ident("NewListValue"), "(val)")
+				g.P("} else {")
+				g.P("	var v interface{}")
+				g.P("	err := ", jsonPackage.Ident("NewDecoder"), "(", stringsPackage.Ident("NewReader"), "(vals[0])).Decode(&v)")
+				g.P("	if err != nil {")
+				g.P("		val, _ := ", structpbPackage.Ident("NewValue(v)"))
+				g.P("		", path, " = val")
+				g.P("	} else {")
+				g.P("		", path, " = ", structpbPackage.Ident("NewStringValue"), "(vals[0])")
+				g.P("	}")
+				g.P("}")
+			} else {
+				g.P("if ", path, " == nil {")
+				g.P("	", path, " = &", subMsg.GoIdent, "{}")
+				g.P("}")
+			}
 		}
 	default:
 		return fmt.Errorf("not support type %q for query string", desc.Kind())
@@ -282,6 +325,11 @@ func createQueryParams(fields []*protogen.Field) []*queryParam {
 
 	var fn func(parent *queryParam, fields []*protogen.Field, root *protogen.Field)
 	fn = func(parent *queryParam, fields []*protogen.Field, root *protogen.Field) {
+		if root != nil && root.Message != nil {
+			if root.Message.Desc.FullName() == "google.protobuf.Value" {
+				return
+			}
+		}
 		for _, field := range fields {
 			if field.Desc.Kind() == protoreflect.MessageKind {
 				if field.Desc.IsList() || field.Desc.IsMap() || field.Desc.IsExtension() || field.Desc.IsWeak() || field.Desc.IsPacked() || field.Desc.IsPlaceholder() {
