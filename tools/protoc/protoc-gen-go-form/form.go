@@ -28,10 +28,9 @@ const (
 	urlencPackage   = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/urlenc")
 	stringsPackage  = protogen.GoImportPath("strings")
 	structpbPackage = protogen.GoImportPath("google.golang.org/protobuf/types/known/structpb")
-
-	base64Package  = protogen.GoImportPath("encoding/base64")
-	jsonPackage    = protogen.GoImportPath("encoding/json")
-	strconvPackage = protogen.GoImportPath("strconv")
+	base64Package   = protogen.GoImportPath("encoding/base64")
+	jsonPackage     = protogen.GoImportPath("encoding/json")
+	strconvPackage  = protogen.GoImportPath("strconv")
 )
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) (*protogen.GeneratedFile, error) {
