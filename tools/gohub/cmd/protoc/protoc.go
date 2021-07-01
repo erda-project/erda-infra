@@ -31,6 +31,7 @@ import (
 func init() {
 	messageCmd.Flags().String("msg_out", ".", "output directory of Message files")
 	messageCmd.Flags().Bool("validate", false, "generate Validate function")
+	messageCmd.Flags().StringSlice("include", nil, "include directory")
 	protoCmd.AddCommand(messageCmd)
 
 	protocolCmd.Flags().Bool("grpc", true, "support expose gRPC APIs")
@@ -39,15 +40,18 @@ func init() {
 	protocolCmd.Flags().String("client_out", "./client", "output directory of gRPC Client files")
 	protocolCmd.Flags().String("msg_out", "./pb", "output directory of Message files")
 	protocolCmd.Flags().String("service_out", "./pb", "output directory of Service files")
+	protocolCmd.Flags().StringSlice("include", nil, "include directory")
 	protoCmd.AddCommand(protocolCmd)
 
 	implementCmd.Flags().String("imp_out", ".", "output directory of implementation")
 	implementCmd.Flags().Bool("grpc", true, "implements gRPC APIs")
 	implementCmd.Flags().Bool("http", true, "implements HTTP APIs")
+	implementCmd.Flags().StringSlice("include", nil, "include directory")
 	protoCmd.AddCommand(implementCmd)
 
 	pluginCmd.Flags().StringSlice("opt", nil, "options for protoc plugin")
 	pluginCmd.Flags().String("out", ".", "output directory of plugin")
+	pluginCmd.Flags().StringSlice("include", nil, "include directory")
 	protoCmd.AddCommand(pluginCmd)
 
 	cmd.AddCommand(protoCmd)
@@ -123,7 +127,8 @@ var pluginCmd = &cobra.Command{
 		}
 		files := protoFiles(args[1:])
 		dirs := protoDirs(files)
-		execProtoc(files, dirs, params...)
+		includes, _ := command.Flags().GetStringSlice("include")
+		execProtoc(files, dirs, includes, params...)
 	},
 }
 
@@ -173,11 +178,13 @@ func ensureOutputDir(command *cobra.Command, key, typ string) string {
 	return output
 }
 
-func execProtoc(files, dirs []string, params ...string) {
+func execProtoc(files, dirs, include []string, params ...string) {
 	for _, d := range dirs {
 		params = append(params, fmt.Sprintf("-I=%s", d))
 	}
-
+	for _, d := range include {
+		params = append(params, fmt.Sprintf("-I=%s", d))
+	}
 	includes := install.IncludeDirs()
 	for _, include := range includes {
 		if len(include) > 0 {
@@ -198,13 +205,14 @@ func execProtoc(files, dirs []string, params ...string) {
 
 func createMessage(command *cobra.Command, args, files, dirs []string) {
 	output := ensureOutputDir(command, "msg_out", "Message")
-	execProtoc(files, dirs,
+	includes, _ := command.Flags().GetStringSlice("include")
+	execProtoc(files, dirs, includes,
 		fmt.Sprintf("--go_out=%s", output), "--go_opt=paths=source_relative",
 	)
 	valid, err := command.Flags().GetBool("validate")
 	cmd.CheckError(err)
 	if valid {
-		execProtoc(files, dirs,
+		execProtoc(files, dirs, includes,
 			fmt.Sprintf("--govalidators_out=%s", output), "--govalidators_opt=paths=source_relative",
 		)
 	}
@@ -224,8 +232,9 @@ func createService(command *cobra.Command, args, files, dirs []string) {
 	}
 
 	if createGRPC || createHTTP {
+		includes, _ := command.Flags().GetStringSlice("include")
 		srvDir := ensureOutputDir(command, "service_out", "Service")
-		execProtoc(files, dirs,
+		execProtoc(files, dirs, includes,
 			fmt.Sprintf("--go-register_out=%s", srvDir), "--go-register_opt=paths=source_relative",
 			"--go-register_opt=grpc="+strconv.FormatBool(createGRPC), "--go-register_opt=http="+strconv.FormatBool(createHTTP),
 		)
@@ -235,7 +244,8 @@ func createService(command *cobra.Command, args, files, dirs []string) {
 func createGRPCService(command *cobra.Command, args, files, dirs []string) {
 	clientDir := ensureOutputDir(command, "client_out", "Client")
 	grpcDir := ensureOutputDir(command, "service_out", "Service")
-	execProtoc(files, dirs,
+	includes, _ := command.Flags().GetStringSlice("include")
+	execProtoc(files, dirs, includes,
 		fmt.Sprintf("--go-grpc_out=%s", grpcDir), "--go-grpc_opt=paths=source_relative",
 		fmt.Sprintf("--go-client_out=%s", clientDir), "--go-client_opt=paths=source_relative",
 	)
@@ -244,7 +254,8 @@ func createGRPCService(command *cobra.Command, args, files, dirs []string) {
 func createHTTPService(command *cobra.Command, args, files, dirs []string) {
 	msgDir := ensureOutputDir(command, "msg_out", "Message")
 	httpDir := ensureOutputDir(command, "service_out", "Service")
-	execProtoc(files, dirs,
+	includes, _ := command.Flags().GetStringSlice("include")
+	execProtoc(files, dirs, includes,
 		fmt.Sprintf("--go-http_out=%s", httpDir), "--go-http_opt=paths=source_relative",
 		fmt.Sprintf("--go-form_out=%s", msgDir), "--go-form_opt=paths=source_relative",
 	)
@@ -256,7 +267,8 @@ func createImplementTemp(command *cobra.Command, args, files, dirs []string) {
 	createHTTP, err := command.Flags().GetBool("http")
 	cmd.CheckError(err)
 	impDir := ensureOutputDir(command, "imp_out", "Implementation")
-	execProtoc(files, dirs,
+	includes, _ := command.Flags().GetStringSlice("include")
+	execProtoc(files, dirs, includes,
 		fmt.Sprintf("--go-provider_out=%s", impDir), "--go-provider_opt=paths=source_relative",
 		"--go-provider_opt=grpc="+strconv.FormatBool(createGRPC), "--go-provider_opt=http="+strconv.FormatBool(createHTTP),
 	)

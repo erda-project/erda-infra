@@ -35,6 +35,7 @@ type baseResponse struct {
 
 func (r *baseResponse) Error(httpserver.Context) error { return nil }
 func (r *baseResponse) Status(httpserver.Context) int  { return r.status }
+func (r *baseResponse) Body() interface{}              { return r.body }
 func (r *baseResponse) ReadCloser(httpserver.Context) io.ReadCloser {
 	byts, err := json.Marshal(r.body)
 	if err != nil {
