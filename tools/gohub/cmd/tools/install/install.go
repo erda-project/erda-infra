@@ -116,6 +116,7 @@ func Download(override, verbose bool) {
 		"protoc-gen-go-client",
 		"protoc-gen-go-http",
 		"protoc-gen-go-form",
+		"protoc-gen-go-json",
 		"protoc-gen-go-register",
 		"protoc-gen-go-provider",
 	}
