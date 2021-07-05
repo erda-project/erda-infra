@@ -31,12 +31,16 @@ import (
 func init() {
 	messageCmd.Flags().String("msg_out", ".", "output directory of Message files")
 	messageCmd.Flags().Bool("validate", false, "generate Validate function")
+	messageCmd.Flags().Bool("json", true, "generate JSON Marshal and Unmarshal")
+	messageCmd.Flags().StringSlice("json_opt", nil, "options for JSON Marshal and Unmarshal")
 	messageCmd.Flags().StringSlice("include", nil, "include directory")
 	protoCmd.AddCommand(messageCmd)
 
 	protocolCmd.Flags().Bool("grpc", true, "support expose gRPC APIs")
 	protocolCmd.Flags().Bool("http", true, "support expose HTTP APIs")
 	protocolCmd.Flags().Bool("validate", false, "generate Validate function")
+	protocolCmd.Flags().Bool("json", true, "generate JSON function")
+	protocolCmd.Flags().StringSlice("json_opt", nil, "options for JSON Marshal and Unmarshal")
 	protocolCmd.Flags().String("client_out", "./client", "output directory of gRPC Client files")
 	protocolCmd.Flags().String("msg_out", "./pb", "output directory of Message files")
 	protocolCmd.Flags().String("service_out", "./pb", "output directory of Service files")
@@ -215,6 +219,18 @@ func createMessage(command *cobra.Command, args, files, dirs []string) {
 		execProtoc(files, dirs, includes,
 			fmt.Sprintf("--govalidators_out=%s", output), "--govalidators_opt=paths=source_relative",
 		)
+	}
+	json, err := command.Flags().GetBool("json")
+	cmd.CheckError(err)
+	if json {
+		jsonOpts, _ := command.Flags().GetStringSlice("json_opt")
+		params := []string{
+			fmt.Sprintf("--go-json_out=%s", output), "--go-json_opt=paths=source_relative",
+		}
+		for _, opt := range jsonOpts {
+			params = append(params, fmt.Sprintf("--go-json_opt=%s", opt))
+		}
+		execProtoc(files, dirs, includes, params...)
 	}
 }
 

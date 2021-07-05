@@ -24,11 +24,15 @@ import (
 
 const (
 	version = "v1.0.0"
-	genName = "protoc-gen-go-form"
+	genName = "protoc-gen-go-json"
 )
 
 var (
-	showVersion = flag.Bool("version", false, "print the version and exit")
+	showVersion        = flag.Bool("version", false, "print the version and exit")
+	origName           bool
+	enumsAsInts        bool
+	emitDefaults       bool
+	allowUnknownFields bool
 )
 
 func main() {
@@ -39,6 +43,10 @@ func main() {
 	}
 
 	var flags flag.FlagSet
+	flags.BoolVar(&origName, "orig_name", false, "")
+	flags.BoolVar(&enumsAsInts, "enums_as_ints", false, "")
+	flags.BoolVar(&emitDefaults, "emit_defaults", false, "")
+	flags.BoolVar(&allowUnknownFields, "allow_unknown_fields", false, "")
 	protogen.Options{
 		ParamFunc: flags.Set,
 	}.Run(func(p *protogen.Plugin) error {
