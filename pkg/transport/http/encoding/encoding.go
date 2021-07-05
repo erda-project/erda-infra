@@ -150,7 +150,7 @@ func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out in
 	default:
 		if mtype == "application/json" || (strings.HasPrefix(mtype, "application/vnd.") && strings.HasSuffix(mtype, "+json")) {
 			if msg, ok := out.(proto.Message); ok {
-				byts, err := protojson.Marshal(msg)
+				byts, err := protojson.MarshalOptions{EmitUnpopulated: true}.Marshal(msg)
 				if err != nil {
 					return false, err
 				}
