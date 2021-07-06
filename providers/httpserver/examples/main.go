@@ -26,18 +26,6 @@ import (
 	"github.com/erda-project/erda-infra/providers/httpserver"
 )
 
-type define struct{}
-
-func (d *define) Services() []string     { return []string{"hello"} }
-func (d *define) Dependencies() []string { return []string{"http-server"} }
-func (d *define) Description() string    { return "hello for example" }
-func (d *define) Config() interface{}    { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type config struct {
 	Message string `file:"message"`
 }
@@ -144,7 +132,15 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("hello", &define{})
+	servicehub.Register("hello", &servicehub.Spec{
+		Services:     []string{"hello"},
+		Dependencies: []string{"http-server"},
+		Description:  "hello for example",
+		ConfigFunc:   func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {

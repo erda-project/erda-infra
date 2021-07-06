@@ -23,25 +23,6 @@ import (
 	election "github.com/erda-project/erda-infra/providers/zk-master-election"
 )
 
-// define Represents the definition of provider and provides some information
-type define struct{}
-
-// Declare what services the provider provides
-func (d *define) Services() []string { return []string{"example"} }
-
-// Declare which services the provider depends on
-func (d *define) Dependencies() []string { return []string{"zk-master-election"} }
-
-// Describe information about this provider
-func (d *define) Description() string { return "example" }
-
-// Return a provider creator
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type provider struct {
 	Election election.Interface // autowired
 }
@@ -65,7 +46,14 @@ func (p *provider) masterChanged(event election.Event) {
 }
 
 func init() {
-	servicehub.RegisterProvider("example", &define{})
+	servicehub.Register("example", &servicehub.Spec{
+		Services:     []string{"example"},
+		Dependencies: []string{"zk-master-election"},
+		Description:  "example",
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {

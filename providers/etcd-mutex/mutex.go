@@ -42,27 +42,6 @@ type Interface interface {
 
 var mutexType = reflect.TypeOf((*Mutex)(nil)).Elem()
 
-type define struct{}
-
-func (d *define) Services() []string     { return []string{"etcd-mutex"} }
-func (d *define) Dependencies() []string { return []string{"etcd"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*Interface)(nil)).Elem(),
-		mutexType,
-	}
-}
-func (d *define) Description() string { return "distributed lock implemented by etcd" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{
-			instances:   make(map[string]Mutex),
-			inProcMutex: &inProcMutex{},
-		}
-	}
-}
-
 type config struct {
 	RootPath   string `file:"root_path"`
 	DefaultKey string `file:"default_key"`
@@ -176,5 +155,20 @@ func (m *inProcMutex) Unlock(ctx context.Context) error {
 func (m *inProcMutex) Close() error { return nil }
 
 func init() {
-	servicehub.RegisterProvider("etcd-mutex", &define{})
+	servicehub.Register("etcd-mutex", &servicehub.Spec{
+		Services: []string{"etcd-mutex"},
+		Types: []reflect.Type{
+			reflect.TypeOf((*Interface)(nil)).Elem(),
+			mutexType,
+		},
+		Dependencies: []string{"etcd"},
+		Description:  "distributed lock implemented by etcd",
+		ConfigFunc:   func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{
+				instances:   make(map[string]Mutex),
+				inProcMutex: &inProcMutex{},
+			}
+		},
+	})
 }

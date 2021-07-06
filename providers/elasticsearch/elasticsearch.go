@@ -53,25 +53,6 @@ type config struct {
 	Password string `file:"password" default:"" desc:"password"`
 }
 
-type define struct{}
-
-func (d *define) Services() []string {
-	return []string{"elasticsearch", "elasticsearch-client", "elastic-client"}
-}
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*Interface)(nil)).Elem(),
-		clientType,
-	}
-}
-func (d *define) Description() string { return "elasticsearch" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 // provider .
 type provider struct {
 	Cfg    *config
@@ -137,5 +118,16 @@ func (s *service) batchWriteError(err error) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("elasticsearch", &define{})
+	servicehub.Register("elasticsearch", &servicehub.Spec{
+		Services: []string{"elasticsearch", "elasticsearch-client", "elastic-client"},
+		Types: []reflect.Type{
+			reflect.TypeOf((*Interface)(nil)).Elem(),
+			clientType,
+		},
+		Description: "elasticsearch",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

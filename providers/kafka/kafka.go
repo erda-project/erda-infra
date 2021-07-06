@@ -54,24 +54,6 @@ type config struct {
 	} `file:"admin"`
 }
 
-type define struct{}
-
-func (d *define) Services() []string {
-	return []string{"kafka", "kafka-producer", "kafka-consumer"}
-}
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*Interface)(nil)).Elem(),
-	}
-}
-func (d *define) Description() string { return "kafka、kafka-producer、kafka-consumer" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 // provider .
 type provider struct {
 	Cfg      *config
@@ -116,5 +98,15 @@ func (s *service) NewAdminClient() (*kafka.AdminClient, error) {
 }
 
 func init() {
-	servicehub.RegisterProvider("kafka", &define{})
+	servicehub.Register("kafka", &servicehub.Spec{
+		Services: []string{"kafka", "kafka-producer", "kafka-consumer"},
+		Types: []reflect.Type{
+			reflect.TypeOf((*Interface)(nil)).Elem(),
+		},
+		Description: "kafka、kafka-producer、kafka-consumer",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

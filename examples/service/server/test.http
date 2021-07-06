@@ -1,0 +1,5 @@
+@url = http://localhost:8080
+
+### test api
+GET {{url}}/api/greeter/erda
+Content-Type: application/json

@@ -47,6 +47,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 				return func(ctx context.Context, req interface{}) (interface{}, error) {
 					info := transport.ContextServiceInfo(ctx)
 					p.Log.Infof("before %s/%s\n", info.Service(), info.Method())
+					header := transport.ContextHeader(ctx)
+					p.Log.Info("header: ", header)
 					p.Log.Info(req)
 					out, err := h(ctx, req)
 					p.Log.Infof("after %s/%s\n", info.Service(), info.Method())
@@ -62,6 +64,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 				return func(ctx context.Context, req interface{}) (interface{}, error) {
 					info := transport.ContextServiceInfo(ctx)
 					p.Log.Infof("before %s/%s\n", info.Service(), info.Method())
+					header := transport.ContextHeader(ctx)
+					p.Log.Info("header: ", header)
 					p.Log.Info(req)
 					out, err := h(ctx, req)
 					p.Log.Infof("after %s/%s\n", info.Service(), info.Method())

@@ -49,6 +49,9 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			if err != nil {
 				return err
 			}
+			if len(body) <= 0 {
+				return nil
+			}
 			return proto.Unmarshal(body, msg)
 		}
 	case "application/json":
@@ -56,6 +59,9 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				return err
+			}
+			if len(body) <= 0 {
+				return nil
 			}
 			return protojson.Unmarshal(body, msg)
 		}
@@ -69,11 +75,17 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			return un.UnmarshalURLValues("", r.Form)
 		}
 	}
+	if r.ContentLength <= 0 {
+		return nil
+	}
 	return fmt.Errorf("not support Unmarshal type %s with %s", reflect.TypeOf(out).Name(), mtype)
 }
 
 // EncodeResponse .
 func EncodeResponse(w http.ResponseWriter, r *http.Request, out interface{}) error {
+	if out == nil {
+		return nil
+	}
 	accept := r.Header.Get("Accept")
 	var acceptAny bool
 	if len(accept) > 0 {

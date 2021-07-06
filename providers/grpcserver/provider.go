@@ -30,25 +30,6 @@ type Interface interface {
 	RegisterService(sd *grpc.ServiceDesc, ss interface{})
 }
 
-type define struct{}
-
-func (d *define) Services() []string {
-	return []string{"grpc-server"}
-}
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*grpc.Server)(nil)),
-		reflect.TypeOf((*Interface)(nil)).Elem(),
-	}
-}
-func (d *define) Description() string { return "grpc server" }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 // config .
 type config struct {
 	Addr string `file:"addr" default:":7070" desc:"grpc address to listen"`
@@ -99,5 +80,16 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.RegisterProvider("grpc-server", &define{})
+	servicehub.Register("grpc-server", &servicehub.Spec{
+		Services: []string{"grpc-server"},
+		Types: []reflect.Type{
+			reflect.TypeOf((*grpc.Server)(nil)),
+			reflect.TypeOf((*Interface)(nil)).Elem(),
+		},
+		Description: "grpc server",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

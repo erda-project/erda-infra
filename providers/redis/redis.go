@@ -56,23 +56,6 @@ type config struct {
 	IdleCheckFrequency time.Duration `file:"idle_check_frequency" env:"REDIS_IDLE_CHECK_FREQUENCY"`
 }
 
-type define struct{}
-
-func (d *define) Services() []string { return []string{"redis", "redis-client"} }
-func (d *define) Types() []reflect.Type {
-	return []reflect.Type{
-		interfaceType, clientType,
-	}
-}
-func (d *define) Summary() string     { return "redis" }
-func (d *define) Description() string { return d.Summary() }
-func (d *define) Config() interface{} { return &config{} }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{clients: make(map[int]*redis.Client)}
-	}
-}
-
 // provider .
 type provider struct {
 	Cfg     *config
@@ -169,5 +152,15 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.RegisterProvider("redis", &define{})
+	servicehub.Register("redis", &servicehub.Spec{
+		Services: []string{"redis", "redis-client"},
+		Types: []reflect.Type{
+			interfaceType, clientType,
+		},
+		Description: "redis",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{clients: make(map[int]*redis.Client)}
+		},
+	})
 }

@@ -25,17 +25,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type define struct{}
-
-func (d *define) Services() []string     { return []string{"hello"} }
-func (d *define) Dependencies() []string { return []string{"kubernetes"} }
-func (d *define) Description() string    { return "hello for example" }
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type provider struct {
 	Kube   pkube.Interface
 	Client *kubernetes.Clientset
@@ -60,7 +49,14 @@ func (p *provider) Run(ctx context.Context) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("examples", &define{})
+	servicehub.Register("examples", &servicehub.Spec{
+		Services:     []string{"hello"},
+		Dependencies: []string{"kubernetes"},
+		Description:  "hello for example",
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {
