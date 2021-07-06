@@ -76,6 +76,11 @@ func Download(override, verbose bool) {
 			URL:  "https://github.com/mwitkow/go-proto-validators",
 			Path: "protoc-gen-govalidators",
 		},
+		{
+			Name: "protoc-gen-gogofast",
+			URL:  "https://github.com/gogo/protobuf",
+			Path: "protoc-gen-gogofast",
+		},
 	} {
 		if !cmd.IsFileExist(filepath.Join(dir, p.Name)) || (!*localInstall && override) {
 			u, err := url.Parse(p.URL)

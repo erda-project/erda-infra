@@ -34,6 +34,7 @@ func init() {
 	messageCmd.Flags().Bool("json", true, "generate JSON Marshal and Unmarshal")
 	messageCmd.Flags().StringSlice("json_opt", nil, "options for JSON Marshal and Unmarshal")
 	messageCmd.Flags().StringSlice("include", nil, "include directory")
+	messageCmd.Flags().Bool("gogofast", false, "use gogofast")
 	protoCmd.AddCommand(messageCmd)
 
 	protocolCmd.Flags().Bool("grpc", true, "support expose gRPC APIs")
@@ -210,9 +211,17 @@ func execProtoc(files, dirs, include []string, params ...string) {
 func createMessage(command *cobra.Command, args, files, dirs []string) {
 	output := ensureOutputDir(command, "msg_out", "Message")
 	includes, _ := command.Flags().GetStringSlice("include")
-	execProtoc(files, dirs, includes,
-		fmt.Sprintf("--go_out=%s", output), "--go_opt=paths=source_relative",
-	)
+
+	gogo, err := command.Flags().GetBool("gogofast")
+	cmd.CheckError(err)
+	if gogo {
+		execProtoc(files, dirs, includes, fmt.Sprintf("--gogofast_out=%s", output))
+	} else {
+		execProtoc(files, dirs, includes,
+			fmt.Sprintf("--go_out=%s", output), "--go_opt=paths=source_relative",
+		)
+	}
+
 	valid, err := command.Flags().GetBool("validate")
 	cmd.CheckError(err)
 	if valid {
@@ -220,6 +229,7 @@ func createMessage(command *cobra.Command, args, files, dirs []string) {
 			fmt.Sprintf("--govalidators_out=%s", output), "--govalidators_opt=paths=source_relative",
 		)
 	}
+
 	json, err := command.Flags().GetBool("json")
 	cmd.CheckError(err)
 	if json {
