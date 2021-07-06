@@ -19,11 +19,10 @@ import (
 )
 
 const (
-	stringsPackage   = protogen.GoImportPath("strings")
 	protojsonPackage = protogen.GoImportPath("google.golang.org/protobuf/encoding/protojson")
-	base64Package    = protogen.GoImportPath("encoding/base64")
+	jsonpbPackage    = protogen.GoImportPath("github.com/erda-project/erda-infra/pkg/transport/http/encoding/jsonpb")
 	jsonPackage      = protogen.GoImportPath("encoding/json")
-	strconvPackage   = protogen.GoImportPath("strconv")
+	bytesPackage     = protogen.GoImportPath("bytes")
 )
 
 func generateFile(gen *protogen.Plugin, file *protogen.File) (*protogen.GeneratedFile, error) {
@@ -55,11 +54,13 @@ func genMessage(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P()
 	g.P("// ", message.GoIdent.GoName, " implement ", jsonPackage.Ident("Marshaler"), ".")
 	g.P("func (m *", message.GoIdent.GoName, ") MarshalJSON() ([]byte, error) {")
-	g.P("	return (&", protojsonPackage.Ident("MarshalOptions"), "{")
-	g.P("		UseProtoNames: ", origName, ",")
-	g.P("		UseEnumNumbers: ", enumsAsInts, ",")
-	g.P("		EmitUnpopulated: ", emitDefaults, ",")
-	g.P("	}).Marshal(m)")
+	g.P("	buf := &", bytesPackage.Ident("Buffer"), "{}")
+	g.P("	err := (&", jsonpbPackage.Ident("Marshaler"), "{")
+	g.P("		OrigName: ", origName, ",")
+	g.P("		EnumsAsInts: ", enumsAsInts, ",")
+	g.P("		EmitDefaults: ", emitDefaults, ",")
+	g.P("	}).Marshal(buf, m)")
+	g.P("	return buf.Bytes(), err")
 	g.P("}")
 	g.P()
 

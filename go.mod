@@ -18,7 +18,7 @@ require (
 	github.com/go-zookeeper/zk v1.0.2
 	github.com/gocql/gocql v0.0.0-20210313142353-65899a66288b
 	github.com/gofrs/uuid v4.0.0+incompatible
-	github.com/golang/protobuf v1.5.1 // indirect
+	github.com/golang/protobuf v1.5.1
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/gorilla/mux v1.7.3
