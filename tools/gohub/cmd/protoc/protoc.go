@@ -46,6 +46,7 @@ func init() {
 	protocolCmd.Flags().String("msg_out", "./pb", "output directory of Message files")
 	protocolCmd.Flags().String("service_out", "./pb", "output directory of Service files")
 	protocolCmd.Flags().StringSlice("include", nil, "include directory")
+	protocolCmd.Flags().Bool("gogofast", false, "use gogofast")
 	protoCmd.AddCommand(protocolCmd)
 
 	implementCmd.Flags().String("imp_out", ".", "output directory of implementation")
