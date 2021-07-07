@@ -55,7 +55,13 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			return proto.Unmarshal(body, msg)
 		}
 	case "application/json":
-		if msg, ok := out.(proto.Message); ok {
+		if um, ok := out.(json.Unmarshaler); ok {
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				return err
+			}
+			return um.UnmarshalJSON(body)
+		} else if msg, ok := out.(proto.Message); ok {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				return err
