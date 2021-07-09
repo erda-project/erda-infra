@@ -21,13 +21,19 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
 
 	"github.com/erda-project/erda-infra/pkg/urlenc"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
+
+type notSupportMediaTypeErr struct {
+	text string
+}
+
+func (e notSupportMediaTypeErr) HTTPStatus() int { return http.StatusNotAcceptable }
+func (e notSupportMediaTypeErr) Error() string   { return e.text }
 
 // DecodeRequest .
 func DecodeRequest(r *http.Request, out interface{}) error {
@@ -84,7 +90,7 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 	if r.ContentLength <= 0 {
 		return nil
 	}
-	return fmt.Errorf("not support Unmarshal type %s with %s", reflect.TypeOf(out).Name(), mtype)
+	return notSupportMediaTypeErr{text: fmt.Sprintf("not support media type: %s", mtype)}
 }
 
 // EncodeResponse .
@@ -113,6 +119,9 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, out interface{}) err
 				return nil
 			}
 		}
+	} else {
+		_, err := encodeResponse("application/json", w, r, out)
+		return err
 	}
 	if acceptAny {
 		contentType := r.Header.Get("Content-Type")
@@ -132,7 +141,7 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, out interface{}) err
 		_, err := encodeResponse("application/json", w, r, out)
 		return err
 	}
-	return fmt.Errorf("not support Marshal type %s with Accept %q", reflect.TypeOf(out).Name(), accept)
+	return notSupportMediaTypeErr{text: fmt.Sprintf("not support media type: %s", accept)}
 }
 
 func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out interface{}) (bool, error) {
