@@ -50,6 +50,9 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 	}
 	switch mtype {
 	case "application/protobuf", "application/x-protobuf":
+		if r.ContentLength <= 0 {
+			return nil
+		}
 		if msg, ok := out.(proto.Message); ok {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
@@ -61,6 +64,9 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			return proto.Unmarshal(body, msg)
 		}
 	case "application/json":
+		if r.ContentLength <= 0 {
+			return nil
+		}
 		if um, ok := out.(json.Unmarshaler); ok {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
@@ -86,9 +92,6 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			}
 			return un.UnmarshalURLValues("", r.Form)
 		}
-	}
-	if r.ContentLength <= 0 {
-		return nil
 	}
 	return notSupportMediaTypeErr{text: fmt.Sprintf("not support media type: %s", mtype)}
 }
