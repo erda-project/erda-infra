@@ -21,13 +21,19 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
 
 	"github.com/erda-project/erda-infra/pkg/urlenc"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
+
+type notSupportMediaTypeErr struct {
+	text string
+}
+
+func (e notSupportMediaTypeErr) HTTPStatus() int { return http.StatusNotAcceptable }
+func (e notSupportMediaTypeErr) Error() string   { return e.text }
 
 // DecodeRequest .
 func DecodeRequest(r *http.Request, out interface{}) error {
@@ -44,6 +50,9 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 	}
 	switch mtype {
 	case "application/protobuf", "application/x-protobuf":
+		if r.ContentLength <= 0 {
+			return nil
+		}
 		if msg, ok := out.(proto.Message); ok {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
@@ -55,6 +64,9 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			return proto.Unmarshal(body, msg)
 		}
 	case "application/json":
+		if r.ContentLength <= 0 {
+			return nil
+		}
 		if um, ok := out.(json.Unmarshaler); ok {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
@@ -81,10 +93,7 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			return un.UnmarshalURLValues("", r.Form)
 		}
 	}
-	if r.ContentLength <= 0 {
-		return nil
-	}
-	return fmt.Errorf("not support Unmarshal type %s with %s", reflect.TypeOf(out).Name(), mtype)
+	return notSupportMediaTypeErr{text: fmt.Sprintf("not support media type: %s", mtype)}
 }
 
 // EncodeResponse .
@@ -113,6 +122,9 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, out interface{}) err
 				return nil
 			}
 		}
+	} else {
+		_, err := encodeResponse("application/json", w, r, out)
+		return err
 	}
 	if acceptAny {
 		contentType := r.Header.Get("Content-Type")
@@ -132,7 +144,7 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, out interface{}) err
 		_, err := encodeResponse("application/json", w, r, out)
 		return err
 	}
-	return fmt.Errorf("not support Marshal type %s with Accept %q", reflect.TypeOf(out).Name(), accept)
+	return notSupportMediaTypeErr{text: fmt.Sprintf("not support media type: %s", accept)}
 }
 
 func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out interface{}) (bool, error) {
