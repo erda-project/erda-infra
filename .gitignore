@@ -18,6 +18,7 @@
 
 # Files for direnv
 .envrc
+**/.env
 
 # Files for vscode
 .vscode/*
