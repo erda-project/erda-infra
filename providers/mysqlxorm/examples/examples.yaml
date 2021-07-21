@@ -1,0 +1,8 @@
+mysql-xorm:
+    host: "${MYSQL_HOST:localhost}"
+    port: "${MYSQL_PORT:3306}"
+    username: "${MYSQL_USERNAME:root}"
+    password: "${MYSQL_PASSWORD:123456}"
+    database: "${MYSQL_DATABASE:test}"
+
+example:
