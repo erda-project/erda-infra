@@ -23,6 +23,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/go-xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a // indirect
 	github.com/go-zookeeper/zk v1.0.2
 	github.com/gocql/gocql v0.0.0-20210313142353-65899a66288b
 	github.com/gofrs/uuid v4.0.0+incompatible
@@ -33,6 +34,7 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.14.6 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/jinzhu/gorm v1.9.16
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
@@ -52,13 +54,13 @@ require (
 	github.com/sirupsen/logrus v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be // indirect
-	github.com/xormplus/core v0.0.0-20200308074340-f3bce19d5f31
-	github.com/xormplus/xorm v0.0.0-20210512135344-8123d584d5f5
+	github.com/xormplus/builder v0.0.0-20181220055446-b12ceebee76f // indirect
+	github.com/xormplus/core v0.0.0-20181016121923-6bfce2eb8867
+	github.com/xormplus/xorm v0.0.0-20181212020813-da46657160ff
+	github.com/ziutek/mymysql v1.5.4 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0 // indirect
 	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect

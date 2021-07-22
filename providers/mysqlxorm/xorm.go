@@ -73,7 +73,11 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	}
 
 	db.SetMapper(core.GonicMapper{})
-	db.ShowSQL(p.Cfg.MySQLShowSQL)
+	if p.Cfg.MySQLShowSQL {
+		db.ShowSQL(true)
+		db.ShowExecTime(true)
+		db.SetLogLevel(core.LOG_DEBUG)
+	}
 
 	// connection pool
 	db.SetMaxIdleConns(int(p.Cfg.MySQLMaxIdleConns))
