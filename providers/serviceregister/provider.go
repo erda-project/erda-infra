@@ -41,7 +41,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	p.router, _ = ctx.Service("http-server").(httpserver.Router)
 	p.grpc, _ = ctx.Service("grpc-server").(grpcserver.Interface)
 	if p.router == nil && p.grpc == nil {
-		return fmt.Errorf("not found http-server of grpc-server")
+		return fmt.Errorf("not found http-server or grpc-server")
 	}
 	return nil
 }

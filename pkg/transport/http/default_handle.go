@@ -43,6 +43,7 @@ func EncodeError(w http.ResponseWriter, r *http.Request, err error) {
 	} else {
 		status = http.StatusInternalServerError
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	byts, _ := json.Marshal(map[string]interface{}{
 		"code": status,

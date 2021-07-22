@@ -63,27 +63,6 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			}
 			return proto.Unmarshal(body, msg)
 		}
-	case "application/json":
-		if r.ContentLength <= 0 {
-			return nil
-		}
-		if um, ok := out.(json.Unmarshaler); ok {
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				return err
-			}
-			return um.UnmarshalJSON(body)
-		} else if msg, ok := out.(proto.Message); ok {
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				return err
-			}
-			if len(body) <= 0 {
-				return nil
-			}
-			return protojson.Unmarshal(body, msg)
-		}
-		return json.NewDecoder(r.Body).Decode(out)
 	case "application/x-www-form-urlencoded", "multipart/form-data":
 		if un, ok := out.(urlenc.URLValuesUnmarshaler); ok {
 			err := r.ParseForm()
@@ -91,6 +70,29 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 				return err
 			}
 			return un.UnmarshalURLValues("", r.Form)
+		}
+	default:
+		if mtype == "application/json" || (strings.HasPrefix(mtype, "application/vnd.") && strings.HasSuffix(mtype, "+json")) {
+			if r.ContentLength <= 0 {
+				return nil
+			}
+			if um, ok := out.(json.Unmarshaler); ok {
+				body, err := ioutil.ReadAll(r.Body)
+				if err != nil {
+					return err
+				}
+				return um.UnmarshalJSON(body)
+			} else if msg, ok := out.(proto.Message); ok {
+				body, err := ioutil.ReadAll(r.Body)
+				if err != nil {
+					return err
+				}
+				if len(body) <= 0 {
+					return nil
+				}
+				return protojson.Unmarshal(body, msg)
+			}
+			return json.NewDecoder(r.Body).Decode(out)
 		}
 	}
 	return notSupportMediaTypeErr{text: fmt.Sprintf("not support media type: %s", mtype)}
