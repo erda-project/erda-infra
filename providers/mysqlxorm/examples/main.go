@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -38,6 +39,9 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func (p *provider) Run(ctx context.Context) error {
+	/*
+		test db
+	*/
 	r, err := p.MySQL.DB().QueryString("show tables")
 	if err != nil {
 		panic(err)
@@ -47,7 +51,102 @@ func (p *provider) Run(ctx context.Context) error {
 			fmt.Println(i, k, v)
 		}
 	}
+
+	/*
+		test tx
+	*/
+	// create table for test
+	if err := p.DB.CreateTables(&Table{}); err != nil {
+		return err
+	}
+	defer func() {
+		if err := p.DB.DropTables(&Table{}); err != nil {
+			logrus.Fatalf("failed to cleanup table, err: %v", err)
+		}
+	}()
+
+	// tx
+	txSession := p.MySQL.NewSession()
+	defer txSession.Close()
+	// begin tx
+	err = txSession.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			logrus.Error(err)
+
+			// check table size before rollback, should be 0 (2 in tx)
+			count := p.checkTableRows(0)
+			logrus.Printf("count before rollback: %d", count)
+
+			// rollback
+			err = txSession.Rollback()
+			if err != nil {
+				logrus.Fatalf("failed to rollback, err: %v", err)
+			}
+		} else { // make insertFailed as success
+			p.checkTableRows(2)
+		}
+	}()
+
+	// insert success
+	err = p.insertSuccess(mysqlxorm.WithSession(txSession))
+	if err != nil {
+		return err
+	}
+
+	// insert failed
+	err = p.insertFailed(mysqlxorm.WithSession(txSession))
+	if err != nil {
+		return err
+	}
+
+	// tx commit
+	err = txSession.Commit()
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+type Table struct {
+	ID   uint64 `json:"id" xorm:"pk autoincr"`
+	Name string
+}
+
+func (t *Table) TableName() string {
+	return "table"
+}
+
+func (p *provider) insertSuccess(opts ...mysqlxorm.SessionOption) error {
+	s := p.MySQL.NewSession(opts...)
+	defer s.Close()
+	_, err := s.InsertOne(&Table{Name: "n1"})
+	return err
+}
+
+func (p *provider) insertFailed(opts ...mysqlxorm.SessionOption) error {
+	s := p.MySQL.NewSession(opts...)
+	defer s.Close()
+	_, err := s.InsertOne(&Table{Name: "n2"})
+	if err != nil {
+		return err
+	}
+	// force err
+	return fmt.Errorf("fake error by func: insertFailed")
+}
+
+func (p *provider) checkTableRows(expectRows int64) int64 {
+	count, _ := p.DB.Count(&Table{})
+	if count != expectRows {
+		logrus.Errorf("expectRows: %d, actualRows: %d", expectRows, count)
+	} else {
+		logrus.Infof("expectRows: %d, actualRows: %d", expectRows, count)
+	}
+	return count
 }
 
 func init() {

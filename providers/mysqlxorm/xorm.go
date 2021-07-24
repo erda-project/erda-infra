@@ -31,6 +31,7 @@ import (
 // Interface .
 type Interface interface {
 	DB() *xorm.Engine
+	NewSession(ops ...SessionOption) *session
 }
 
 var (
