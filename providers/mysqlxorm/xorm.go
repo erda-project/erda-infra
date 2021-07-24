@@ -15,6 +15,7 @@
 package mysqlxorm
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"time"
@@ -48,6 +49,9 @@ type config struct {
 	MySQLMaxOpenConns uint64        `file:"max_open_conns" env:"MYSQL_MAXOPENCONNS" default:"2"`
 	MySQLMaxLifeTime  time.Duration `file:"max_lifetime" env:"MYSQL_MAXLIFETIME" default:"30m"`
 	MySQLShowSQL      bool          `file:"show_sql" env:"MYSQL_SHOW_SQL" default:"false"`
+
+	MySQLPingWhenInit   bool   `file:"ping_when_init" env:"MYSQL_PING_WHEN_INIT" default:"true"`
+	MySQLPingTimeoutSec uint64 `file:"ping_timeout_sec" env:"MYSQL_PING_TIMEOUT_SEC" default:"10"`
 }
 
 func (c *config) url() string {
@@ -84,6 +88,15 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	db.SetMaxOpenConns(int(p.Cfg.MySQLMaxOpenConns))
 	db.SetConnMaxLifetime(p.Cfg.MySQLMaxLifeTime)
 	db.SetDisableGlobalCache(true)
+
+	// ping when init
+	if p.Cfg.MySQLPingWhenInit {
+		ctxForPing, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(p.Cfg.MySQLPingTimeoutSec))
+		defer cancel()
+		if err := db.PingContext(ctxForPing); err != nil {
+			return err
+		}
+	}
 
 	p.db = db
 
