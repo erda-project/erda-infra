@@ -4,5 +4,7 @@ mysql-xorm:
     username: "${MYSQL_USERNAME:root}"
     password: "${MYSQL_PASSWORD:123456}"
     database: "${MYSQL_DATABASE:test}"
+    ping_when_init: true
+    ping_timeout_sec: 5
 
 example:
