@@ -113,6 +113,12 @@ func (s *serviceDesc) execute(g *protogen.GeneratedFile) error {
 			}
 			g.P("	r.Add(method, path, encodeFunc(")
 			g.P("	func(w ", httpPackage.Ident("ResponseWriter"), ", r *", httpPackage.Ident("Request"), ") (interface{}, error) {")
+			g.P("		ctx := ", transhttpPackage.Ident("WithRequest"), "(r.Context(), r)")
+			g.P("		ctx = ", transportPackage.Ident("WithHTTPHeaderForServer"), "(ctx, r.Header)")
+			g.P("		if h.Interceptor != nil {")
+			g.P("			ctx = ", contextPackage.Ident("WithValue"), "(ctx, ", transportPackage.Ident("ServiceInfoContextKey"), ", ", infoVar, ")")
+			g.P("		}")
+			g.P("		r = r.WithContext(ctx)")
 			g.P("		var in ", m.Request)
 			if len(m.ReqBody) > 0 {
 				path, _, err := protocutils.GetFieldPath(m.ReqBody, m.Meta.Input.Fields)
@@ -188,11 +194,6 @@ func (s *serviceDesc) execute(g *protogen.GeneratedFile) error {
 				g.P("		}")
 				g.P("	}")
 			}
-			g.P("		ctx := ", transhttpPackage.Ident("WithRequest"), "(r.Context(), r)")
-			g.P("		ctx = ", transportPackage.Ident("WithHTTPHeaderForServer"), "(ctx, r.Header)")
-			g.P("		if h.Interceptor != nil {")
-			g.P("			ctx = ", contextPackage.Ident("WithValue"), "(ctx, ", transportPackage.Ident("ServiceInfoContextKey"), ", ", infoVar, ")")
-			g.P("		}")
 			g.P("		out, err := handler(ctx, &in)")
 			g.P("		if err != nil {")
 			g.P("			return out, err")

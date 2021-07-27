@@ -126,7 +126,11 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P("if err != nil {")
 			g.P("	return err")
 			g.P("}")
-			g.P(path, " = val")
+			if desc.HasOptionalKeyword() {
+				g.P(path, " = &val")
+			} else {
+				g.P(path, " = val")
+			}
 		}
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
 		if desc.IsList() {
@@ -144,7 +148,12 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P("if err != nil {")
 			g.P("	return err")
 			g.P("}")
-			g.P(path, " = int32(val)")
+			if desc.HasOptionalKeyword() {
+				g.P("int32val := int32(val)")
+				g.P(path, " = &int32val")
+			} else {
+				g.P(path, " = int32(val)")
+			}
 		}
 	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
 		if desc.IsList() {
@@ -162,7 +171,12 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P("if err != nil {")
 			g.P("	return err")
 			g.P("}")
-			g.P(path, " = uint32(val)")
+			if desc.HasOptionalKeyword() {
+				g.P("uint32val := uint32(val)")
+				g.P(path, " = &uint32val")
+			} else {
+				g.P(path, " = uint32(val)")
+			}
 		}
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
 		if desc.IsList() {
@@ -180,7 +194,11 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P("if err != nil {")
 			g.P("	return err")
 			g.P("}")
-			g.P(path, " = val")
+			if desc.HasOptionalKeyword() {
+				g.P(path, " = &val")
+			} else {
+				g.P(path, " = val")
+			}
 		}
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
 		if desc.IsList() {
@@ -198,7 +216,11 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P("if err != nil {")
 			g.P("	return err")
 			g.P("}")
-			g.P(path, " = val")
+			if desc.HasOptionalKeyword() {
+				g.P(path, " = &val")
+			} else {
+				g.P(path, " = val")
+			}
 		}
 	case protoreflect.FloatKind:
 		if desc.IsList() {
@@ -216,7 +238,12 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P("if err != nil {")
 			g.P("	return err")
 			g.P("}")
-			g.P(path, " = float32(val)")
+			if desc.HasOptionalKeyword() {
+				g.P("float32val := float32(val)")
+				g.P(path, " = &float32val")
+			} else {
+				g.P(path, " = float32(val)")
+			}
 		}
 	case protoreflect.DoubleKind:
 		if desc.IsList() {
@@ -234,13 +261,21 @@ func genQueryStringValue(g *protogen.GeneratedFile, path string, desc protorefle
 			g.P("if err != nil {")
 			g.P("	return err")
 			g.P("}")
-			g.P(path, " = val")
+			if desc.HasOptionalKeyword() {
+				g.P(path, " = &val")
+			} else {
+				g.P(path, " = val")
+			}
 		}
 	case protoreflect.StringKind:
 		if desc.IsList() {
 			g.P(path, " = vals")
 		} else {
-			g.P(path, " = vals[0]")
+			if desc.HasOptionalKeyword() {
+				g.P(path, " = &vals[0]")
+			} else {
+				g.P(path, " = vals[0]")
+			}
 		}
 	case protoreflect.BytesKind:
 		if desc.IsList() {

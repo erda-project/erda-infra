@@ -18,6 +18,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -29,6 +30,7 @@ import (
 
 	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 	"github.com/erda-project/erda-infra/tools/gohub/cmd/pkgpath"
+	"github.com/erda-project/erda-infra/tools/gohub/cmd/version"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -42,9 +44,34 @@ func IncludeDirs() []string {
 	}
 }
 
+func getVersion() string {
+	home := homeDir()
+	file := filepath.Join(home, "."+cmd.Name, ".version")
+	bytes, err := ioutil.ReadFile(file)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return ""
+		}
+		cmd.CheckError(err)
+	}
+	return strings.TrimSpace(string(bytes))
+}
+
+func updateVersion() {
+	home := homeDir()
+	file := filepath.Join(home, "."+cmd.Name, ".version")
+	err := ioutil.WriteFile(file, []byte(version.Version), os.ModePerm)
+	cmd.CheckError(err)
+}
+
 // Download .
 func Download(override, verbose bool) {
 	dir := ensureToolsDir()
+
+	// check version
+	if getVersion() != version.Version {
+		override = true
+	}
 
 	// download protoc
 	if !cmd.IsFileExist(filepath.Join(dir, "protoc")) || (!*localInstall && override) {
@@ -165,6 +192,11 @@ func Download(override, verbose bool) {
 			}
 		}
 	}
+
+	if override {
+		updateVersion()
+	}
+
 	paths := []string{dir}
 	goPath := os.Getenv("GOPATH")
 	if len(goPath) > 0 {

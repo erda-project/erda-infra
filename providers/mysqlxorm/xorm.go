@@ -100,7 +100,6 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	}
 
 	p.db = db
-
 	return nil
 }
 
