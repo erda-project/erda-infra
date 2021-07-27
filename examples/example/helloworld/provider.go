@@ -16,11 +16,17 @@ package example
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 )
+
+// Interface .
+type Interface interface {
+	Hello(name string) string
+}
 
 type config struct {
 	// some fields of config for this provider
@@ -33,7 +39,7 @@ type provider struct {
 	Log logs.Logger
 }
 
-// Run this is optional
+// Init this is optional
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.Log.Info("message: ", p.Cfg.Message)
 	return nil
@@ -53,15 +59,16 @@ func (p *provider) Run(ctx context.Context) error {
 	}
 }
 
+// Hello .
+func (p *provider) Hello(name string) string {
+	return fmt.Sprintf("hello %s", p.Cfg.Message)
+}
+
 func init() {
 	servicehub.Register("helloworld", &servicehub.Spec{
-		Services: []string{
-			"helloworld-service",
-		},
+		Services:    []string{"helloworld-service"},
 		Description: "here is description of helloworld",
-		ConfigFunc: func() interface{} {
-			return &config{}
-		},
+		ConfigFunc:  func() interface{} { return &config{} },
 		Creator: func() servicehub.Provider {
 			return &provider{}
 		},
