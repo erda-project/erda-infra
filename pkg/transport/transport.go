@@ -129,6 +129,9 @@ func WithHeader(ctx context.Context, header Header) context.Context {
 // ContextHeader get header in server
 func ContextHeader(ctx context.Context) Header {
 	md, _ := metadata.FromIncomingContext(ctx)
+	if md == nil {
+		md, _ = metadata.FromOutgoingContext(ctx)
+	}
 	return md
 }
 
