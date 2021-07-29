@@ -50,6 +50,7 @@ type config struct {
 	MySQLMaxOpenConns uint64        `file:"max_open_conns" env:"MYSQL_MAXOPENCONNS" default:"2"`
 	MySQLMaxLifeTime  time.Duration `file:"max_lifetime" env:"MYSQL_MAXLIFETIME" default:"30m"`
 	MySQLShowSQL      bool          `file:"show_sql" env:"MYSQL_SHOW_SQL" default:"false"`
+	MySQLProperties   string        `file:"properties" env:"MYSQL_PROPERTIES" default:"charset=utf8mb4&collation=utf8mb4_unicode_ci&parseTime=True&loc=Local"`
 
 	MySQLPingWhenInit   bool   `file:"ping_when_init" env:"MYSQL_PING_WHEN_INIT" default:"true"`
 	MySQLPingTimeoutSec uint64 `file:"ping_timeout_sec" env:"MYSQL_PING_TIMEOUT_SEC" default:"10"`
@@ -59,8 +60,8 @@ func (c *config) url() string {
 	if c.MySQLURL != "" {
 		return c.MySQLURL
 	}
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		c.MySQLUsername, c.MySQLPassword, c.MySQLHost, c.MySQLPort, c.MySQLDatabase)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s",
+		c.MySQLUsername, c.MySQLPassword, c.MySQLHost, c.MySQLPort, c.MySQLDatabase, c.MySQLProperties)
 }
 
 // provider .
