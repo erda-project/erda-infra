@@ -24,22 +24,6 @@ type Interface interface {
 	Add(a, b int) int
 }
 
-// define Represents the definition of provider and provides some information
-type define struct{}
-
-// Declare what services the provider provides
-func (d *define) Service() []string { return []string{"example"} }
-
-// Describe information about this provider
-func (d *define) Description() string { return "example" }
-
-// Return a provider creator
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 var _ Interface = (*provider)(nil) // check interface implemented
 
 type provider struct{}
@@ -57,5 +41,11 @@ func (p *provider) sub(a, b int) int {
 }
 
 func init() {
-	servicehub.RegisterProvider("example-provider", &define{})
+	servicehub.Register("example-provider", &servicehub.Spec{
+		Services:    []string{"example"},
+		Description: "example",
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }

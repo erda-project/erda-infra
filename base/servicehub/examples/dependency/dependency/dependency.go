@@ -23,28 +23,25 @@ type Interface interface {
 	Hello(name string) string
 }
 
-// define Represents the definition of provider and provides some information
-type define struct{}
-
-// Declare what services the provider provides
-func (d *define) Service() []string { return []string{"example-dependency"} }
-
-// Describe information about this provider
-func (d *define) Description() string { return "dependency for example" }
-
-// Return a provider creator
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
+type config struct {
+	Prefix string `file:"prefix"`
 }
 
-type provider struct{}
+type provider struct {
+	Cfg *config
+}
 
 func (p *provider) Hello(name string) string {
-	return "hello " + name
+	return p.Cfg.Prefix + "hello " + name
 }
 
 func init() {
-	servicehub.RegisterProvider("example-dependency-provider", &define{})
+	servicehub.Register("example-dependency-provider", &servicehub.Spec{
+		Services:    []string{"example-dependency"},
+		Description: "dependency for example",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
