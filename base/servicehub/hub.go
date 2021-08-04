@@ -22,6 +22,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -238,41 +239,59 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	ch := make(chan error, len(h.providers))
 	var num int
 	for _, item := range h.providers {
+		key := item.key
+		if key != item.name {
+			key = fmt.Sprintf("%s (%s)", item.key, item.name)
+		}
 		if runner, ok := item.provider.(ProviderRunner); ok {
 			num++
 			h.wg.Add(1)
-			go func(key, name string, provider ProviderRunner) {
-				if key != name {
-					key = fmt.Sprintf("%s (%s)", key, name)
-				}
+			go func(provider ProviderRunner) {
 				h.logger.Infof("provider %s starting ...", key)
 				err := provider.Start()
 				if err != nil {
-					h.logger.Errorf("fail to start provider %s: %s", key, err)
+					h.logger.Errorf("failed to start provider %s: %s", key, err)
 				} else {
 					h.logger.Infof("provider %s closed", key)
 				}
 				h.wg.Done()
 				ch <- err
-			}(item.key, item.name, runner)
+			}(runner)
 		}
 		if runner, ok := item.provider.(ProviderRunnerWithContext); ok {
 			num++
 			h.wg.Add(1)
-			go func(key, name string, provider ProviderRunnerWithContext) {
-				if key != name {
-					key = fmt.Sprintf("%s (%s)", key, name)
-				}
+			go func(provider ProviderRunnerWithContext) {
+
 				h.logger.Infof("provider %s running ...", key)
 				err := provider.Run(ctx)
 				if err != nil {
-					h.logger.Errorf("fail to run provider %s: %s", key, err)
+					h.logger.Errorf("failed to run provider %s: %s", key, err)
 				} else {
-					h.logger.Infof("provider %s exit", key)
+					h.logger.Infof("provider %s Run exit", key)
 				}
 				h.wg.Done()
 				ch <- err
-			}(item.key, item.name, runner)
+			}(runner)
+		}
+		for i, t := range item.tasks {
+			num++
+			h.wg.Add(1)
+			go func(i int, t task) {
+				tname := t.name
+				if len(tname) <= 0 {
+					tname = strconv.Itoa(i + 1)
+				}
+				h.logger.Infof("provider %s task(%s) running ...", key, tname)
+				err := t.fn(ctx)
+				if err != nil {
+					h.logger.Errorf("failed to run provider %s task(%s): %s", key, err)
+				} else {
+					h.logger.Infof("provider %s task(%s) exit", key, tname)
+				}
+				h.wg.Done()
+				ch <- err
+			}(i, t)
 		}
 	}
 	h.started = true

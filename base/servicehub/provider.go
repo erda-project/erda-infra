@@ -97,7 +97,11 @@ type Context interface {
 	Config() interface{}
 	Logger() logs.Logger
 	Service(name string, options ...interface{}) interface{}
+	AddTask(task func(context.Context) error, options ...TaskOption)
 }
+
+// TaskOption .
+type TaskOption func(*task)
 
 // ProviderRunner .
 type ProviderRunner interface {

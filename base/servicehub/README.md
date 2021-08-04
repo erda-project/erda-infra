@@ -26,25 +26,6 @@ import (
 	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
-// define Represents the definition of provider and provides some information
-type define struct{}
-
-// Declare what services the provider provides
-func (d *define) Services() []string { return []string{"hello"} }
-
-// Describe information about this provider
-func (d *define) Description() string { return "hello for example" }
-
-// Return an instance representing the configuration
-func (d *define) Config() interface{} { return &config{} }
-
-// Return a provider creator
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type config struct {
 	Message string `file:"message" flag:"msg" default:"hi" desc:"message to show" env:"HELLO_MESSAGE"`
 }
@@ -74,14 +55,20 @@ func (p *provider) Run(ctx context.Context) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("hello-provider", &define{})
+	servicehub.Register("hello-provider", &servicehub.Spec{
+		Services:    []string{"hello"},
+		Description: "hello for example",
+		ConfigFunc:  func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {
 	hub := servicehub.New()
 	hub.Run("examples", "", os.Args...)
 }
-
 ```
 
 Output:
@@ -94,7 +81,7 @@ INFO[2021-03-23 11:55:34.831] hello provider is running...                  modu
 INFO[2021-03-23 11:55:37.831] do something...                               module=hello-provider
 INFO[2021-03-23 11:55:40.835] do something...                               module=hello-provider
 ^C
-INFO[2021-03-23 11:55:41.624] provider hello-provider exit  
+INFO[2021-03-23 11:55:41.624] provider hello-provider Run exit  
 ```
 
 [Example details](./examples/run/main.go)
@@ -116,6 +103,3 @@ Supports file formats:
 * toml
 * ...
 
-## TODO List
-* CLI tools to quick start
-* Test Case

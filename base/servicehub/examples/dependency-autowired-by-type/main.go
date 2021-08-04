@@ -23,28 +23,6 @@ import (
 	"github.com/erda-project/erda-infra/base/servicehub/examples/dependency-autowired-by-type/dependency"
 )
 
-// define Represents the definition of provider and provides some information
-type define struct{}
-
-// Declare what services the provider provides
-func (d *define) Services() []string { return []string{"hello"} }
-
-// Declare which services the provider depends on
-func (d *define) Dependencies() []string { return []string{"example-dependency"} }
-
-// Describe information about this provider
-func (d *define) Description() string { return "hello for example" }
-
-// Return an instance representing the configuration
-func (d *define) Config() interface{} { return &config{} }
-
-// Return a provider creator
-func (d *define) Creator() servicehub.Creator {
-	return func() servicehub.Provider {
-		return &provider{}
-	}
-}
-
 type config struct {
 	Name string `file:"name" default:"recallsong"`
 }
@@ -61,7 +39,15 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func init() {
-	servicehub.RegisterProvider("hello-provider", &define{})
+	servicehub.Register("hello-provider", &servicehub.Spec{
+		Services:     []string{"hello"},
+		Dependencies: []string{"example-dependency"},
+		Description:  "hello for example",
+		ConfigFunc:   func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
 }
 
 func main() {

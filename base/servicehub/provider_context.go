@@ -15,6 +15,7 @@
 package servicehub
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -39,6 +40,7 @@ type providerContext struct {
 	structValue reflect.Value
 	structType  reflect.Type
 	define      ProviderDefine
+	tasks       []task
 }
 
 var loggerType = reflect.TypeOf((*logs.Logger)(nil)).Elem()
@@ -274,6 +276,30 @@ func (c *providerContext) Service(name string, options ...interface{}) interface
 		nil,
 		reflect.StructTag(""),
 	), options...)
+}
+
+// AddTask .
+func (c *providerContext) AddTask(fn func(context.Context) error, options ...TaskOption) {
+	t := task{
+		name: "",
+		fn:   fn,
+	}
+	for _, opt := range options {
+		opt(&t)
+	}
+	c.tasks = append(c.tasks, t)
+}
+
+// WithTaskName .
+func WithTaskName(name string) TaskOption {
+	return func(t *task) {
+		t.name = name
+	}
+}
+
+type task struct {
+	name string
+	fn   func(context.Context) error
 }
 
 // dependencyContext .
