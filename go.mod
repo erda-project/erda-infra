@@ -25,9 +25,10 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a // indirect
 	github.com/go-zookeeper/zk v1.0.2
-	github.com/gocql/gocql v0.0.0-20210313142353-65899a66288b
+	github.com/gocql/gocql v0.0.0-20210707082121-9a3953d1826d
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang/protobuf v1.5.1
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/gorilla/mux v1.7.3
