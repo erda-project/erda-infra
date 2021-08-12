@@ -15,8 +15,6 @@ jobs:
       image: letmein7788/letmein:golangci-lint
     steps:
       - uses: actions/checkout@v2
-      - name: Run go mod tidy
-        run: make tidy
       - name: Run Go Lint
         run: |
           go get -u golang.org/x/lint/golint
@@ -29,15 +27,15 @@ jobs:
           # Optional: working directory, useful for monorepos
           # working-directory: somedir
           # Optional: golangci-lint command line arguments.
-          args: --timeout=10m
+          # args: --timeout=10m
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
           # Optional: if set to true then the action will use pre-installed Go.
-          skip-go-installation: true
-          # Optional: if set to true then the action don't cache or restore ~/go/pkg.
-          skip-pkg-cache: true
-          # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
-          skip-build-cache: true
+          # skip-go-installation: true
+          # # Optional: if set to true then the action don't cache or restore ~/go/pkg.
+          # skip-pkg-cache: true
+          # # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
+          # skip-build-cache: true
       - name: Run Go Vet
         run: go vet ./...
       - name: Run Test
