@@ -220,7 +220,7 @@ func ensureToolsDir() string {
 		cmd.CheckError(err)
 	}
 	if !stat.IsDir() {
-		cmd.CheckError(fmt.Errorf("%s file already exist, it not a directory.", dir))
+		cmd.CheckError(fmt.Errorf("%s file already exist, it not a directory", dir))
 	}
 	return dir
 }

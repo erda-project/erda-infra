@@ -21,6 +21,7 @@ import (
 	"github.com/gocql/gocql"
 )
 
+// StatementBuilder .
 type StatementBuilder interface {
 	GetStatement(data interface{}) (string, []interface{}, error)
 }

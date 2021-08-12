@@ -25,6 +25,7 @@ func init() {
 	cmd.AddCommand(versionCmd)
 }
 
+// Version .
 const Version = "1.0.2"
 
 var versionCmd = &cobra.Command{
