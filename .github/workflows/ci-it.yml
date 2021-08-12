@@ -44,6 +44,8 @@ jobs:
       image: letmein7788/letmein:golangci-lint
     steps:
       - uses: actions/checkout@v2
+      - name: Run go mod tidy
+        run: make tidy
       - name: Run Go Lint
         run: |
           go get -u golang.org/x/lint/golint
