@@ -16,7 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run Go Lint
-        run: golint -set_exit_status=1 ./...
+        run: |
+          go get -u golang.org/x/lint/golint
+          golint -set_exit_status=1 ./...
       - name: Run Lint
         uses: golangci/golangci-lint-action@v2
         with:
