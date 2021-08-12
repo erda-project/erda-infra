@@ -41,7 +41,7 @@ jobs:
   CODE-CHECK:
     runs-on: ubuntu-latest
     container:
-      image: registry.cn-hangzhou.aliyuncs.com/terminus/golang-base:210416
+      image: recallsong/golang-base:210416
     steps:
       - uses: actions/checkout@v2
       - name: Run go mod tidy
@@ -50,5 +50,5 @@ jobs:
         run: |
           go get -u golang.org/x/lint/golint
           golint -set_exit_status=1 ./...
-      - name: Run Go Vet
-        run: go vet ./...
+      # - name: Run Go Vet
+      #   run: go vet ./...
