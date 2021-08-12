@@ -23,6 +23,7 @@ func init() {
 	cmd.AddCommand(ToolsCmd)
 }
 
+// ToolsCmd .
 var ToolsCmd = &cobra.Command{
 	Use:   "tools",
 	Short: "Tools",

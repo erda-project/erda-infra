@@ -52,7 +52,7 @@ func WithInterceptors(o ...interceptor.Interceptor) ServiceOption {
 	}
 }
 
-// WithHTTPOption .
+// WithHTTPOptions .
 func WithHTTPOptions(o ...transhttp.HandleOption) ServiceOption {
 	return func(opts *ServiceOptions) {
 		opts.HTTP = append(opts.HTTP, o...)
@@ -85,12 +85,12 @@ type serviceInfoContextKey int8
 // ServiceInfoContextKey .
 const ServiceInfoContextKey = serviceInfoContextKey(0)
 
-// WithRequest .
+// WithServiceInfo .
 func WithServiceInfo(ctx context.Context, info ServiceInfo) context.Context {
 	return context.WithValue(ctx, ServiceInfoContextKey, info)
 }
 
-// ContextRequest .
+// ContextServiceInfo .
 func ContextServiceInfo(ctx context.Context) ServiceInfo {
 	info, _ := ctx.Value(ServiceInfoContextKey).(ServiceInfo)
 	return info

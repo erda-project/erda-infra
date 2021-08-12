@@ -39,9 +39,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func (p *provider) Run(ctx context.Context) error {
-	/*
-		test db
-	*/
+	/* test db */
 	r, err := p.MySQL.DB().QueryString("show tables")
 	if err != nil {
 		panic(err)
@@ -52,9 +50,7 @@ func (p *provider) Run(ctx context.Context) error {
 		}
 	}
 
-	/*
-		test tx
-	*/
+	/* test tx */
 	// create table for test
 	if err := p.DB.CreateTables(&Table{}); err != nil {
 		return err
@@ -112,14 +108,14 @@ func (p *provider) Run(ctx context.Context) error {
 	return nil
 }
 
+// Table .
 type Table struct {
 	ID   uint64 `json:"id" xorm:"pk autoincr"`
 	Name string
 }
 
-func (t *Table) TableName() string {
-	return "table"
-}
+// TableName .
+func (t *Table) TableName() string { return "table" }
 
 func (p *provider) insertSuccess(opts ...mysqlxorm.SessionOption) error {
 	s := p.MySQL.NewSession(opts...)

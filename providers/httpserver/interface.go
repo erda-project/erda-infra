@@ -194,8 +194,10 @@ func WithInterceptor(fn func(handler func(ctx Context) error) func(ctx Context) 
 	return Interceptor(fn)
 }
 
+// PathFormat .
 type PathFormat int32
 
+// PathFormat values
 const (
 	PathFormatEcho       = 0
 	PathFormatGoogleAPIs = 1

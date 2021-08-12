@@ -57,7 +57,7 @@ type Marshaler struct {
 	AnyResolver AnyResolver
 }
 
-// JSONPBMarshaler is implemented by protobuf messages that customize the
+// IMarshaler is implemented by protobuf messages that customize the
 // way they are marshaled to JSON. Messages that implement this should also
 // implement JSONPBUnmarshaler so that the custom format can be parsed.
 //
@@ -65,7 +65,7 @@ type Marshaler struct {
 //	https://developers.google.com/protocol-buffers/docs/proto3#json
 //
 // Deprecated: Custom types should implement protobuf reflection instead.
-type JSONPBMarshaler interface {
+type IMarshaler interface {
 	MarshalJSONPB(*Marshaler) ([]byte, error)
 }
 
@@ -97,7 +97,7 @@ func (jm *Marshaler) marshal(m proto.Message) ([]byte, error) {
 
 	// Check for custom marshalers first since they may not properly
 	// implement protobuf reflection that the logic below relies on.
-	if jsm, ok := m.(JSONPBMarshaler); ok {
+	if jsm, ok := m.(IMarshaler); ok {
 		return jsm.MarshalJSONPB(jm)
 	}
 
@@ -122,7 +122,7 @@ func (w *jsonWriter) write(s string) {
 }
 
 func (w *jsonWriter) marshalMessage(m protoreflect.Message, indent, typeURL string) error {
-	if jsm, ok := proto.MessageV1(m.Interface()).(JSONPBMarshaler); ok {
+	if jsm, ok := proto.MessageV1(m.Interface()).(IMarshaler); ok {
 		b, err := jsm.MarshalJSONPB(w.Marshaler)
 		if err != nil {
 			return err

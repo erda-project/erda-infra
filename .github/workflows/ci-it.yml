@@ -38,3 +38,17 @@ jobs:
         run: |
           go test -cpu=2 -timeout 3s -race -coverprofile=coverage.txt -covermode=atomic ./...
           bash <(curl -s https://codecov.io/bash)
+  CODE-CHECK:
+    runs-on: ubuntu-latest
+    container:
+      image: recallsong/golang-base:210416
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run go mod tidy
+        run: make tidy
+      - name: Run Go Lint
+        run: |
+          go get -u golang.org/x/lint/golint
+          golint -set_exit_status=1 ./...
+      # - name: Run Go Vet
+      #   run: go vet ./...

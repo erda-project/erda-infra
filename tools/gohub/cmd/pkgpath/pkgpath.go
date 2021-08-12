@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// FindPkgDir .
 func FindPkgDir(path, srcDir string) string {
 	if path == "" {
 		return ""

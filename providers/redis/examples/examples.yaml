@@ -1,0 +1,6 @@
+redis:
+    master_name: "master"
+    sentinels_addr: "localhost:26379"
+    password: "123456"
+
+example:

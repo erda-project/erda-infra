@@ -5,12 +5,13 @@ package client
 
 import (
 	fmt "fmt"
+	reflect "reflect"
+	strings "strings"
+
 	servicehub "github.com/erda-project/erda-infra/base/servicehub"
 	pb "github.com/erda-project/erda-infra/examples/service/protocol/pb"
 	grpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
 	grpc1 "google.golang.org/grpc"
-	reflect "reflect"
-	strings "strings"
 )
 
 var dependencies = []string{

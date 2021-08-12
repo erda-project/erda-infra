@@ -22,8 +22,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const Name = "gohub"
-const PackagePath = "github.com/erda-project/erda-infra"
+// common value
+const (
+	Name        = "gohub"
+	PackagePath = "github.com/erda-project/erda-infra"
+)
 
 // RootCmd .
 var RootCmd = &cobra.Command{
@@ -37,15 +40,10 @@ Complete documentation is available at https://` + PackagePath + ` .`,
 	},
 }
 
-var verbose *bool
+var verbose = RootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose information")
 
-func Verbose() bool {
-	return *verbose
-}
-
-func init() {
-	verbose = RootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose information")
-}
+// Verbose .
+func Verbose() bool { return *verbose }
 
 // AddCommand .
 func AddCommand(cmd *cobra.Command) {
@@ -76,6 +74,7 @@ func Confirm(msg string) bool {
 	}
 }
 
+// IsFileExist .
 func IsFileExist(path string) bool {
 	_, err := os.Stat(path)
 	if err != nil {

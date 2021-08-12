@@ -23,9 +23,11 @@ type (
 		*xorm.Session
 		needAutoClose bool
 	}
+	// SessionOption .
 	SessionOption func(s *session)
 )
 
+// WithSession .
 func WithSession(passedInSession *session) SessionOption {
 	return func(s *session) {
 		s.Session = passedInSession.Session
@@ -34,7 +36,6 @@ func WithSession(passedInSession *session) SessionOption {
 
 func (p *provider) NewSession(opts ...SessionOption) *session {
 	tx := &session{}
-
 	for _, opt := range opts {
 		opt(tx)
 	}
@@ -52,5 +53,4 @@ func (tx *session) Close() {
 	if tx.needAutoClose {
 		tx.Session.Close()
 	}
-	return
 }
