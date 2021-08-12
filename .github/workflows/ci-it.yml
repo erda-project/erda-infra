@@ -11,6 +11,8 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    container:
+      image: letmein7788/letmein:golangci-lint
     steps:
       - uses: actions/checkout@v2
       - name: Set up Go
