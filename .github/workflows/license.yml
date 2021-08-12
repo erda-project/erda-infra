@@ -1,4 +1,4 @@
-name: LICENSE CHECK
+name: LICENSE
 on:
   push:
     tags:

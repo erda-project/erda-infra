@@ -41,7 +41,7 @@ jobs:
   CODE-CHECK:
     runs-on: ubuntu-latest
     container:
-      image: letmein7788/letmein:golangci-lint
+      image: registry.cn-hangzhou.aliyuncs.com/terminus/golang-base:210416
     steps:
       - uses: actions/checkout@v2
       - name: Run go mod tidy
