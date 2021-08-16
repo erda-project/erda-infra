@@ -19,9 +19,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/recallsong/go-utils/reflectx"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/erda-project/erda-infra/base/logs"
 	writer "github.com/erda-project/erda-infra/pkg/parallel-writer"
 )
@@ -157,34 +157,27 @@ func (p *producer) WriteN(data ...interface{}) (int, error) {
 
 func (p *producer) publish(data interface{}) error {
 	var (
-		topic *string
 		bytes []byte
 		key   []byte
 	)
+	topic := &p.topic
 	switch val := data.(type) {
 	case *Message:
 		if val.Topic != nil {
 			topic = val.Topic
-		} else {
-			topic = &p.topic
 		}
 		bytes = val.Data
 		key = val.Key
 	case *StringMessage:
 		if val.Topic != nil {
 			topic = val.Topic
-		} else {
-			topic = &p.topic
 		}
 		bytes = reflectx.StringToBytes(val.Data)
 	case []byte:
-		topic = &p.topic
 		bytes = val
 	case string:
-		topic = &p.topic
 		bytes = reflectx.StringToBytes(val)
 	default:
-		topic = &p.topic
 		data, err := json.Marshal(data)
 		if err != nil {
 			return err

@@ -20,17 +20,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAbsInt(t *testing.T) {
-	x := AbsInt(10)
-	assert.Equal(t, 10, x)
-
-	x = AbsInt(0)
-	assert.Equal(t, 0, x)
-
-	x = AbsInt(-10)
-	assert.Equal(t, 10, x)
-}
-
 func TestAbsInt32(t *testing.T) {
 	x := AbsInt32(10)
 	assert.Equal(t, int32(10), x)
