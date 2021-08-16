@@ -33,6 +33,7 @@ type Message struct {
 	Key   []byte
 }
 
+// StringMessage .
 type StringMessage struct {
 	Topic *string
 	Data  string
