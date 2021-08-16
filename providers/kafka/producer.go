@@ -19,6 +19,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/recallsong/go-utils/reflectx"
+
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/erda-project/erda-infra/base/logs"
 	writer "github.com/erda-project/erda-infra/pkg/parallel-writer"
@@ -29,6 +31,11 @@ type Message struct {
 	Topic *string
 	Data  []byte
 	Key   []byte
+}
+
+type StringMessage struct {
+	Topic *string
+	Data  string
 }
 
 // ProducerConfig .
@@ -149,25 +156,34 @@ func (p *producer) WriteN(data ...interface{}) (int, error) {
 
 func (p *producer) publish(data interface{}) error {
 	var (
-		topic string
+		topic *string
 		bytes []byte
 		key   []byte
 	)
 	switch val := data.(type) {
 	case *Message:
 		if val.Topic != nil {
-			topic = *val.Topic
+			topic = val.Topic
+		} else {
+			topic = &p.topic
 		}
 		bytes = val.Data
 		key = val.Key
+	case *StringMessage:
+		if val.Topic != nil {
+			topic = val.Topic
+		} else {
+			topic = &p.topic
+		}
+		bytes = reflectx.StringToBytes(val.Data)
 	case []byte:
-		topic = p.topic
+		topic = &p.topic
 		bytes = val
 	case string:
-		topic = p.topic
-		bytes = []byte(val)
+		topic = &p.topic
+		bytes = reflectx.StringToBytes(val)
 	default:
-		topic = p.topic
+		topic = &p.topic
 		data, err := json.Marshal(data)
 		if err != nil {
 			return err
@@ -177,7 +193,7 @@ func (p *producer) publish(data interface{}) error {
 	p.kp.ProduceChannel() <- &kafka.Message{
 		Value:          bytes,
 		Key:            key,
-		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		TopicPartition: kafka.TopicPartition{Topic: topic, Partition: kafka.PartitionAny},
 	}
 	return nil
 }
