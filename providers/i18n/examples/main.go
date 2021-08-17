@@ -42,7 +42,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	text = p.Tran.Text(langs, "other")
 	p.Log.Info(text)
 
-	text = p.Tran.Sprintf(langs, "${param name}")
+	text = p.Tran.Sprintf(langs, "${Internal Error}: reason ${Reason}")
 	p.Log.Info(text)
 	return nil
 }
@@ -69,6 +69,6 @@ func main() {
 // INFO[2021-06-28 12:46:55.075] 名字                                            module=hello
 // INFO[2021-06-28 12:46:55.075] 名字                                            module=hello
 // INFO[2021-06-28 12:46:55.075] other                                         module=hello
-// INFO[2021-06-28 12:46:55.075] param name                                    module=hello
+// INFO[2021-06-28 12:46:55.075] 内部错误: reason 未知                               module=hello
 // INFO[2021-06-28 12:46:55.075] provider hello (depends services: [i18n], providers: [i18n]) initialized
 // INFO[2021-06-28 12:46:55.075] signals to quit: [hangup interrupt terminated quit]
