@@ -143,15 +143,13 @@ func (p *provider) Run(ctx context.Context) error {
 		p.Log.Infof("I am leader ! node is %q", p.Cfg.NodeID)
 
 		p.runHandlers()
-	loop:
-		for {
-			select {
-			case <-session.Done():
-				p.resignLeader()
-				break loop
-			case <-ctx.Done():
-				p.resignLeader()
-			}
+		select {
+		case <-session.Done():
+			p.resignLeader()
+			continue
+		case <-ctx.Done():
+			p.resignLeader()
+			return nil
 		}
 	}
 }
