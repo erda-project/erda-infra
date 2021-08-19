@@ -280,7 +280,7 @@ func (t *translator) escape(lang LanguageCodes, text string) string {
 		if len(param) != 3 {
 			continue
 		}
-		var defval, key []byte = param[1], nil
+		var key, defval []byte = param[1], nil
 		if len(param[2]) > 0 {
 			defval = param[2][1:]
 		}
