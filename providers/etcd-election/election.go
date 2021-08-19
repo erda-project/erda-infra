@@ -149,7 +149,7 @@ func (p *provider) Run(ctx context.Context) error {
 		// The etcd server's stopped and it's restarted after a while like 10 seconds.
 		// The campaign of B exited with nil after connection was restored.
 		select {
-		case <-p.session.Done():
+		case <-session.Done():
 			p.reset(session)
 			continue
 		default:

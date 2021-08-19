@@ -25,6 +25,8 @@ import (
 	"github.com/erda-project/erda-infra/base/logs/logrusx"
 )
 
+var waitTime = 300 * time.Millisecond
+
 func TestElection(t *testing.T) {
 	cfg := integration.ClusterConfig{Size: 1}
 	clus := integration.NewClusterV3(nil, &cfg)
@@ -45,7 +47,7 @@ func TestElection(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go primary.Run(ctx)
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(waitTime)
 	if !primary.IsLeader() || atomic.LoadInt32(&leaderSet) == 0 {
 		t.Fatalf("no leader is selected")
 	}
@@ -59,7 +61,7 @@ func TestElection(t *testing.T) {
 	secondaryCtx, secondaryCancel := context.WithCancel(context.Background())
 	defer secondaryCancel()
 	go secondary.Run(secondaryCtx)
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(waitTime)
 	if secondary.IsLeader() {
 		t.Fatalf("secondary should not be elected")
 	}
@@ -72,7 +74,7 @@ func TestElection(t *testing.T) {
 	// primary exit
 	cancel()
 
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(waitTime)
 	if !secondary.IsLeader() {
 		t.Fatalf("secondary should be elected")
 	}
@@ -95,7 +97,7 @@ func TestElectionOnClusterReboot(t *testing.T) {
 	defer cancel()
 	go primary.Run(ctx)
 
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 	if !primary.IsLeader() {
 		t.Fatalf("no leader is selected")
 	}
@@ -104,7 +106,7 @@ func TestElectionOnClusterReboot(t *testing.T) {
 	secondaryCtx, secondaryCancel := context.WithCancel(context.Background())
 	defer secondaryCancel()
 	go secondary.Run(secondaryCtx)
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(waitTime)
 
 	// simulate secondary losing connection
 	secondary.lock.Lock()
@@ -113,7 +115,7 @@ func TestElectionOnClusterReboot(t *testing.T) {
 	// primary quit
 	cancel()
 
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(waitTime)
 	if !secondary.IsLeader() {
 		t.Fatalf("secondary should be leader now")
 	}

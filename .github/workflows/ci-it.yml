@@ -36,7 +36,7 @@ jobs:
           # skip-build-cache: true
       - name: Run Test
         run: |
-          go test -cpu=2 -timeout 3s -race -coverprofile=coverage.txt -covermode=atomic ./...
+          go test -cpu=2 -timeout 10s -race -coverprofile=coverage.txt -covermode=atomic ./...
           bash <(curl -s https://codecov.io/bash)
   CODE-CHECK:
     runs-on: ubuntu-latest
