@@ -53,7 +53,7 @@ type (
 	RouterManager interface {
 		NewRouter(opts ...interface{}) RouterTx
 	}
-	// RouteTx .
+	// RouterTx .
 	RouterTx interface {
 		Router
 		Commit() error
