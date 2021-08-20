@@ -46,6 +46,12 @@ type ScenarioRender map[string]*CompRenderSpec
 // scenario: componentName: componentRender
 var ScenarioRenders = make(map[string]*ScenarioRender)
 
+func MustRegister(r *CompRenderSpec) {
+	if err := Register(r); err != nil {
+		panic(err)
+	}
+}
+
 func Register(r *CompRenderSpec) error {
 	if r == nil {
 		err := fmt.Errorf("invalid register request")
@@ -244,7 +250,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 	}
 
 	// clean pre render error
-	SetGlobalStateKV(req.Protocol, GlobalInnerKeyError.String(), "")
+	SetGlobalStateKV(req.Protocol, GlobalInnerKeyError.String(), nil)
 
 	PolishProtocol(req.Protocol)
 

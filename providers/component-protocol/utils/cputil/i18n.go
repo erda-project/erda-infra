@@ -12,23 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package component_protocol
+package cputil
 
 import (
 	"context"
 
 	"github.com/erda-project/erda-infra/providers/i18n"
-	"github.com/erda-project/erda-proto-go/cp/pb"
 )
 
-type Interface interface {
-	Render(ctx context.Context, req *pb.RenderRequest) (*pb.RenderResponse, error)
-	SetI18nTran(tran i18n.Translator)
-	WithContextValue(key, value interface{})
+// Language .
+func Language(ctx context.Context) i18n.LanguageCodes {
+	lang := GetHeader(ctx, "Lang")
+	if len(lang) <= 0 {
+		lang = GetHeader(ctx, "Accept-Language")
+	}
+	langs, _ := i18n.ParseLanguageCode(lang)
+	return langs
 }
 
-func (p *provider) Render(ctx context.Context, req *pb.RenderRequest) (*pb.RenderResponse, error) {
-	return p.protocolService.Render(ctx, req)
+// I18n .
+func I18n(ctx context.Context, key string, args ...interface{}) string {
+	return SDK(ctx).I18n(key, args...)
 }
-func (p *provider) SetI18nTran(tran i18n.Translator)        { p.Tran = tran }
-func (p *provider) WithContextValue(key, value interface{}) { p.CustomContextKVs[key] = value }
+

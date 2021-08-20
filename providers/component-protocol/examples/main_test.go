@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package component_protocol
+package main
 
 import (
-	"context"
+	"fmt"
+	"testing"
 
-	"github.com/erda-project/erda-infra/providers/i18n"
 	"github.com/erda-project/erda-proto-go/cp/pb"
 )
 
-type Interface interface {
-	Render(ctx context.Context, req *pb.RenderRequest) (*pb.RenderResponse, error)
-	SetI18nTran(tran i18n.Translator)
-	WithContextValue(key, value interface{})
+func TestA(t *testing.T) {
+	s := `{    "scenario": {        "scenarioKey": "home-page-sidebar",        "scenarioType": "home-page-sidebar"    },    "inParams": {        "orgName": "erda"    }}`
+	m := &pb.RenderRequest{}
+	err := m.UnmarshalJSON([]byte(s))
+	if err != nil {
+		panic(err)
+	}
+	b, err := m.MarshalJSON()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(b))
 }
-
-func (p *provider) Render(ctx context.Context, req *pb.RenderRequest) (*pb.RenderResponse, error) {
-	return p.protocolService.Render(ctx, req)
-}
-func (p *provider) SetI18nTran(tran i18n.Translator)        { p.Tran = tran }
-func (p *provider) WithContextValue(key, value interface{}) { p.CustomContextKVs[key] = value }

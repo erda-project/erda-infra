@@ -1,0 +1,14 @@
+scenario: demo
+
+hierarchy:
+  root: demoTable
+  structure:
+    demoTable: []
+
+components:
+  demoTable:
+    type: Table
+
+rendering:
+  __DefaultRendering__:
+    - name: demoTable

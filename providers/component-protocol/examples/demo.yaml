@@ -1,0 +1,17 @@
+demo:
+
+erda.cp:
+#  scenario_parent_dirs: # contains parent dirs
+#    - ../scenario/
+  default_protocol_yaml_scan_base_paths:
+    - ./scenario
+
+service-register:
+http-server:
+  addr: ":8080"
+grpc-server:
+  addr: ":8081"
+
+i18n:
+  files:
+    - dic.yaml

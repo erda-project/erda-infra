@@ -40,7 +40,7 @@ func (s GlobalInnerKey) Normal() string {
 }
 
 const (
-	GlobalInnerKeyCtxBundle GlobalInnerKey = "_ctxBundle_"
+	GlobalInnerKeyCtxSDK    GlobalInnerKey = "_sdk_"
 	GlobalInnerKeyUserIDs   GlobalInnerKey = "_userIDs_"
 	GlobalInnerKeyError     GlobalInnerKey = "_error_"
 	// userID & orgID
@@ -53,11 +53,21 @@ const (
 	InParamsStateBindingKey = "__InParams__"
 )
 
-type ContextBundle struct {
-	// TODO cp
-	Tran        i18n.Translator
-	Identity    *commonpb.IdentityInfo
-	InParams    map[string]interface{}
+type SDK struct {
+	Tran     i18n.Translator
+	Identity *commonpb.IdentityInfo
+	InParams map[string]interface{}
+	Lang     i18n.LanguageCodes
+}
+
+func (sdk *SDK) I18n(key string, args ...interface{}) string {
+	if len(args) == 0 {
+		try := sdk.Tran.Text(sdk.Lang, key)
+		if try != key {
+			return try
+		}
+	}
+	return sdk.Tran.Sprintf(sdk.Lang, key, args...)
 }
 
 // scenario name: scenario default protocol
@@ -81,6 +91,9 @@ func InitDefaultCompProtocols(path string) {
 			fullDir := path + "/" + fi.Name()
 			InitDefaultCompProtocols(fullDir)
 		} else {
+			if fi.Name() != "protocol.yml" && fi.Name() != "protocol.yaml" {
+				continue
+			}
 			fullName := path + "/" + fi.Name()
 			yamlFile, er := ioutil.ReadFile(fullName)
 			if er != nil {
@@ -236,7 +249,7 @@ func ProtoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r c
 		return err
 	}
 	// inParams
-	inParams := ctx.Value(GlobalInnerKeyCtxBundle.String()).(ContextBundle).InParams
+	inParams := ctx.Value(GlobalInnerKeyCtxSDK).(*SDK).InParams
 	for _, state := range r.State {
 		// parse state bound info
 		stateFrom, stateFromKey, err := ParseStateBound(state.Value)
