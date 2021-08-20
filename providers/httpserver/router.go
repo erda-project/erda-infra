@@ -58,6 +58,7 @@ type (
 		Router
 		Commit() error
 		Rollback()
+		Reloadable() bool
 	}
 )
 
@@ -307,6 +308,9 @@ func (r *router) Rollback() {
 		r.lock.Unlock()
 	}
 }
+
+// Reloadable .
+func (r *router) Reloadable() bool { return r.lock != nil }
 
 type routesSorter []*route
 
