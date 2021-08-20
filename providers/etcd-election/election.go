@@ -105,6 +105,14 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	return nil
 }
 
+func (p *provider) reset(session *concurrency.Session) {
+	session.Close()
+	p.lock.Lock()
+	p.session, p.election = nil, nil
+	p.iAmLeader = false
+	p.lock.Unlock()
+}
+
 func (p *provider) Run(ctx context.Context) error {
 	for {
 		select {
@@ -131,16 +139,23 @@ func (p *provider) Run(ctx context.Context) error {
 			if errors.Is(err, context.Canceled) {
 				return nil
 			}
-			session.Close()
-			p.lock.Lock()
-			p.session, p.election = nil, nil
-			p.iAmLeader = false
-			p.lock.Unlock()
+			p.reset(session)
 			p.Log.Errorf("fail to Campaign: %s", err, reflect.TypeOf(err))
 			time.Sleep(1 * time.Second)
 			continue
 		}
-		p.Log.Infof("I am leader ! node is %q", p.Cfg.NodeID)
+
+		// Let's say A is leader and B is non-leader.
+		// The etcd server's stopped and it's restarted after a while like 10 seconds.
+		// The campaign of B exited with nil after connection was restored.
+		select {
+		case <-session.Done():
+			p.reset(session)
+			continue
+		default:
+		}
+
+		p.Log.Infof("I am leader ! Node is %q", p.Cfg.NodeID)
 
 		p.runHandlers()
 		select {
