@@ -1,15 +1,16 @@
 // Copyright (c) 2021 Terminus, Inc.
 //
-// This program is free software: you can use, redistribute, and/or modify
-// it under the terms of the GNU Affero General Public License, version 3
-// or later ("AGPL"), as published by the Free Software Foundation.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE.
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package table
 
@@ -17,6 +18,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/definition/cptype"
 )
 
+// CommonTable .
 type CommonTable struct {
 	State      State                                    `json:"state"`
 	Type       string                                   `json:"type"`
@@ -24,12 +26,14 @@ type CommonTable struct {
 	Props      Props                                    `json:"props"`
 }
 
+// Operate .
 type Operate struct {
 	RenderType string                `json:"renderType"`
 	Value      string                `json:"value"`
 	Operations map[string]Operations `json:"operations"`
 }
 
+// Operations .
 type Operations struct {
 	Key     string `json:"key"`
 	Text    string `json:"text"`
@@ -38,30 +42,35 @@ type Operations struct {
 	Meta    Meta   `json:"meta"`
 }
 
+// Meta .
 type Meta struct {
-	Id int64 `json:"id"`
+	ID int64 `json:"id"`
 }
 
+// FormData .
 type FormData struct {
-	Id       int64    `json:"id"`
+	ID       int64    `json:"id"`
 	Name     string   `json:"name"`
 	Items    []string `json:"items"`
 	Target   string   `json:"target"`
 	Channels []string `json:"channels"`
 }
 
+// State .
 type State struct {
-	EditId    uint64 `json:"editId"`
+	EditID    uint64 `json:"editId"`
 	Operation string `json:"operation"`
 	Visible   bool   `json:"visible"`
 }
 
+// Props .
 type Props struct {
 	RowKey     string       `json:"rowKey"`
 	Columns    []PropColumn `json:"columns"`
 	Pagination bool         `json:"pagination"`
 }
 
+// PropColumn .
 type PropColumn struct {
 	Title     string `json:"title"`
 	DataIndex string `json:"dataIndex"`

@@ -1,15 +1,16 @@
 // Copyright (c) 2021 Terminus, Inc.
 //
-// This program is free software: you can use, redistribute, and/or modify
-// it under the terms of the GNU Affero General Public License, version 3
-// or later ("AGPL"), as published by the Free Software Foundation.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE.
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package gantt
 
@@ -17,6 +18,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/definition/cptype"
 )
 
+// CommonGantt .
 type CommonGantt struct {
 	Version    string                                   `json:"version,omitempty"`
 	Name       string                                   `json:"name,omitempty"`
@@ -27,6 +29,7 @@ type CommonGantt struct {
 	Data       Data                                     `json:"data,omitempty"`
 }
 
+// State .
 type State struct {
 	// set after render
 	Total               uint64 `json:"total,omitempty"`
@@ -36,6 +39,7 @@ type State struct {
 	IssueType           string
 }
 
+// Props .
 type Props struct {
 	Visible   bool         `json:"visible"`
 	RowKey    string       `json:"rowKey,omitempty"`
@@ -43,6 +47,7 @@ type Props struct {
 	Columns   []PropColumn `json:"columns,omitempty"`
 }
 
+// PropColumn .
 type PropColumn struct {
 	Title           string           `json:"title,omitempty"`
 	TitleRenderType string           `json:"titleRenderType,omitempty"`
@@ -52,23 +57,28 @@ type PropColumn struct {
 	TitleTip        []string         `json:"titleTip,omitempty"`
 }
 
+// PropColumnData .
 type PropColumnData struct {
 	Month uint64   `json:"month,omitempty"`
 	Date  []uint64 `json:"date,omitempty"`
 }
 
+// OpChangePageNo .
 var (
 	OpChangePageNo cptype.OperationKey = "changePageNo"
 )
 
+// Operations .
 var Operations = map[cptype.OperationKey]cptype.Operation{
 	OpChangePageNo: {Reload: true},
 }
 
+// Data .
 type Data struct {
 	List []DataItem `json:"list,omitempty"`
 }
 
+// DataItem .
 type DataItem struct {
 	// 此ID全局唯一: autoID + issueID
 	ID        uint64    `json:"id,omitempty"`
@@ -77,11 +87,13 @@ type DataItem struct {
 	User      User      `json:"user,omitempty"`
 }
 
+// DateRange .
 type DateRange struct {
 	RenderType RenderType       `json:"renderType,omitempty"`
 	Value      []DateRangeValue `json:"value,omitempty"`
 }
 
+// DateRangeValue .
 type DateRangeValue struct {
 	Tooltip string `json:"tooltip"`
 	// 单位天
@@ -91,11 +103,13 @@ type DateRangeValue struct {
 	ActualTime float64 `json:"actualTime"`
 }
 
+// DataTask .
 type DataTask struct {
 	RenderType RenderType      `json:"renderType,omitempty"`
 	Value      []DataTaskValue `json:"value,omitempty"`
 }
 
+// DataTaskValue .
 type DataTaskValue struct {
 	Text        string `json:"text,omitempty"`
 	ID          int64  `json:"id,omitempty"`
@@ -104,6 +118,7 @@ type DataTaskValue struct {
 	LinkStyle   bool   `json:"linkStyle,omitempty"`
 }
 
+// User .
 type User struct {
 	Avatar     string     `json:"avatar,omitempty"`
 	Value      uint64     `json:"value,omitempty"`
@@ -112,8 +127,10 @@ type User struct {
 	RenderType RenderType `json:"renderType,omitempty"`
 }
 
+// RenderType .
 type RenderType string
 
+// RenderTypeGantt .
 var (
 	RenderTypeGantt        RenderType = "gantt"
 	RenderTypeStringList   RenderType = "string-list"

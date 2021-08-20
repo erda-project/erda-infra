@@ -1,15 +1,16 @@
 // Copyright (c) 2021 Terminus, Inc.
 //
-// This program is free software: you can use, redistribute, and/or modify
-// it under the terms of the GNU Affero General Public License, version 3
-// or later ("AGPL"), as published by the Free Software Foundation.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE.
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package definition
 
@@ -25,6 +26,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/definition/cptype"
 )
 
+// CompRenderSpec .
 type CompRenderSpec struct {
 	// 具体的场景名
 	Scenario string `json:"scenario"`
@@ -34,24 +36,28 @@ type CompRenderSpec struct {
 	RenderC RenderCreator
 }
 
+// RenderCreator .
 type RenderCreator func() CompRender
 
+// CompRender .
 type CompRender interface {
 	Render(ctx context.Context, c *cptype.Component, scenario cptype.ComponentProtocolScenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error
 }
 
-// componentName: componentRender
+// ScenarioRender .
 type ScenarioRender map[string]*CompRenderSpec
 
-// scenario: componentName: componentRender
+// ScenarioRenders .
 var ScenarioRenders = make(map[string]*ScenarioRender)
 
+// MustRegister .
 func MustRegister(r *CompRenderSpec) {
 	if err := Register(r); err != nil {
 		panic(err)
 	}
 }
 
+// Register .
 func Register(r *CompRenderSpec) error {
 	if r == nil {
 		err := fmt.Errorf("invalid register request")
@@ -80,6 +86,7 @@ func Register(r *CompRenderSpec) error {
 	return nil
 }
 
+// GetScenarioRenders .
 func GetScenarioRenders(scenario string) (*ScenarioRender, error) {
 	var r *ScenarioRender
 	r, ok := ScenarioRenders[scenario]
@@ -96,10 +103,12 @@ func GetScenarioRenders(scenario string) (*ScenarioRender, error) {
 
 type emptyComp struct{}
 
+// Render .
 func (ca *emptyComp) Render(ctx context.Context, c *cptype.Component, scenario cptype.ComponentProtocolScenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error {
 	return nil
 }
 
+// GetCompRender .
 func GetCompRender(r *ScenarioRender, comp, typ string) (*CompRenderSpec, error) {
 	if r == nil || comp == "" {
 		err := fmt.Errorf("empty scenario render or compnent name")
@@ -122,6 +131,7 @@ func GetCompRender(r *ScenarioRender, comp, typ string) (*CompRenderSpec, error)
 	return c, nil
 }
 
+// GetScenarioKey .
 func GetScenarioKey(req cptype.ComponentProtocolScenario) (string, error) {
 	if req.ScenarioType == "" && req.ScenarioKey == "" {
 		err := fmt.Errorf("empty scenario key")
@@ -135,6 +145,7 @@ func GetScenarioKey(req cptype.ComponentProtocolScenario) (string, error) {
 	return req.ScenarioKey, nil
 }
 
+// EventConvert .
 // 前端触发的事件转换，如果是组件自身的事件，则透传；
 // 否则, (1) 组件名为空，界面刷新：InitializeOperation
 // 		(2) 通过协议定义的Rending触发的事件：RenderingOperation
@@ -172,6 +183,7 @@ func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions
 	return result
 }
 
+// RunScenarioRender .
 func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest) error {
 	// check debug options
 	if err := checkDebugOptions(req.DebugOptions); err != nil {
@@ -188,7 +200,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 	if req.Protocol == nil || req.Event.Component == "" {
 		isDefaultProtocol = true
-		p, err := LoadDefaultProtocol(sk)
+		p, err := GetDefaultProtocol(sk)
 		if err != nil {
 			logrus.Errorf("load default protocol failed, scenario:%+v, err:%v", req.Scenario, err)
 			return err
@@ -300,6 +312,7 @@ type compRenderWrapper struct {
 	cr CompRender
 }
 
+// Render .
 func (w *compRenderWrapper) Render(ctx context.Context, c *cptype.Component, scenario cptype.ComponentProtocolScenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) (err error) {
 	if err = unmarshal(&w.cr, c); err != nil {
 		return

@@ -15,5 +15,6 @@
 package demo
 
 import (
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/scenario/demo/components/demoTable"
+	// components auto register
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/scenario/demo/components/demotable"
 )

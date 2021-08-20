@@ -46,10 +46,12 @@ func GetHeader(ctx context.Context, key string) string {
 	return ""
 }
 
+// GetAllHeaders get all headers from ctx.
 func GetAllHeaders(ctx context.Context) metadata.MD {
 	return transport.ContextHeader(ctx)
 }
 
+// GetIdentity get identity from ctx.
 func GetIdentity(ctx context.Context) *commonpb.IdentityInfo {
 	return &commonpb.IdentityInfo{
 		UserID: GetUserID(ctx),

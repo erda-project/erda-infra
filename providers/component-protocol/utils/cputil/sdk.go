@@ -20,6 +20,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/definition"
 )
 
+// SDK return cp sdk for easy use.
 func SDK(ctx context.Context) (sdk *definition.SDK) {
 	v := ctx.Value(definition.GlobalInnerKeyCtxSDK)
 	if v == nil {

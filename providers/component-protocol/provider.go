@@ -1,4 +1,18 @@
-package component_protocol
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package componentprotocol
 
 import (
 	"os"
@@ -29,6 +43,7 @@ type provider struct {
 	protocolService *protocolService
 }
 
+// Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.CustomContextKVs = make(map[interface{}]interface{})
 	p.protocolService = &protocolService{p: p}
@@ -40,7 +55,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	for _, basePath := range p.Cfg.DefaultProtocolYamlScanBasePaths {
 		pwd, _ := os.Getwd()
 		absPath := filepath.Join(pwd, basePath)
-		definition.InitDefaultCompProtocols(absPath)
+		definition.RegisterDefaultCompProtocols(absPath)
 	}
 	for key := range definition.DefaultProtocols {
 		p.Log.Infof("default protocol registered for scenario: %s", key)
@@ -49,11 +64,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	return nil
 }
 
+// Provide .
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
-	//switch {
-	//case ctx.Service() == "erda.cp.CPService" || ctx.Type() == pb.CPServiceServerType() || ctx.Type() == pb.CPServiceHandlerType():
-	//	return p.protocolService
-	//}
 	return p
 }
 

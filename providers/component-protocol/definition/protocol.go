@@ -1,15 +1,16 @@
 // Copyright (c) 2021 Terminus, Inc.
 //
-// This program is free software: you can use, redistribute, and/or modify
-// it under the terms of the GNU Affero General Public License, version 3
-// or later ("AGPL"), as published by the Free Software Foundation.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE.
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package definition
 
@@ -23,26 +24,28 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/definition/cptype"
-	"github.com/erda-project/erda-infra/providers/i18n"
-	commonpb "github.com/erda-project/erda-proto-go/common/pb"
 )
 
+// GlobalInnerKey .
 type GlobalInnerKey string
 
+// String .
 func (s GlobalInnerKey) String() string {
 	return string(s)
 }
 
+// Normal .
 func (s GlobalInnerKey) Normal() string {
 	m := strings.TrimPrefix(s.String(), "_")
 	n := strings.TrimPrefix(m, "_")
 	return n
 }
 
+// GlobalInnerKeyCtxSDK .
 const (
-	GlobalInnerKeyCtxSDK    GlobalInnerKey = "_sdk_"
-	GlobalInnerKeyUserIDs   GlobalInnerKey = "_userIDs_"
-	GlobalInnerKeyError     GlobalInnerKey = "_error_"
+	GlobalInnerKeyCtxSDK  GlobalInnerKey = "_sdk_"
+	GlobalInnerKeyUserIDs GlobalInnerKey = "_userIDs_"
+	GlobalInnerKeyError   GlobalInnerKey = "_error_"
 	// userID & orgID
 	GlobalInnerKeyIdentity GlobalInnerKey = "_identity_"
 
@@ -53,28 +56,14 @@ const (
 	InParamsStateBindingKey = "__InParams__"
 )
 
-type SDK struct {
-	Tran     i18n.Translator
-	Identity *commonpb.IdentityInfo
-	InParams map[string]interface{}
-	Lang     i18n.LanguageCodes
-}
-
-func (sdk *SDK) I18n(key string, args ...interface{}) string {
-	if len(args) == 0 {
-		try := sdk.Tran.Text(sdk.Lang, key)
-		if try != key {
-			return try
-		}
-	}
-	return sdk.Tran.Sprintf(sdk.Lang, key, args...)
-}
-
-// scenario name: scenario default protocol
+// DefaultProtocols contains all default protocols.
+// map key: scenarioKey
+// map value: default protocol
 var DefaultProtocols = make(map[string]cptype.ComponentProtocol)
 
+// RegisterDefaultCompProtocols register default component protocols under base path.
 // default path: libs/erda-configs/permission
-func InitDefaultCompProtocols(path string) {
+func RegisterDefaultCompProtocols(basePath string) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -82,19 +71,19 @@ func InitDefaultCompProtocols(path string) {
 			panic(err)
 		}
 	}()
-	rd, err := ioutil.ReadDir(path)
+	rd, err := ioutil.ReadDir(basePath)
 	if err != nil {
 		return
 	}
 	for _, fi := range rd {
 		if fi.IsDir() {
-			fullDir := path + "/" + fi.Name()
-			InitDefaultCompProtocols(fullDir)
+			fullDir := basePath + "/" + fi.Name()
+			RegisterDefaultCompProtocols(fullDir)
 		} else {
 			if fi.Name() != "protocol.yml" && fi.Name() != "protocol.yaml" {
 				continue
 			}
-			fullName := path + "/" + fi.Name()
+			fullName := basePath + "/" + fi.Name()
 			yamlFile, er := ioutil.ReadFile(fullName)
 			if er != nil {
 				err = er
@@ -110,7 +99,8 @@ func InitDefaultCompProtocols(path string) {
 	}
 }
 
-func LoadDefaultProtocol(scenario string) (cptype.ComponentProtocol, error) {
+// GetDefaultProtocol .
+func GetDefaultProtocol(scenario string) (cptype.ComponentProtocol, error) {
 	s, ok := DefaultProtocols[scenario]
 	if !ok {
 		err := fmt.Errorf("default protocol not exist, scenario:%s", scenario)
@@ -130,6 +120,7 @@ func deepCopy(src, dst interface{}) error {
 	return nil
 }
 
+// GetProtoComp .
 func GetProtoComp(p *cptype.ComponentProtocol, compName string) (c *cptype.Component, err error) {
 	if p.Components == nil {
 		err = fmt.Errorf("empty protocol components")
@@ -144,6 +135,7 @@ func GetProtoComp(p *cptype.ComponentProtocol, compName string) (c *cptype.Compo
 	return
 }
 
+// GetCompStateKV .
 func GetCompStateKV(c *cptype.Component, sk string) (interface{}, error) {
 	if c == nil {
 		err := fmt.Errorf("empty component")
@@ -156,6 +148,7 @@ func GetCompStateKV(c *cptype.Component, sk string) (interface{}, error) {
 	return c.State[sk], nil
 }
 
+// SetCompStateValueFromComps .
 func SetCompStateValueFromComps(c *cptype.Component, key string, value interface{}) error {
 	if c == nil {
 		err := fmt.Errorf("empty component")
@@ -175,6 +168,7 @@ func SetCompStateValueFromComps(c *cptype.Component, key string, value interface
 	return nil
 }
 
+// SetCompStateKVFromInParams .
 func SetCompStateKVFromInParams(c *cptype.Component, key string, value interface{}) error {
 	if c == nil {
 		err := fmt.Errorf("empty component")
@@ -194,6 +188,7 @@ func SetCompStateKVFromInParams(c *cptype.Component, key string, value interface
 	return nil
 }
 
+// GetProtoCompStateValue .
 func GetProtoCompStateValue(p *cptype.ComponentProtocol, compName, sk string) (interface{}, error) {
 	c, err := GetProtoComp(p, compName)
 	if err != nil {
@@ -206,6 +201,7 @@ func GetProtoCompStateValue(p *cptype.ComponentProtocol, compName, sk string) (i
 	return v, nil
 }
 
+// GetProtoInParamsValue .
 func GetProtoInParamsValue(inParams map[string]interface{}, key string) interface{} {
 	if inParams == nil {
 		inParams = make(map[string]interface{})
@@ -213,6 +209,7 @@ func GetProtoInParamsValue(inParams map[string]interface{}, key string) interfac
 	return inParams[key]
 }
 
+// ParseStateBound .
 func ParseStateBound(b string) (comp, key string, err error) {
 	prefix := "{{"
 	suffix := "}}"
@@ -238,6 +235,7 @@ func ParseStateBound(b string) (comp, key string, err error) {
 	return
 }
 
+// ProtoCompStateRending .
 func ProtoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r cptype.RendingItem) error {
 	if p == nil {
 		err := fmt.Errorf("empty protocol")
@@ -279,6 +277,7 @@ func ProtoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r c
 	return nil
 }
 
+// SetGlobalStateKV .
 func SetGlobalStateKV(p *cptype.ComponentProtocol, key string, value interface{}) {
 	if p.GlobalState == nil {
 		var gs = make(cptype.GlobalStateData)
@@ -288,6 +287,7 @@ func SetGlobalStateKV(p *cptype.ComponentProtocol, key string, value interface{}
 	(*s)[key] = value
 }
 
+// GetGlobalStateKV .
 func GetGlobalStateKV(p *cptype.ComponentProtocol, key string) interface{} {
 	if p.GlobalState == nil {
 		return nil
@@ -295,6 +295,7 @@ func GetGlobalStateKV(p *cptype.ComponentProtocol, key string) interface{} {
 	return (*p.GlobalState)[key]
 }
 
+// PolishProtocol .
 func PolishProtocol(req *cptype.ComponentProtocol) {
 	if req == nil {
 		return

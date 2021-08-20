@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package demoTable
+package demotable
 
 import (
 	"context"
@@ -36,6 +36,7 @@ type tableLine struct {
 	HelloMsg string `json:"helloMsg,omitempty"`
 }
 
+// Render .
 func (d *demoTable) Render(ctx context.Context, c *cptype.Component, scenario cptype.ComponentProtocolScenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error {
 	sdk := cputil.SDK(ctx)
 	tran := cputil.SDK(ctx).Tran

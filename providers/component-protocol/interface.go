@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package component_protocol
+package componentprotocol
 
 import (
 	"context"
@@ -21,14 +21,20 @@ import (
 	"github.com/erda-project/erda-proto-go/cp/pb"
 )
 
+// Interface wrap CPService and other logic.
 type Interface interface {
 	Render(ctx context.Context, req *pb.RenderRequest) (*pb.RenderResponse, error)
 	SetI18nTran(tran i18n.Translator)
 	WithContextValue(key, value interface{})
 }
 
+// Render .
 func (p *provider) Render(ctx context.Context, req *pb.RenderRequest) (*pb.RenderResponse, error) {
 	return p.protocolService.Render(ctx, req)
 }
-func (p *provider) SetI18nTran(tran i18n.Translator)        { p.Tran = tran }
+
+// SetI18nTran .
+func (p *provider) SetI18nTran(tran i18n.Translator) { p.Tran = tran }
+
+// WithContextValue .
 func (p *provider) WithContextValue(key, value interface{}) { p.CustomContextKVs[key] = value }

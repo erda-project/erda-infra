@@ -12,24 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sortgroup
+package definition
 
-// Props .
-type Props struct {
-	Draggable      bool `json:"draggable"`
-	GroupDraggable bool `json:"groupDraggable"`
+import (
+	"github.com/erda-project/erda-infra/providers/i18n"
+	commonpb "github.com/erda-project/erda-proto-go/common/pb"
+)
+
+// SDK .
+type SDK struct {
+	Tran     i18n.Translator
+	Identity *commonpb.IdentityInfo
+	InParams map[string]interface{}
+	Lang     i18n.LanguageCodes
 }
 
-// Data .
-type Data struct {
-	Type  string `json:"type"`
-	Value []Item `json:"value"`
-}
-
-// Item .
-type Item struct {
-	ID         int                    `json:"id"`
-	GroupID    int                    `json:"groupId"`
-	Title      string                 `json:"title"`
-	Operations map[string]interface{} `json:"operations"`
+// I18n .
+func (sdk *SDK) I18n(key string, args ...interface{}) string {
+	if len(args) == 0 {
+		try := sdk.Tran.Text(sdk.Lang, key)
+		if try != key {
+			return try
+		}
+	}
+	return sdk.Tran.Sprintf(sdk.Lang, key, args...)
 }

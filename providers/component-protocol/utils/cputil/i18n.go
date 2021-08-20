@@ -34,4 +34,3 @@ func Language(ctx context.Context) i18n.LanguageCodes {
 func I18n(ctx context.Context, key string, args ...interface{}) string {
 	return SDK(ctx).I18n(key, args...)
 }
-

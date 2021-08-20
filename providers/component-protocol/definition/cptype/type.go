@@ -1,18 +1,20 @@
 // Copyright (c) 2021 Terminus, Inc.
 //
-// This program is free software: you can use, redistribute, and/or modify
-// it under the terms of the GNU Affero General Public License, version 3
-// or later ("AGPL"), as published by the Free Software Foundation.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE.
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-// You should have received a copy of the GNU Affero General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package cptype
 
+// InitializeOperation .
 const (
 	// 协议定义的操作
 	// 用户通过URL初次访问
@@ -21,7 +23,7 @@ const (
 	RenderingOperation OperationKey = "__Rendering__"
 )
 
-// 组件化协议定义
+// ComponentProtocol is protocol definition.
 type ComponentProtocol struct {
 	Version     string                   `json:"version" yaml:"version"`
 	Scenario    string                   `json:"scenario" yaml:"scenario"`
@@ -31,9 +33,10 @@ type ComponentProtocol struct {
 	Rendering   map[string][]RendingItem `json:"rendering" yaml:"rendering"`
 }
 
+// GlobalStateData .
 type GlobalStateData map[string]interface{}
 
-// Hierarchy只是前端关心，只读，且有些字结构是字典有些是列表，后端不需要关心这部分
+// Hierarchy represents components' hierarchy.
 type Hierarchy struct {
 	Version string `json:"version" yaml:"version"`
 	Root    string `json:"root" yaml:"root"`
@@ -41,6 +44,7 @@ type Hierarchy struct {
 	Structure map[string]interface{} `json:"structure" yaml:"structure"`
 }
 
+// Component defines a component.
 type Component struct {
 	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 	// 组件类型
@@ -57,10 +61,13 @@ type Component struct {
 	Operations ComponentOps `json:"operations,omitempty" yaml:"operations,omitempty"`
 }
 
+// ComponentData .
 type ComponentData map[string]interface{}
 
+// ComponentOps .
 type ComponentOps map[string]interface{}
 
+// Operation .
 type Operation struct {
 	Key      string `json:"key"`
 	Value    string `json:"value"`
@@ -68,19 +75,19 @@ type Operation struct {
 	FillMeta string `json:"fillMeta"`
 }
 
+// RendingItem .
 type RendingItem struct {
 	Name  string         `json:"name" yaml:"name"`
 	State []RendingState `json:"state" yaml:"state"`
 }
 
+// RendingState .
 type RendingState struct {
 	Name  string `json:"name" yaml:"name"`
 	Value string `json:"value" yaml:"value"`
 }
 
-//type ComponentRenderCtx ComponentProtocolRequest
-
-// request
+// ComponentProtocolRequest .
 type ComponentProtocolRequest struct {
 	Scenario ComponentProtocolScenario `json:"scenario"`
 	Event    ComponentEvent            `json:"event"`
@@ -92,6 +99,7 @@ type ComponentProtocolRequest struct {
 	DebugOptions *ComponentProtocolDebugOptions `json:"debugOptions,omitempty"`
 }
 
+// ComponentProtocolScenario .
 type ComponentProtocolScenario struct {
 	// 场景类型, 没有则为空
 	ScenarioType string `json:"scenarioType" query:"scenarioType"`
@@ -99,20 +107,25 @@ type ComponentProtocolScenario struct {
 	ScenarioKey string `json:"scenarioKey" query:"scenarioKey"`
 }
 
+// ComponentEvent .
 type ComponentEvent struct {
 	Component     string                 `json:"component"`
 	Operation     OperationKey           `json:"operation"`
 	OperationData map[string]interface{} `json:"operationData"`
 }
 
+// OperationKey .
 type OperationKey string
 
+// String .
 func (o OperationKey) String() string {
 	return string(o)
 }
 
+// ComponentProtocolParams .
 type ComponentProtocolParams interface{}
 
+// ComponentProtocolDebugOptions .
 type ComponentProtocolDebugOptions struct {
 	ComponentKey string `json:"componentKey"`
 }
