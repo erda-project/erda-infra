@@ -48,6 +48,7 @@ type Hub struct {
 	lock          sync.RWMutex
 
 	started bool
+	ctx     context.Context
 	cancel  func()
 	wg      sync.WaitGroup
 
@@ -57,6 +58,7 @@ type Hub struct {
 // New .
 func New(options ...interface{}) *Hub {
 	hub := &Hub{}
+	hub.ctx, hub.cancel = context.WithCancel(context.Background())
 	for _, opt := range options {
 		processOptions(hub, opt)
 	}
@@ -234,8 +236,7 @@ func (h *Hub) StartWithSignal() error {
 // Start .
 func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.lock.Lock()
-	ctx, cancel := context.WithCancel(context.Background())
-	h.cancel = cancel
+	ctx := h.ctx
 	ch := make(chan error, len(h.providers))
 	var num int
 	for _, item := range h.providers {
@@ -370,6 +371,7 @@ func (h *Hub) Close() error {
 	h.cancel()
 	h.wg.Wait()
 	h.started = false
+	h.ctx, h.cancel = context.WithCancel(context.Background())
 	h.lock.Unlock()
 	return errs.MaybeUnwrap()
 }

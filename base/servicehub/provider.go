@@ -93,6 +93,7 @@ type Provider interface{}
 
 // Context .
 type Context interface {
+	context.Context
 	Hub() *Hub
 	Config() interface{}
 	Logger() logs.Logger

@@ -157,6 +157,7 @@ func (h *Hub) addProvider(key string, cfg interface{}) error {
 	}
 	provider := define.Creator()()
 	pctx := &providerContext{
+		Context:  h.ctx,
 		hub:      h,
 		key:      key,
 		label:    label,

@@ -52,6 +52,7 @@ type (
 	// RouterManager .
 	RouterManager interface {
 		NewRouter(opts ...interface{}) RouterTx
+		Reloadable() bool
 	}
 	// RouterTx .
 	RouterTx interface {
@@ -382,3 +383,5 @@ func (rm *routerManager) NewRouter(opts ...interface{}) RouterTx {
 	copy(args[len(rm.opts):], opts)
 	return rm.p.newRouter(rm.group, args...)
 }
+
+func (rm *routerManager) Reloadable() bool { return rm.p.Cfg.Reloadable }
