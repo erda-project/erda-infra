@@ -20,22 +20,50 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	cfg "github.com/recallsong/go-utils/config"
 	"github.com/recallsong/go-utils/reflectx"
+	"github.com/sirupsen/logrus"
 
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
+
+//go:embed i18n-cp-internal.yaml
+var InternalI18nConfigs string
 
 type tran struct {
 	dic map[string]map[string]string
 }
 
 func NewTranslator() *tran {
+	// make embed content as a temp file
+	f, _ := ioutil.TempFile(os.TempDir(), "*.yaml")
+	defer func() {
+		if err := f.Close(); err != nil {
+			logrus.Errorf("failed to close i18n config file, err: %v", err)
+		}
+	}()
+	if _, err := f.WriteString(InternalI18nConfigs); err != nil {
+		panic(fmt.Errorf("failed to write i18n config content to temp file, err: %v", err))
+	}
+	fPath, err := filepath.Abs(f.Name())
+	if err != nil {
+		panic(fmt.Errorf("failed to get abs path of temp i18n config file, err: %v", err))
+	}
+	defer func() {
+		if err := os.RemoveAll(fPath); err != nil {
+			logrus.Errorf("failed to remove temp i18n config file, err: %v", err)
+		}
+	}()
+
+	// load to dic
 	dic := make(map[string]map[string]string)
-	if err := loadToDic("../i18n-cp-internal.yaml", dic); err != nil {
+	if err := loadToDic(fPath, dic); err != nil {
 		panic(err)
 	}
 	return &tran{dic: dic}
