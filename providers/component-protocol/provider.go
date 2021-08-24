@@ -22,7 +22,8 @@ import (
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/pkg/transport"
-	"github.com/erda-project/erda-infra/providers/component-protocol/definition"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 	"github.com/erda-project/erda-infra/providers/i18n"
 	"github.com/erda-project/erda-proto-go/cp/pb"
 )
@@ -37,28 +38,27 @@ type provider struct {
 	Log      logs.Logger
 	Register transport.Register
 
-	Tran             i18n.Translator
-	CustomContextKVs map[interface{}]interface{}
+	tran             i18n.Translator
+	customContextKVs map[interface{}]interface{}
 
 	protocolService *protocolService
+	// internalTran    i18n.Translator `translator:"18n-cp-internal"`
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.CustomContextKVs = make(map[interface{}]interface{})
+	p.customContextKVs = make(map[interface{}]interface{})
 	p.protocolService = &protocolService{p: p}
 	if p.Register != nil {
 		pb.RegisterCPServiceImp(p.Register, p.protocolService)
 	}
+	protocol.Tran = cptype.NewTranslator()
 
 	// register default protocol yaml files
 	for _, basePath := range p.Cfg.DefaultProtocolYamlScanBasePaths {
 		pwd, _ := os.Getwd()
 		absPath := filepath.Join(pwd, basePath)
-		definition.RegisterDefaultCompProtocols(absPath)
-	}
-	for key := range definition.DefaultProtocols {
-		p.Log.Infof("default protocol registered for scenario: %s", key)
+		protocol.RegisterDefaultProtocols(absPath)
 	}
 
 	return nil

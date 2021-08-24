@@ -1,0 +1,16 @@
+zh:
+  debugoptions.missing.componentkey: 调试选项缺少具体组件名
+  scenario.render.is.empty: 该场景没有可用的组件渲染函数
+  component.name.is.empty: 组件名为空
+  component.missing.renderCreator: 组件缺少
+  component: 组件
+  protocol.empty: 协议
+  scenario.is.empty: 场景为空
+  renderCreator: 渲染函数
+  component.render.is.empty: 组件渲染函数为空
+  default.protocol.not.exist: 默认协议不存在
+  scenario: 场景
+
+en:
+  debugoptions.missing.componentkey: debug options missing concrete component key
+  scenario.render.is.empty: scenario doesn't have any component renders

@@ -16,10 +16,9 @@ package componentprotocol
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/erda-project/erda-infra/providers/component-protocol/definition"
-	"github.com/erda-project/erda-infra/providers/component-protocol/definition/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 	"github.com/erda-project/erda-proto-go/cp/pb"
 )
@@ -34,23 +33,26 @@ func (s *protocolService) Render(ctx context.Context, req *pb.RenderRequest) (*p
 
 	// transfer pb to ComponentProtocolRequest for easy use
 	renderReq := &cptype.ComponentProtocolRequest{}
-	if err := objTransfer(req, renderReq); err != nil {
+	if err := cputil.ObjJSONTransfer(req, renderReq); err != nil {
 		return nil, err
 	}
 
-	ctxBdl := definition.SDK{
-		Tran:     s.p.Tran,
+	// make sdk
+	sdk := cptype.SDK{
+		Tran:     s.p.tran,
 		Identity: cputil.GetIdentity(ctx),
 		InParams: renderReq.InParams,
 		Lang:     cputil.Language(ctx),
 	}
-	ctx = context.WithValue(ctx, definition.GlobalInnerKeyCtxSDK, &ctxBdl)
-	for k, v := range s.p.CustomContextKVs {
+
+	// make ctx with sdk
+	ctx = context.WithValue(ctx, cptype.GlobalInnerKeyCtxSDK, &sdk)
+	for k, v := range s.p.customContextKVs {
 		ctx = context.WithValue(ctx, k, v)
 	}
 
 	// render concrete scenario
-	if err := definition.RunScenarioRender(ctx, renderReq); err != nil {
+	if err := protocol.RunScenarioRender(ctx, renderReq); err != nil {
 		return nil, err
 	}
 
@@ -62,7 +64,7 @@ func (s *protocolService) Render(ctx context.Context, req *pb.RenderRequest) (*p
 
 func (s *protocolService) makeResponse(renderReq *cptype.ComponentProtocolRequest) (*pb.RenderResponse, error) {
 	// check if business error exist, not platform error
-	businessErr := definition.GetGlobalStateKV(renderReq.Protocol, definition.GlobalInnerKeyError.String())
+	businessErr := protocol.GetGlobalStateKV(renderReq.Protocol, cptype.GlobalInnerKeyError.String())
 	if businessErr != nil {
 		if err, ok := businessErr.(error); ok {
 			return nil, err
@@ -72,7 +74,7 @@ func (s *protocolService) makeResponse(renderReq *cptype.ComponentProtocolReques
 
 	// render response
 	polishedPbReq := &pb.RenderRequest{}
-	if err := objTransfer(renderReq, polishedPbReq); err != nil {
+	if err := cputil.ObjJSONTransfer(renderReq, polishedPbReq); err != nil {
 		return nil, err
 	}
 	pbResp := pb.RenderResponse{
@@ -81,13 +83,4 @@ func (s *protocolService) makeResponse(renderReq *cptype.ComponentProtocolReques
 	}
 
 	return &pbResp, nil
-}
-
-// objTransfer transfer from src to dst using json.
-func objTransfer(src interface{}, dst interface{}) error {
-	b, err := json.Marshal(src)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(b, dst)
 }

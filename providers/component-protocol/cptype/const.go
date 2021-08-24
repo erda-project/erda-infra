@@ -12,23 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cputil
+package cptype
 
-import (
-	"context"
+// GlobalInnerCtxKey .
+type GlobalInnerCtxKey string
 
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+func (k GlobalInnerCtxKey) String() string { return string(k) }
+
+const (
+	GlobalInnerKeyCtxSDK   GlobalInnerCtxKey = "_sdk_"
+	GlobalInnerKeyUserIDs  GlobalInnerCtxKey = "_userIDs_"
+	GlobalInnerKeyIdentity GlobalInnerCtxKey = "_identity_"
+	GlobalInnerKeyError    GlobalInnerCtxKey = "_error_"
 )
 
-// SDK return cp sdk for easy use.
-func SDK(ctx context.Context) (sdk *cptype.SDK) {
-	v := ctx.Value(cptype.GlobalInnerKeyCtxSDK)
-	if v == nil {
-		return
-	}
-	vv, ok := v.(*cptype.SDK)
-	if !ok {
-		return
-	}
-	return vv
-}
+const (
+	DefaultRenderingKey     = "__DefaultRendering__"
+	InParamsStateBindingKey = "__InParams__"
+)

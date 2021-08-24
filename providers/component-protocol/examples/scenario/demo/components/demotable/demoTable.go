@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/erda-project/erda-infra/providers/component-protocol/definition"
-	"github.com/erda-project/erda-infra/providers/component-protocol/definition/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
@@ -37,7 +37,7 @@ type tableLine struct {
 }
 
 // Render .
-func (d *demoTable) Render(ctx context.Context, c *cptype.Component, scenario cptype.ComponentProtocolScenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error {
+func (d *demoTable) Render(ctx context.Context, c *cptype.Component, scenario cptype.Scenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error {
 	sdk := cputil.SDK(ctx)
 	tran := cputil.SDK(ctx).Tran
 	c.Props = map[string]interface{}{
@@ -65,10 +65,10 @@ func (d *demoTable) Render(ctx context.Context, c *cptype.Component, scenario cp
 }
 
 func init() {
-	definition.MustRegister(&definition.CompRenderSpec{
+	protocol.MustRegisterComponent(&protocol.CompRenderSpec{
 		Scenario: "demo",
 		CompName: "demoTable",
-		RenderC:  func() definition.CompRender { return &demoTable{} },
+		RenderC:  func() protocol.CompRender { return &demoTable{} },
 	})
 }
 

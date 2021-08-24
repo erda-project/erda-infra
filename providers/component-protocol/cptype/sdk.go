@@ -12,10 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package input
+package cptype
 
-// Props .
-type Props struct {
-	Disabled    bool   `json:"disabled"`
-	Placeholder string `json:"placeholder"`
+import (
+	"github.com/erda-project/erda-infra/providers/i18n"
+	commonpb "github.com/erda-project/erda-proto-go/common/pb"
+)
+
+// SDK .
+type SDK struct {
+	Tran     i18n.Translator
+	Identity *commonpb.IdentityInfo
+	InParams map[string]interface{}
+	Lang     i18n.LanguageCodes
+}
+
+// I18n .
+func (sdk *SDK) I18n(key string, args ...interface{}) string {
+	if len(args) == 0 {
+		try := sdk.Tran.Text(sdk.Lang, key)
+		if try != key {
+			return try
+		}
+	}
+	return sdk.Tran.Sprintf(sdk.Lang, key, args...)
 }

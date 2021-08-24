@@ -12,28 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package treeselect
+package protocol
 
-// INode .
-type INode struct {
-	Key        string `json:"key"`
-	ID         string `json:"id"`
-	PID        string `json:"pId"`
-	Title      string `json:"title"`
-	IsLeaf     bool   `json:"isLeaf"`
-	Value      string `json:"value"`
-	Selectable bool   `json:"selectable"`
-	Disabled   bool   `json:"disabled"`
+import (
+	"context"
+	"fmt"
+
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+)
+
+// checkDebugOptions of protocol.
+func checkDebugOptions(ctx context.Context, debugOptions *cptype.ComponentProtocolDebugOptions) error {
+	if debugOptions == nil {
+		return nil
+	}
+	if debugOptions.ComponentKey == "" {
+		return fmt.Errorf(i18n(ctx, "debugoptions.missing.componentkey"))
+	}
+	return nil
 }
 
-// Data .
-type Data struct {
-	TreeData []INode `json:"treeData"`
-}
-
-// Props .
-type Props struct {
-	Visible     bool   `json:"visible"`
-	Placeholder string `json:"placeholder"`
-	Title       string `json:"title"`
-}

@@ -89,9 +89,9 @@ type RendingState struct {
 
 // ComponentProtocolRequest .
 type ComponentProtocolRequest struct {
-	Scenario ComponentProtocolScenario `json:"scenario"`
-	Event    ComponentEvent            `json:"event"`
-	InParams map[string]interface{}    `json:"inParams"`
+	Scenario Scenario               `json:"scenario"`
+	Event    ComponentEvent         `json:"event"`
+	InParams map[string]interface{} `json:"inParams"`
 	// 初次请求为空，事件出发后，把包含状态的protocol传到后端
 	Protocol *ComponentProtocol `json:"protocol"`
 
@@ -99,8 +99,8 @@ type ComponentProtocolRequest struct {
 	DebugOptions *ComponentProtocolDebugOptions `json:"debugOptions,omitempty"`
 }
 
-// ComponentProtocolScenario .
-type ComponentProtocolScenario struct {
+// Scenario .
+type Scenario struct {
 	// 场景类型, 没有则为空
 	ScenarioType string `json:"scenarioType" query:"scenarioType"`
 	// 场景Key

@@ -34,7 +34,7 @@ func (p *provider) Render(ctx context.Context, req *pb.RenderRequest) (*pb.Rende
 }
 
 // SetI18nTran .
-func (p *provider) SetI18nTran(tran i18n.Translator) { p.Tran = tran }
+func (p *provider) SetI18nTran(tran i18n.Translator) { p.tran = tran }
 
 // WithContextValue .
-func (p *provider) WithContextValue(key, value interface{}) { p.CustomContextKVs[key] = value }
+func (p *provider) WithContextValue(key, value interface{}) { p.customContextKVs[key] = value }

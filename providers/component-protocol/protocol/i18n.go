@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sortgroup
+package protocol
 
-// Props .
-type Props struct {
-	Draggable      bool `json:"draggable"`
-	GroupDraggable bool `json:"groupDraggable"`
-}
+import (
+	"context"
 
-// Data .
-type Data struct {
-	Type  string `json:"type"`
-	Value []Item `json:"value"`
-}
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
+	pi18n "github.com/erda-project/erda-infra/providers/i18n"
+)
 
-// Item .
-type Item struct {
-	ID         int                    `json:"id"`
-	GroupID    int                    `json:"groupId"`
-	Title      string                 `json:"title"`
-	Operations map[string]interface{} `json:"operations"`
+var Tran pi18n.Translator
+
+func i18n(ctx context.Context, key string, args ...interface{}) string {
+	if len(args) == 0 {
+		try := Tran.Text(cputil.Language(ctx), key)
+		if try != key {
+			return try
+		}
+	}
+	return Tran.Sprintf(cputil.Language(ctx), key, args...)
 }

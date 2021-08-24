@@ -1,0 +1,118 @@
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package protocol
+
+import (
+	"context"
+	"fmt"
+	"io/ioutil"
+
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
+
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+)
+
+// defaultProtocols contains all default protocols.
+// map key: scenarioKey
+// map value: default protocol
+var defaultProtocols = make(map[string]cptype.ComponentProtocol)
+
+// RegisterDefaultProtocols register default component protocols under base path.
+// default path: libs/erda-configs/permission
+func RegisterDefaultProtocols(basePath string) {
+	var err error
+	defer func() {
+		if err != nil {
+			logrus.Errorf("load default component protocol failed, err:%v", err)
+			panic(err)
+		}
+	}()
+	rd, err := ioutil.ReadDir(basePath)
+	if err != nil {
+		return
+	}
+	for _, fi := range rd {
+		if fi.IsDir() {
+			fullDir := basePath + "/" + fi.Name()
+			RegisterDefaultProtocols(fullDir)
+		} else {
+			if fi.Name() != "protocol.yml" && fi.Name() != "protocol.yaml" {
+				continue
+			}
+			fullName := basePath + "/" + fi.Name()
+			yamlFile, er := ioutil.ReadFile(fullName)
+			if er != nil {
+				err = er
+				return
+			}
+			var p cptype.ComponentProtocol
+			if er := yaml.Unmarshal(yamlFile, &p); er != nil {
+				err = er
+				return
+			}
+			defaultProtocols[p.Scenario] = p
+			logrus.Infof("default protocol registered for scenario: %s", p.Scenario)
+		}
+	}
+}
+
+// getDefaultProtocol get default protocol by scenario.
+func getDefaultProtocol(scenario string) (cptype.ComponentProtocol, error) {
+	s, ok := defaultProtocols[scenario]
+	if !ok {
+		return cptype.ComponentProtocol{}, fmt.Errorf("${default.protocol.not.exist}, ${scenario}: %s", scenario)
+	}
+	return s, nil
+}
+
+// getProtoComp .
+func getProtoComp(ctx context.Context, p *cptype.ComponentProtocol, compName string) (c *cptype.Component, err error) {
+	if p.Components == nil {
+		err = fmt.Errorf("empty protocol components")
+		return
+	}
+
+	c, ok := p.Components[compName]
+	if !ok {
+		err = fmt.Errorf("empty component [%s] in protocol", compName)
+		return
+	}
+	return
+}
+
+// getProtoCompStateValue .
+func getProtoCompStateValue(ctx context.Context, p *cptype.ComponentProtocol, compName, sk string) (interface{}, error) {
+	c, err := getProtoComp(ctx, p, compName)
+	if err != nil {
+		return nil, err
+	}
+	v, err := getCompStateKV(c, sk)
+	if err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// polishProtocol .
+func polishProtocol(req *cptype.ComponentProtocol) {
+	if req == nil {
+		return
+	}
+	// polish component name
+	for name, component := range req.Components {
+		component.Name = name
+	}
+}

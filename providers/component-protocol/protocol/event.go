@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cputil
+package protocol
 
 import (
-	"context"
-
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-// SDK return cp sdk for easy use.
-func SDK(ctx context.Context) (sdk *cptype.SDK) {
-	v := ctx.Value(cptype.GlobalInnerKeyCtxSDK)
-	if v == nil {
-		return
+// eventConvert .
+// 前端触发的事件转换，如果是组件自身的事件，则透传；
+// 否则, (1) 组件名为空，界面刷新：InitializeOperation
+// 		(2) 通过协议定义的Rending触发的事件：RenderingOperation
+func eventConvert(receiver string, event cptype.ComponentEvent) cptype.ComponentEvent {
+	if receiver == event.Component {
+		return event
+	} else if event.Component != "" {
+		return cptype.ComponentEvent{Operation: cptype.RenderingOperation}
+	} else {
+		return cptype.ComponentEvent{Operation: cptype.InitializeOperation}
 	}
-	vv, ok := v.(*cptype.SDK)
-	if !ok {
-		return
-	}
-	return vv
 }

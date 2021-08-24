@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package form
+package cputil
 
-// Props .
-type Props struct {
-	Width      int                    `json:"width"`
-	Name       string                 `json:"name"`
-	Title      string                 `json:"title"`
-	Visible    bool                   `json:"visible"`
-	Fields     []interface{}          `json:"fields"`
-	FormData   map[string]interface{} `json:"formData"`
-	FormRef    interface{}            `json:"formRef"`
-	ModalProps map[string]interface{} `json:"modalProps"`
+import (
+	"encoding/json"
+)
+
+// ObjJSONTransfer transfer from src to dst using json.
+func ObjJSONTransfer(src interface{}, dst interface{}) error {
+	b, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, dst)
 }
