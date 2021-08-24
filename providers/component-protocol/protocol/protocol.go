@@ -30,13 +30,28 @@ import (
 // map value: default protocol
 var defaultProtocols = make(map[string]cptype.ComponentProtocol)
 
-// RegisterDefaultProtocols register default component protocols under base path.
+// RegisterDefaultProtocols register protocol contents.
+func RegisterDefaultProtocols(protocolYAMLs ...[]byte) {
+	for idx, protocolYAML := range protocolYAMLs {
+		var p cptype.ComponentProtocol
+		if err := yaml.Unmarshal(protocolYAML, &p); err != nil {
+			panic(fmt.Errorf("failed to parse protocol yaml, index: %d, err: %v", idx, err))
+		}
+		if p.Scenario == "" {
+			continue
+		}
+		defaultProtocols[p.Scenario] = p
+		logrus.Infof("default protocol registered for scenario: %s", p.Scenario)
+	}
+}
+
+// RegisterDefaultProtocolsFromBasePath register default component protocols under base path.
 // default path: libs/erda-configs/permission
-func RegisterDefaultProtocols(basePath string) {
+func RegisterDefaultProtocolsFromBasePath(basePath string) {
 	var err error
 	defer func() {
 		if err != nil {
-			logrus.Errorf("load default component protocol failed, err:%v", err)
+			logrus.Errorf("failed to register default component protocol, err: %v", err)
 			panic(err)
 		}
 	}()
@@ -47,7 +62,7 @@ func RegisterDefaultProtocols(basePath string) {
 	for _, fi := range rd {
 		if fi.IsDir() {
 			fullDir := basePath + "/" + fi.Name()
-			RegisterDefaultProtocols(fullDir)
+			RegisterDefaultProtocolsFromBasePath(fullDir)
 		} else {
 			if fi.Name() != "protocol.yml" && fi.Name() != "protocol.yaml" {
 				continue

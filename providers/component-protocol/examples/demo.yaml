@@ -4,7 +4,7 @@ erda.cp:
 #  scenario_parent_dirs: # contains parent dirs
 #    - ../scenario/
   default_protocol_yaml_scan_base_paths:
-    - ./scenario
+    - ./scenarios
 
 service-register:
 http-server:

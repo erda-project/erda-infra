@@ -15,8 +15,6 @@
 package componentprotocol
 
 import (
-	"os"
-	"path/filepath"
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/logs"
@@ -29,7 +27,6 @@ import (
 )
 
 type config struct {
-	DefaultProtocolYamlScanBasePaths []string `file:"default_protocol_yaml_scan_base_paths" env:"DEFAULT_PROTOCOL_YAML_SCAN_BASE_PATHS"`
 }
 
 // +provider
@@ -53,13 +50,6 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		pb.RegisterCPServiceImp(p.Register, p.protocolService)
 	}
 	protocol.Tran = cptype.NewTranslator()
-
-	// register default protocol yaml files
-	for _, basePath := range p.Cfg.DefaultProtocolYamlScanBasePaths {
-		pwd, _ := os.Getwd()
-		absPath := filepath.Join(pwd, basePath)
-		protocol.RegisterDefaultProtocols(absPath)
-	}
 
 	return nil
 }

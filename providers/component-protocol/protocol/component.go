@@ -74,7 +74,7 @@ func RegisterComponent(r *CompRenderSpec) error {
 		err := fmt.Errorf("register render failed, component [%s] already exist", r.CompName)
 		return err
 	}
-	logrus.Infof("register render success, render:%+v", *r)
+	logrus.Infof("register render success, scenario: %s, component: %s", r.Scenario, r.CompName)
 	return nil
 }
 
@@ -118,7 +118,7 @@ func protoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r c
 	}
 	pc, err := getProtoComp(ctx, p, r.Name)
 	if err != nil {
-		logrus.Errorf("get protocol component failed, err:%v", err)
+		logrus.Errorf("failed to get protocol component, err: %v", err)
 		return err
 	}
 	// inParams

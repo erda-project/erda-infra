@@ -15,18 +15,23 @@
 package main
 
 import (
+	"embed"
 	"os"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/component-protocol"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol"
-	component_protocol "github.com/erda-project/erda-infra/providers/component-protocol"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 	"github.com/erda-project/erda-infra/providers/i18n"
 	_ "github.com/erda-project/erda-infra/providers/serviceregister"
 
-	// scenario
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/scenario/demo"
+	// import all scenarios
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/scenarios"
 )
+
+//go:embed scenarios
+var scenarioFS embed.FS
 
 type config struct {
 }
@@ -36,7 +41,7 @@ type provider struct {
 	Cfg *config
 	Log logs.Logger
 
-	Protocol component_protocol.Interface
+	Protocol componentprotocol.Interface
 	Tran     i18n.Translator `translator:"dic"` // match dic.yaml
 }
 
@@ -45,6 +50,9 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	p.Log.Info("init demo")
 	p.Protocol.SetI18nTran(p.Tran)          // use custom i18n translator
 	p.Protocol.WithContextValue("k1", "v1") // test custom context kv
+
+	// register protocols
+	protocol.MustRegisterProtocolsFromFS(scenarioFS)
 
 	return nil
 }

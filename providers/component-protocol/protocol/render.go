@@ -55,7 +55,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 	sr, err := getScenarioRenders(sk)
 	if err != nil {
-		logrus.Errorf("get scenario render failed, err:%v", err)
+		logrus.Errorf("faield to get scenario render, err: %v", err)
 		return err
 	}
 
