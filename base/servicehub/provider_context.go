@@ -31,6 +31,7 @@ import (
 )
 
 type providerContext struct {
+	context.Context
 	hub         *Hub
 	key         string
 	label       string

@@ -1,5 +1,6 @@
 http-server:
     addr: ":8080"
+    reloadable: true
 
 hello:
-    message: "hello world"
+hello2:
