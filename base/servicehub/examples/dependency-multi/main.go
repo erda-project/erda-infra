@@ -57,3 +57,11 @@ func main() {
 	hub := servicehub.New()
 	hub.Run("examples", "", os.Args...)
 }
+
+// OUTPUT:
+// INFO[2021-08-25 14:36:45.422] provider example-dependency-provider initialized
+// INFO[2021-08-25 14:36:45.422] provider example-dependency-provider@label initialized
+// label-hello recallsong
+// hello recallsong
+// INFO[2021-08-25 14:36:45.422] provider hello-provider (depends services: [example-dependency@label example-dependency]) initialized
+// INFO[2021-08-25 14:36:45.423] signals to quit: [hangup interrupt terminated quit]
