@@ -1,4 +1,11 @@
 cassandra:
-    host: "${CASSANDRA_ADDR:localhost:9042}"
+  host: "${CASSANDRA_ADDR:localhost:9042}"
 
 example:
+  session:
+    keyspace:
+      name: "system"
+    reconnection:
+      enable: ${SESSION_RECONNECTION:true}
+      check_interval: 10s
+      check_timeout: 5s

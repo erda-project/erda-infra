@@ -38,8 +38,9 @@ type WriterConfig struct {
 
 // SessionConfig .
 type SessionConfig struct {
-	Keyspace    KeyspaceConfig `file:"keyspace"`
-	Consistency string         `file:"consistency" default:"LOCAL_ONE"`
+	Keyspace     KeyspaceConfig     `file:"keyspace"`
+	Consistency  string             `file:"consistency" default:"LOCAL_ONE"`
+	Reconnection ReconnectionConfig `file:"reconnection"`
 }
 
 // KeyspaceConfig .
@@ -58,7 +59,7 @@ type KeyspaceReplicationConfig struct {
 // Interface .
 type Interface interface {
 	CreateKeyspaces(ksc ...*KeyspaceConfig) error
-	Session(cfg *SessionConfig) (*gocql.Session, error)
+	NewSession(cfg *SessionConfig) (*Session, error)
 	NewBatchWriter(session *gocql.Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer
 }
 
@@ -109,7 +110,7 @@ type service struct {
 	name string
 }
 
-func (s *service) CreateKeyspaces(ksc ...*KeyspaceConfig) (err error) {
+func (s *service) CreateKeyspaces(ksc ...*KeyspaceConfig) error {
 	var sys *gocql.Session
 	defer func() {
 		if sys != nil {
@@ -118,12 +119,13 @@ func (s *service) CreateKeyspaces(ksc ...*KeyspaceConfig) (err error) {
 	}()
 	for _, kc := range ksc {
 		if sys == nil {
-			sys, err = s.p.newSession("system", gocql.All.String())
+			s, err := s.p.newSession("system", gocql.All.String())
 			if err != nil {
 				return err
 			}
+			sys = s
 		}
-		err = s.createKeySpace(sys, kc)
+		err := s.createKeySpace(sys, kc)
 		if err != nil {
 			return err
 		}
@@ -131,14 +133,30 @@ func (s *service) CreateKeyspaces(ksc ...*KeyspaceConfig) (err error) {
 	return nil
 }
 
-func (s *service) Session(cfg *SessionConfig) (session *gocql.Session, err error) {
+func (s *service) NewSession(cfg *SessionConfig) (*Session, error) {
 	if cfg.Keyspace.Auto {
 		err := s.CreateKeyspaces(&cfg.Keyspace)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return s.p.newSession(cfg.Keyspace.Name, cfg.Consistency)
+	session, err := s.p.newSession(cfg.Keyspace.Name, cfg.Consistency)
+	if err != nil {
+		return nil, fmt.Errorf("new session failed: %w", err)
+	}
+	ms := &Session{
+		session: session,
+		log:     s.log.Sub("MySession"),
+		done:    make(chan struct{}),
+	}
+
+	// workaround for issue: https://github.com/gocql/gocql/issues/831
+	// remove it when issue fixed
+	if cfg.Reconnection.Enable {
+		go ms.checkAndReconnect(s.p, cfg)
+	}
+
+	return ms, nil
 }
 
 func (s *service) createKeySpace(session *gocql.Session, kc *KeyspaceConfig) error {
