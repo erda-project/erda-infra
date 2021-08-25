@@ -26,8 +26,8 @@ import (
 	"github.com/erda-project/erda-infra/providers/i18n"
 	_ "github.com/erda-project/erda-infra/providers/serviceregister"
 
-	// import all scenarios
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/scenarios"
+	// components
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demotable"
 )
 
 //go:embed scenarios

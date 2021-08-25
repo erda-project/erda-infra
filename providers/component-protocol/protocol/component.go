@@ -54,7 +54,8 @@ func RegisterComponent(r *CompRenderSpec) error {
 		return fmt.Errorf("register request is empty")
 	}
 	if r.Scenario == "" {
-		return fmt.Errorf("scenario is empty")
+		// use default scenario
+		r.Scenario = cptype.DefaultComponentNamespace
 	}
 	if r.CompName == "" {
 		return fmt.Errorf("component name is empty")
@@ -74,7 +75,7 @@ func RegisterComponent(r *CompRenderSpec) error {
 		err := fmt.Errorf("register render failed, component [%s] already exist", r.CompName)
 		return err
 	}
-	logrus.Infof("register render success, scenario: %s, component: %s", r.Scenario, r.CompName)
+	logrus.Infof("register component render success, scenario: %s, component: %s", r.Scenario, r.CompName)
 	return nil
 }
 
@@ -97,10 +98,6 @@ func getCompRender(ctx context.Context, r ScenarioRender, compName, typ string) 
 	}
 	var c *CompRenderSpec
 	if _, ok := r[compName]; !ok {
-		switch typ {
-		case "Container", "LRContainer", "RowContainer", "SplitPage", "Popover", "Title", "Drawer":
-			return &CompRenderSpec{RenderC: emptyRenderFunc}, nil
-		}
 		// component not exist
 		return nil, fmt.Errorf(i18n(ctx, "${component %s missing renderCreator}", compName))
 	}

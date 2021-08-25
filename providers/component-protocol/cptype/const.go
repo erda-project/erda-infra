@@ -30,3 +30,7 @@ const (
 	DefaultRenderingKey     = "__DefaultRendering__"
 	InParamsStateBindingKey = "__InParams__"
 )
+
+const (
+	DefaultComponentNamespace = "__DefaultComponentNamespace__"
+)

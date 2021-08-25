@@ -1,10 +1,11 @@
 demo:
 
+# component-protocol framework
 erda.cp:
-#  scenario_parent_dirs: # contains parent dirs
-#    - ../scenario/
-  default_protocol_yaml_scan_base_paths:
-    - ./scenarios
+
+# components
+erda.cp.components.table.demo:
+erda.cp.components.table.demo@demoTable2: # multi-instances
 
 service-register:
 http-server:

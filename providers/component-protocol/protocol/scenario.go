@@ -30,17 +30,44 @@ var ScenarioRenders = make(map[string]*ScenarioRender)
 
 // getScenarioRenders .
 func getScenarioRenders(scenario string) (*ScenarioRender, error) {
-	var r *ScenarioRender
-	r, ok := ScenarioRenders[scenario]
+	renders := ScenarioRenders[scenario]
+	if renders == nil {
+		renders = &ScenarioRender{}
+	}
+
+	defaultRenders := ScenarioRenders[cptype.DefaultComponentNamespace]
+	if defaultRenders == nil {
+		defaultRenders = &ScenarioRender{}
+	}
+
+	// append component render from default component namespace
+	p, ok := defaultProtocols[scenario]
 	if !ok {
-		err := fmt.Errorf("scenario not exist, scenario: %s", scenario)
-		return r, err
+		return nil, fmt.Errorf("failed to get scenario renders, default protocol not exist, scenario: %s", scenario)
 	}
-	if r == nil {
-		err := fmt.Errorf("empty scenario [%s]", scenario)
-		return nil, err
+	for compName := range p.Components {
+		// skip if scenario-level component render exist
+		_, renderExist := (*renders)[compName]
+		if renderExist {
+			continue
+		}
+		// if component render not exist, add render from default component namespace
+		defaultCompRender, dOK := (*defaultRenders)[compName]
+		if dOK {
+			(*renders)[compName] = defaultCompRender
+			continue
+		}
+		// build-in component renders
+		switch compName {
+		case "Container", "LRContainer", "RowContainer", "SplitPage", "Popover", "Title", "Drawer":
+			(*renders)[compName] = &CompRenderSpec{RenderC: emptyRenderFunc}
+			continue
+		}
+		return nil, fmt.Errorf("failed to found component render neither in scenario renders nor default renders, "+
+			"sceneario: %s, component: %s", scenario, compName)
 	}
-	return r, nil
+
+	return renders, nil
 }
 
 // getScenarioKey get scenario key from protocol.
@@ -54,4 +81,3 @@ func getScenarioKey(req cptype.Scenario) (string, error) {
 	}
 	return req.ScenarioKey, nil
 }
-

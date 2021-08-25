@@ -1,0 +1,22 @@
+scenario: demo
+
+hierarchy:
+  root: Container
+  structure:
+    Container:
+      - demoTable
+      - demoTable2
+
+components:
+  Container:
+    type: Container
+  demoTable:
+    type: Table
+  demoTable2:
+    type: Table
+
+rendering:
+  __DefaultRendering__:
+    - name: Container
+    - name: demoTable
+    - name: demoTable2

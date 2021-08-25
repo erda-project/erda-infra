@@ -21,6 +21,8 @@ import (
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/erda-project/erda-infra/pkg/strutil"
 )
 
 type file struct {
@@ -42,7 +44,7 @@ func MustRegisterProtocolsFromFS(rootFS embed.FS) {
 	walkEmbedFS(rootFS, ".", &files)
 	// log
 	for _, file := range files {
-		logrus.Debugf("register ptorocols from fs: fullPath: %s, isDir: %d", file.fullPath, file.isDir)
+		logrus.Infof("register ptorocols from fs: fullPath: %s, isDir: %t", file.fullPath, file.isDir)
 	}
 	// map
 	fileMapByFullPath := make(map[string]*file)
@@ -79,7 +81,7 @@ func registerAllProtocolsFromRootFSFiles(files []*file) {
 		if file.isDir {
 			continue
 		}
-		if file.name != "protocol.yml" && file.name != "protocol.yaml" {
+		if !strutil.HasSuffixes(file.name, ".yml", ".yaml") {
 			continue
 		}
 		protocols = append(protocols, file.data)

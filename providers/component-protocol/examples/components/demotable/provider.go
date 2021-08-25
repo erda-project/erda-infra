@@ -17,13 +17,25 @@ package demotable
 import (
 	"context"
 	"fmt"
+	"reflect"
 
+	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
-type demoTable struct {
+type Interface interface {
+	Render(ctx context.Context, c *cptype.Component, scenario cptype.Scenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error
+}
+
+type config struct {
+	Scenario string
+	Name     string
+}
+
+type provider struct {
+	Cfg *config
 }
 
 type column struct {
@@ -37,7 +49,7 @@ type tableLine struct {
 }
 
 // Render .
-func (d *demoTable) Render(ctx context.Context, c *cptype.Component, scenario cptype.Scenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error {
+func (p *provider) Render(ctx context.Context, c *cptype.Component, scenario cptype.Scenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error {
 	sdk := cputil.SDK(ctx)
 	tran := cputil.SDK(ctx).Tran
 	c.Props = map[string]interface{}{
@@ -64,11 +76,35 @@ func (d *demoTable) Render(ctx context.Context, c *cptype.Component, scenario cp
 	return nil
 }
 
-func init() {
+// Init .
+func (p *provider) Init(ctx servicehub.Context) error {
+	compName := "demoTable"
+	if ctx.Label() != "" {
+		compName = ctx.Label()
+	}
 	protocol.MustRegisterComponent(&protocol.CompRenderSpec{
-		Scenario: "demo",
-		CompName: "demoTable",
-		RenderC:  func() protocol.CompRender { return &demoTable{} },
+		Scenario: p.Cfg.Scenario,
+		CompName: compName,
+		RenderC:  func() protocol.CompRender { return &provider{} },
+	})
+	return nil
+}
+
+// Provide .
+func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
+	return p
+}
+
+func init() {
+	interfaceType := reflect.TypeOf((*Interface)(nil)).Elem()
+	servicehub.Register("erda.cp.components.table.demo", &servicehub.Spec{
+		Types: []reflect.Type{interfaceType},
+		ConfigFunc: func() interface{} {
+			return &config{}
+		},
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
 	})
 }
 
