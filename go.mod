@@ -49,7 +49,7 @@ require (
 	github.com/onsi/gomega v1.11.0 // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/prometheus/client_golang v1.10.0 // indirect
-	github.com/recallsong/go-utils v1.1.1
+	github.com/recallsong/go-utils v1.1.2-0.20210825061755-9df21f10489e
 	github.com/recallsong/unmarshal v1.0.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.8.0
