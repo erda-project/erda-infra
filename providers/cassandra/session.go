@@ -78,8 +78,6 @@ func (s *Session) checkAndReconnect(p *provider, cfg *SessionConfig) {
 					continue
 				}
 				s.updateSession(newSession)
-			} else {
-				continue
 			}
 		}
 	}

@@ -59,7 +59,6 @@ type KeyspaceReplicationConfig struct {
 // Interface .
 type Interface interface {
 	CreateKeyspaces(ksc ...*KeyspaceConfig) error
-	Session(cfg *SessionConfig) (*gocql.Session, error)
 	NewSession(cfg *SessionConfig) (*Session, error)
 	NewBatchWriter(session *gocql.Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer
 }
@@ -132,16 +131,6 @@ func (s *service) CreateKeyspaces(ksc ...*KeyspaceConfig) error {
 		}
 	}
 	return nil
-}
-
-func (s *service) Session(cfg *SessionConfig) (*gocql.Session, error) {
-	if cfg.Keyspace.Auto {
-		err := s.CreateKeyspaces(&cfg.Keyspace)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return s.p.newSession(cfg.Keyspace.Name, cfg.Consistency)
 }
 
 func (s *service) NewSession(cfg *SessionConfig) (*Session, error) {
