@@ -22,12 +22,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/recallsong/go-utils/config"
 	"github.com/recallsong/go-utils/encoding/jsonx"
 	"github.com/recallsong/unmarshal"
 	unmarshalflag "github.com/recallsong/unmarshal/unmarshal-flag"
 	"github.com/spf13/pflag"
+
+	"github.com/erda-project/erda-infra/base/logs"
 )
 
 type providerContext struct {
@@ -289,6 +290,11 @@ func (c *providerContext) AddTask(fn func(context.Context) error, options ...Tas
 		opt(&t)
 	}
 	c.tasks = append(c.tasks, t)
+}
+
+// Label .
+func (c *providerContext) Label() string {
+	return c.label
 }
 
 // WithTaskName .
