@@ -14,5 +14,5 @@ Add one of the following kinds:
 Fixes #
 
 #### Specified Reivewers:
-/assgin @your-reviewer
+/assign @your-reviewer
 

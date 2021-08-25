@@ -15,13 +15,34 @@
 package httpserver
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 
 	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
-	"github.com/labstack/echo"
+	"github.com/erda-project/erda-infra/providers/httpserver/server"
 )
+
+// PathFormat .
+type PathFormat int32
+
+// PathFormat values
+const (
+	PathFormatEcho       = 0
+	PathFormatGoogleAPIs = 1
+)
+
+// WithPathFormat .
+func WithPathFormat(format PathFormat) interface{} {
+	formater := &pathFormater{typ: format}
+	switch format {
+	case PathFormatGoogleAPIs:
+		formater.format = buildGoogleAPIsPath
+		formater.parser = googleAPIsPathParamsInterceptor
+	default:
+		formater.format = buildEchoPath
+	}
+	return formater
+}
 
 func (r *router) getPathFormater(options []interface{}) *pathFormater {
 	pformater := r.pathFormater
@@ -39,7 +60,7 @@ func (r *router) getPathFormater(options []interface{}) *pathFormater {
 type pathFormater struct {
 	typ    PathFormat
 	format func(string) string
-	parser func(path string) func(echo.HandlerFunc) echo.HandlerFunc
+	parser func(path string) func(server.HandlerFunc) server.HandlerFunc
 }
 
 func newPathFormater() *pathFormater {
@@ -110,23 +131,28 @@ func buildGoogleAPIsPath(path string) string {
 	return sb.String()
 }
 
-func googleAPIsPathParamsInterceptor(path string) func(echo.HandlerFunc) echo.HandlerFunc {
-	raw := func(handler echo.HandlerFunc) echo.HandlerFunc {
+func googleAPIsPathParamsInterceptor(path string) func(server.HandlerFunc) server.HandlerFunc {
+	raw := func(handler server.HandlerFunc) server.HandlerFunc {
 		return handler
 	}
 	matcher, err := runtime.Compile(path)
 	if err != nil {
-		panic(fmt.Errorf("path %q error: %s", path, err))
+		// panic(fmt.Errorf("path %q error: %s", path, err))
+		return func(server.HandlerFunc) server.HandlerFunc {
+			return func(ctx server.Context) error {
+				return server.NotFoundHandler(ctx)
+			}
+		}
 	}
 	if matcher.IsStatic() {
 		return raw
 	}
-	return func(handler echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
+	return func(handler server.HandlerFunc) server.HandlerFunc {
+		return func(ctx server.Context) error {
 			path := ctx.Request().URL.Path
 			vars, err := matcher.Match(path)
 			if err != nil {
-				return echo.NotFoundHandler(ctx)
+				return server.NotFoundHandler(ctx)
 			}
 			c := ctx.(*context)
 			c.vars = vars

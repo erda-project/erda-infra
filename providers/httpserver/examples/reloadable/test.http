@@ -1,0 +1,10 @@
+@url = http://localhost:8080
+
+### hello
+GET {{url}}/hello
+
+### hello2
+GET {{url}}/hello2
+
+### hello3
+GET {{url}}/hello3

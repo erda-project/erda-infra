@@ -23,10 +23,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/base/servicehub"
 	cfg "github.com/recallsong/go-utils/config"
 	"github.com/recallsong/go-utils/reflectx"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
 // Internationalizable .
@@ -280,7 +281,7 @@ func (t *translator) escape(lang LanguageCodes, text string) string {
 		if len(param) != 3 {
 			continue
 		}
-		var defval, key []byte = param[1], nil
+		var key, defval []byte = param[1], nil
 		if len(param[2]) > 0 {
 			defval = param[2][1:]
 		}

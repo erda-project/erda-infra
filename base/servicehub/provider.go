@@ -93,11 +93,13 @@ type Provider interface{}
 
 // Context .
 type Context interface {
+	context.Context
 	Hub() *Hub
 	Config() interface{}
 	Logger() logs.Logger
 	Service(name string, options ...interface{}) interface{}
 	AddTask(task func(context.Context) error, options ...TaskOption)
+	Label() string
 }
 
 // TaskOption .

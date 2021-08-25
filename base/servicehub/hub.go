@@ -28,14 +28,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/base/logs/logrusx"
-	graph "github.com/erda-project/erda-infra/base/servicehub/dependency-graph"
 	"github.com/recallsong/go-utils/config"
 	"github.com/recallsong/go-utils/errorx"
 	"github.com/recallsong/go-utils/os/signalx"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/logs/logrusx"
+	graph "github.com/erda-project/erda-infra/base/servicehub/dependency-graph"
 )
 
 // Hub .
@@ -48,6 +49,7 @@ type Hub struct {
 	lock          sync.RWMutex
 
 	started bool
+	ctx     context.Context
 	cancel  func()
 	wg      sync.WaitGroup
 
@@ -57,6 +59,7 @@ type Hub struct {
 // New .
 func New(options ...interface{}) *Hub {
 	hub := &Hub{}
+	hub.ctx, hub.cancel = context.WithCancel(context.Background())
 	for _, opt := range options {
 		processOptions(hub, opt)
 	}
@@ -131,9 +134,9 @@ func (h *Hub) Init(config map[string]interface{}, flags *pflag.FlagSet, args []s
 		}
 		dependencies := ctx.dependencies()
 		if len(dependencies) > 0 {
-			h.logger.Infof("provider %s (depends %s) initialized", ctx.name, dependencies)
+			h.logger.Infof("provider %s (depends %s) initialized", ctx.key, dependencies)
 		} else {
-			h.logger.Infof("provider %s initialized", ctx.name)
+			h.logger.Infof("provider %s initialized", ctx.key)
 		}
 	}
 	for i := len(h.listeners) - 1; i >= 0; i-- {
@@ -234,8 +237,7 @@ func (h *Hub) StartWithSignal() error {
 // Start .
 func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.lock.Lock()
-	ctx, cancel := context.WithCancel(context.Background())
-	h.cancel = cancel
+	ctx := h.ctx
 	ch := make(chan error, len(h.providers))
 	var num int
 	for _, item := range h.providers {
@@ -370,6 +372,7 @@ func (h *Hub) Close() error {
 	h.cancel()
 	h.wg.Wait()
 	h.started = false
+	h.ctx, h.cancel = context.WithCancel(context.Background())
 	h.lock.Unlock()
 	return errs.MaybeUnwrap()
 }

@@ -36,8 +36,8 @@ type provider struct {
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	// get httpserver.Router from service name "http-server"
-	routes := ctx.Service("http-server",
+	// get httpserver.Router from service name "http-router"
+	routes := ctx.Service("http-router",
 		// this is interceptor for this provider
 		func(handler func(ctx httpserver.Context) error) func(ctx httpserver.Context) error {
 			return func(ctx httpserver.Context) error {
@@ -46,6 +46,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			}
 		},
 	).(httpserver.Router)
+
 	// request parameters http.ResponseWriter, *http.Request
 	routes.GET("/hello",
 		func(resp http.ResponseWriter, req *http.Request) {
@@ -126,8 +127,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	})
 
 	// handle static files
-	routes.Static("/hello/static", "/")
-	routes.File("/hello/file", "/page.html")
+	routes.Static("/hello/static", "")
+	routes.File("/hello/file", "index.html")
 	return nil
 }
 

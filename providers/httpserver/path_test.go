@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/erda-project/erda-infra/pkg/transport/http/runtime"
-	"github.com/labstack/echo"
+	"github.com/erda-project/erda-infra/providers/httpserver/server"
 )
 
 func Test_buildGoogleAPIsPath(t *testing.T) {
@@ -250,10 +250,10 @@ func Test_buildEchoPath(t *testing.T) {
 }
 
 func Test_googleAPIsPathParamsInterceptor(t *testing.T) {
-	handler := func(c echo.Context) error { return nil }
+	handler := func(c server.Context) error { return nil }
 	type args struct {
 		path    string
-		handler echo.HandlerFunc
+		handler server.HandlerFunc
 	}
 	tests := []struct {
 		name   string
@@ -288,6 +288,40 @@ func Test_googleAPIsPathParamsInterceptor(t *testing.T) {
 				if fmt.Sprint(handler) == fmt.Sprint(tt.args.handler) {
 					t.Errorf("googleAPIsPathParamsInterceptor()(handler) got wrapped handler")
 				}
+			}
+		})
+	}
+}
+
+func TestWithPathFormat(t *testing.T) {
+	tests := []struct {
+		name   string
+		format PathFormat
+		want   *pathFormater
+	}{
+		{
+			name:   "googleapis",
+			format: PathFormatGoogleAPIs,
+			want: &pathFormater{
+				typ:    PathFormatGoogleAPIs,
+				format: buildGoogleAPIsPath,
+				parser: googleAPIsPathParamsInterceptor,
+			},
+		},
+		{
+			name:   "echo path",
+			format: PathFormatEcho,
+			want: &pathFormater{
+				typ:    PathFormatEcho,
+				format: buildEchoPath,
+			},
+		},
+	}
+	for _, tt := range tests {
+
+		t.Run(tt.name, func(t *testing.T) {
+			if got, ok := WithPathFormat(tt.format).(*pathFormater); !ok || fmt.Sprint(*got) != fmt.Sprint(*tt.want) {
+				t.Errorf("WithPathFormat() = %v, want %v", got, tt.want)
 			}
 		})
 	}
