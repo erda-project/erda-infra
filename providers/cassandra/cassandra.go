@@ -123,9 +123,8 @@ func (s *service) CreateKeyspaces(ksc ...*KeyspaceConfig) error {
 			s, err := s.p.newSession("system", gocql.All.String())
 			if err != nil {
 				return err
-			} else {
-				sys = s
 			}
+			sys = s
 		}
 		err := s.createKeySpace(sys, kc)
 		if err != nil {
