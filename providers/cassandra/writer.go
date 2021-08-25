@@ -27,7 +27,7 @@ type StatementBuilder interface {
 }
 
 type batchWriter struct {
-	session       *gocql.Session
+	session       *Session
 	builder       StatementBuilder
 	retry         int
 	retryDuration time.Duration
@@ -43,7 +43,7 @@ func (w *batchWriter) WriteN(data ...interface{}) (int, error) {
 	if len(data) <= 0 {
 		return 0, nil
 	}
-	batch := w.session.NewBatch(gocql.LoggedBatch)
+	batch := w.session.Session().NewBatch(gocql.LoggedBatch)
 	for _, item := range data {
 		stmt, args, err := w.builder.GetStatement(item)
 		if err != nil {
@@ -53,7 +53,7 @@ func (w *batchWriter) WriteN(data ...interface{}) (int, error) {
 		batch.Query(stmt, args...)
 	}
 	for i := 0; ; i++ {
-		err := w.session.ExecuteBatch(batch)
+		err := w.session.Session().ExecuteBatch(batch)
 		if err != nil {
 			if w.retry == -1 || i < w.retry {
 				w.log.Warnf("fail to write batch(%d) to cassandra and retry after %s: %s", batch.Size(), w.retryDuration.String(), err)

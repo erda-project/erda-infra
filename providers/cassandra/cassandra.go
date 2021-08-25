@@ -60,7 +60,7 @@ type KeyspaceReplicationConfig struct {
 type Interface interface {
 	CreateKeyspaces(ksc ...*KeyspaceConfig) error
 	NewSession(cfg *SessionConfig) (*Session, error)
-	NewBatchWriter(session *gocql.Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer
+	NewBatchWriter(session *Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer
 }
 
 type config struct {
@@ -172,7 +172,7 @@ func (s *service) createKeySpace(session *gocql.Session, kc *KeyspaceConfig) err
 	return q.Exec()
 }
 
-func (s *service) NewBatchWriter(session *gocql.Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer {
+func (s *service) NewBatchWriter(session *Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer {
 	return writer.ParallelBatch(func(uint64) writer.Writer {
 		return &batchWriter{
 			session:       session,
