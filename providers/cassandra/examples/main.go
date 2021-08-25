@@ -15,34 +15,53 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
+	"time"
 
+	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/cassandra"
 )
 
+type config struct {
+	Session cassandra.SessionConfig `file:"session"`
+}
+
 type provider struct {
 	Client cassandra.Interface
+	Logger logs.Logger
+	Cfg    *config
+
+	s *cassandra.Session
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	session, err := p.Client.Session(&cassandra.SessionConfig{
-		Keyspace: cassandra.KeyspaceConfig{
-			Name: "system",
-		},
-		Consistency: "LOCAL_ONE",
-	})
+	session, err := p.Client.NewSession(&p.Cfg.Session)
+	p.s = session
 	if err != nil {
 		return err
 	}
-	meta, err := session.KeyspaceMetadata("system")
-	if err != nil {
-		return err
-	}
-	fmt.Printf("keyspace name: %s\n", meta.Name)
 
 	return nil
+}
+
+func (p *provider) Run(ctx context.Context) error {
+	ticker := time.NewTicker(time.Second * 5)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			data, err := p.s.Session().Query("SELECT cql_version FROM system.local").Iter().SliceMap()
+			if err != nil {
+				p.Logger.Errorf("query error: %s", err)
+				continue
+			}
+			p.Logger.Infof("data: %+v\n", data)
+		}
+	}
 }
 
 func init() {
@@ -50,6 +69,9 @@ func init() {
 		Services:     []string{"example"},
 		Dependencies: []string{"cassandra"},
 		Description:  "example",
+		ConfigFunc: func() interface{} {
+			return &config{}
+		},
 		Creator: func() servicehub.Provider {
 			return &provider{}
 		},
