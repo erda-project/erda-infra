@@ -22,14 +22,14 @@ import (
 	"github.com/gocql/gocql"
 )
 
-// ReconnectionConfig
+// ReconnectionConfig .
 type ReconnectionConfig struct {
 	Enable        bool          `file:"enable" default:"true"`
 	CheckInterval time.Duration `file:"check_interval" default:"10m"`
 	CheckTimeout  time.Duration `file:"check_timeout" default:"60s"`
 }
 
-// Session. manager of gocql.Session
+// Session manager of gocql.Session.
 type Session struct {
 	session *gocql.Session
 	mu      sync.RWMutex
@@ -37,14 +37,14 @@ type Session struct {
 	done    chan struct{}
 }
 
-// get gocql.Session
+// Session get gocql.Session.
 func (s *Session) Session() *gocql.Session {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.session
 }
 
-// Close
+// Close .
 func (s *Session) Close() {
 	close(s.done)
 }
