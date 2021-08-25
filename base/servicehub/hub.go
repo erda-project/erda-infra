@@ -28,14 +28,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/base/logs/logrusx"
-	graph "github.com/erda-project/erda-infra/base/servicehub/dependency-graph"
 	"github.com/recallsong/go-utils/config"
 	"github.com/recallsong/go-utils/errorx"
 	"github.com/recallsong/go-utils/os/signalx"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/logs/logrusx"
+	graph "github.com/erda-project/erda-infra/base/servicehub/dependency-graph"
 )
 
 // Hub .
@@ -133,9 +134,9 @@ func (h *Hub) Init(config map[string]interface{}, flags *pflag.FlagSet, args []s
 		}
 		dependencies := ctx.dependencies()
 		if len(dependencies) > 0 {
-			h.logger.Infof("provider %s (depends %s) initialized", ctx.name, dependencies)
+			h.logger.Infof("provider %s (depends %s) initialized", ctx.key, dependencies)
 		} else {
-			h.logger.Infof("provider %s initialized", ctx.name)
+			h.logger.Infof("provider %s initialized", ctx.key)
 		}
 	}
 	for i := len(h.listeners) - 1; i >= 0; i-- {
