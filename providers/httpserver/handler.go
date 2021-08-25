@@ -24,14 +24,30 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/erda-project/erda-infra/providers/httpserver/server"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/recallsong/go-utils/errorx"
 	"github.com/recallsong/go-utils/reflectx"
 )
 
-func getInterceptors(options []interface{}) []echo.MiddlewareFunc {
-	var list []echo.MiddlewareFunc
+type (
+	// Response .
+	Response interface {
+		Status(Context) int
+		ReadCloser(Context) io.ReadCloser
+		Error(Context) error
+	}
+	// ResponseGetter .
+	ResponseGetter interface {
+		Response(ctx Context) Response
+	}
+	// Interceptor .
+	Interceptor func(handler func(ctx Context) error) func(ctx Context) error
+)
+
+func getInterceptors(options []interface{}) []server.MiddlewareFunc {
+	var list []server.MiddlewareFunc
 	for _, opt := range options {
 		var inter Interceptor
 		switch val := opt.(type) {
@@ -39,19 +55,19 @@ func getInterceptors(options []interface{}) []echo.MiddlewareFunc {
 			inter = val
 		case func(handler func(ctx Context) error) func(ctx Context) error:
 			inter = Interceptor(val)
-		case echo.MiddlewareFunc:
+		case server.MiddlewareFunc:
 			list = append(list, val)
-		case func(echo.HandlerFunc) echo.HandlerFunc:
+		case func(server.HandlerFunc) server.HandlerFunc:
 			list = append(list, val)
 		default:
 			continue
 		}
 		if inter != nil {
-			list = append(list, func(fn echo.HandlerFunc) echo.HandlerFunc {
+			list = append(list, func(fn server.HandlerFunc) server.HandlerFunc {
 				handler := inter(func(ctx Context) error {
 					return fn(ctx.(*context))
 				})
-				return func(ctx echo.Context) error {
+				return func(ctx server.Context) error {
 					return handler(ctx.(*context))
 				}
 			})
@@ -60,35 +76,35 @@ func getInterceptors(options []interface{}) []echo.MiddlewareFunc {
 	return list
 }
 
-func (r *router) add(method, path string, handler interface{}, inters []echo.MiddlewareFunc, outer echo.MiddlewareFunc) {
-	var echoHandler echo.HandlerFunc
+func (r *router) add(method, path string, handler interface{}, inters []server.MiddlewareFunc, outer server.MiddlewareFunc) server.HandlerFunc {
+	var echoHandler server.HandlerFunc
 	switch fn := handler.(type) {
-	case echo.HandlerFunc:
+	case server.HandlerFunc:
 		echoHandler = fn
-	case func(echo.Context) error:
-		echoHandler = echo.HandlerFunc(fn)
-	case func(echo.Context):
-		echoHandler = echo.HandlerFunc(func(ctx echo.Context) error {
+	case func(server.Context) error:
+		echoHandler = server.HandlerFunc(fn)
+	case func(server.Context):
+		echoHandler = server.HandlerFunc(func(ctx server.Context) error {
 			fn(ctx)
 			return nil
 		})
 	case http.HandlerFunc:
-		echoHandler = echo.HandlerFunc(func(ctx echo.Context) error {
+		echoHandler = server.HandlerFunc(func(ctx server.Context) error {
 			fn(ctx.Response(), ctx.Request())
 			return nil
 		})
 	case func(http.ResponseWriter, *http.Request):
-		echoHandler = echo.HandlerFunc(func(ctx echo.Context) error {
+		echoHandler = server.HandlerFunc(func(ctx server.Context) error {
 			fn(ctx.Response(), ctx.Request())
 			return nil
 		})
 	case func(*http.Request, http.ResponseWriter):
-		echoHandler = echo.HandlerFunc(func(ctx echo.Context) error {
+		echoHandler = server.HandlerFunc(func(ctx server.Context) error {
 			fn(ctx.Request(), ctx.Response())
 			return nil
 		})
 	case http.Handler:
-		echoHandler = echo.HandlerFunc(func(ctx echo.Context) error {
+		echoHandler = server.HandlerFunc(func(ctx server.Context) error {
 			fn.ServeHTTP(ctx.Response(), ctx.Request())
 			return nil
 		})
@@ -99,7 +115,7 @@ func (r *router) add(method, path string, handler interface{}, inters []echo.Mid
 		}
 	}
 	if outer != nil {
-		list := make([]echo.MiddlewareFunc, 1+len(r.interceptors)+len(inters))
+		list := make([]server.MiddlewareFunc, 1+len(r.interceptors)+len(inters))
 		list[0] = outer
 		copy(list[1:], r.interceptors)
 		copy(list[1+len(r.interceptors):], inters)
@@ -114,7 +130,8 @@ func (r *router) add(method, path string, handler interface{}, inters []echo.Mid
 		}
 		echoHandler = handler
 	}
-	r.p.server.Add(method, path, echoHandler)
+	r.tx.Add(method, path, echoHandler)
+	return echoHandler
 }
 
 var (
@@ -123,16 +140,16 @@ var (
 	errorType       = reflect.TypeOf((*error)(nil)).Elem()
 	requestType     = reflect.TypeOf((*http.Request)(nil))
 	responseType    = reflect.TypeOf((*http.ResponseWriter)(nil)).Elem()
-	echoContextType = reflect.TypeOf((*echo.Context)(nil)).Elem()
+	echoContextType = reflect.TypeOf((*server.Context)(nil)).Elem()
 	contextType     = reflect.TypeOf((*Context)(nil)).Elem()
 	interfaceType   = reflect.TypeOf((*interface{})(nil)).Elem()
 )
 
-func (r *router) handlerWrap(handler interface{}) echo.HandlerFunc {
+func (r *router) handlerWrap(handler interface{}) server.HandlerFunc {
 	typ := reflect.TypeOf(handler)
 	if typ.Kind() == reflect.Func {
 		val := reflect.ValueOf(handler)
-		var argGets []func(ctx echo.Context) (interface{}, error)
+		var argGets []func(ctx server.Context) (interface{}, error)
 		argNum := typ.NumIn()
 		for i := 0; i < argNum; i++ {
 			argTyp := typ.In(i)
@@ -211,13 +228,13 @@ func (r *router) handlerWrap(handler interface{}) echo.HandlerFunc {
 				return
 			}
 		}
-		return echo.HandlerFunc(func(ctx echo.Context) error {
+		return server.HandlerFunc(func(ctx server.Context) error {
 			var values []reflect.Value
 			for _, getter := range argGets {
 				val, err := getter(ctx)
 				if err != nil {
 					if _, ok := err.(validator.ValidationErrors); ok {
-						// TODO custom
+						//TODO: custom error encode
 						return ctx.JSON(400, map[string]interface{}{
 							"success": false,
 							"err": map[string]interface{}{
@@ -228,6 +245,7 @@ func (r *router) handlerWrap(handler interface{}) echo.HandlerFunc {
 					}
 					if herr, ok := err.(*echo.HTTPError); ok {
 						if http.StatusBadRequest <= herr.Code && herr.Code < http.StatusInternalServerError {
+							//TODO: custom error encode
 							ctx.JSON(400, map[string]interface{}{
 								"success": false,
 								"err": map[string]interface{}{
@@ -308,7 +326,7 @@ func (r *router) handlerWrap(handler interface{}) echo.HandlerFunc {
 	return nil
 }
 
-func argGetter(argTyp reflect.Type) func(ctx echo.Context) (interface{}, error) {
+func argGetter(argTyp reflect.Type) func(ctx server.Context) (interface{}, error) {
 	if argTyp == requestType {
 		return requestGetter
 	} else if argTyp == responseType {
@@ -353,17 +371,11 @@ func argGetter(argTyp reflect.Type) func(ctx echo.Context) (interface{}, error) 
 	}
 }
 
-func requestGetter(ctx echo.Context) (interface{}, error) {
-	return ctx.Request(), nil
-}
-func responseGetter(ctx echo.Context) (interface{}, error) {
-	return ctx.Response(), nil
-}
-func contextGetter(ctx echo.Context) (interface{}, error) {
-	return ctx, nil
-}
-func requestDataBind(typ reflect.Type, validate bool) func(echo.Context) (interface{}, error) {
-	return func(ctx echo.Context) (data interface{}, err error) {
+func requestGetter(ctx server.Context) (interface{}, error)  { return ctx.Request(), nil }
+func responseGetter(ctx server.Context) (interface{}, error) { return ctx.Response(), nil }
+func contextGetter(ctx server.Context) (interface{}, error)  { return ctx, nil }
+func requestDataBind(typ reflect.Type, validate bool) func(server.Context) (interface{}, error) {
+	return func(ctx server.Context) (data interface{}, err error) {
 		outVal := reflect.New(typ)
 		if typ.Kind() != reflect.Ptr {
 			data = outVal.Interface()
@@ -404,8 +416,8 @@ func requestDataBind(typ reflect.Type, validate bool) func(echo.Context) (interf
 		return outVal.Elem().Interface(), nil
 	}
 }
-func requestValuesGetter(typ reflect.Type) func(ctx echo.Context) (interface{}, error) {
-	return func(ctx echo.Context) (interface{}, error) {
+func requestValuesGetter(typ reflect.Type) func(ctx server.Context) (interface{}, error) {
+	return func(ctx server.Context) (interface{}, error) {
 		out := reflect.New(typ)
 		byts, err := ioutil.ReadAll(ctx.Request().Body)
 		if err != nil {
@@ -419,7 +431,7 @@ func requestValuesGetter(typ reflect.Type) func(ctx echo.Context) (interface{}, 
 		return out.Elem().Interface(), nil
 	}
 }
-func requestBodyBytesGetter(ctx echo.Context) (interface{}, error) {
+func requestBodyBytesGetter(ctx server.Context) (interface{}, error) {
 	byts, err := ioutil.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return nil, fmt.Errorf("fail to read body: %s", err)
@@ -428,7 +440,7 @@ func requestBodyBytesGetter(ctx echo.Context) (interface{}, error) {
 	return byts, nil
 }
 
-func requestBodyStirngGetter(ctx echo.Context) (interface{}, error) {
+func requestBodyStirngGetter(ctx server.Context) (interface{}, error) {
 	byts, err := ioutil.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return "", fmt.Errorf("fail to read body: %s", err)

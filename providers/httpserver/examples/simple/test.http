@@ -1,0 +1,9 @@
+@url = http://localhost:8080
+
+### test
+POST {{url}}/hello/struct/ptr/recallsong
+Content-Type: application/json
+
+{
+	"message": "hello"
+}
