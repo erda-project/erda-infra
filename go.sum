@@ -488,8 +488,8 @@ github.com/prometheus/procfs v0.1.3/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4O
 github.com/prometheus/procfs v0.6.0 h1:mxy4L2jP6qMonqmq+aTtOx1ifVWUgG/TAmntgbh3xv4=
 github.com/prometheus/procfs v0.6.0/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1xBZuNvfVA=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
-github.com/recallsong/go-utils v1.1.2-0.20210825061755-9df21f10489e h1:hoCgZvzt/h3XCxc+j9Q69ngG4RSf9hPQUlQLX+iUWqc=
-github.com/recallsong/go-utils v1.1.2-0.20210825061755-9df21f10489e/go.mod h1:NARLokMUOzyJ55oYXvPcxQh3rBoTBAbolNfqou6AqdY=
+github.com/recallsong/go-utils v1.1.2-0.20210826100715-fce05eefa294 h1:1CONHJOaZVu3fJv11U+/KSstXi4KK3PvdFNPyf6MjYA=
+github.com/recallsong/go-utils v1.1.2-0.20210826100715-fce05eefa294/go.mod h1:NARLokMUOzyJ55oYXvPcxQh3rBoTBAbolNfqou6AqdY=
 github.com/recallsong/unmarshal v1.0.0 h1:y18hJihfxJ6vIkXAYROKPh9i3xKmZHH9wTiRvshY9bQ=
 github.com/recallsong/unmarshal v1.0.0/go.mod h1:NnPiL4s7z9XV1aBS5LJaXo3V7r1l/ZH3wWOzCkKqyWo=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
