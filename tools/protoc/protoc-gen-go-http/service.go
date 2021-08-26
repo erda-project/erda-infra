@@ -46,17 +46,18 @@ type serviceDesc struct {
 }
 
 type methodDesc struct {
-	Name        string
-	Comment     string
-	Path        string
-	Method      string
-	QueryParams map[string][]string
-	PathParams  []string
-	Request     string
-	Response    string
-	ReqBody     string
-	RespBody    string
-	Meta        *protogen.Method
+	Name           string
+	Comment        string
+	Path           string
+	Method         string
+	QueryParams    map[string][]string
+	QueryParamKeys []string
+	PathParams     []string
+	Request        string
+	Response       string
+	ReqBody        string
+	RespBody       string
+	Meta           *protogen.Method
 }
 
 func (s *serviceDesc) execute(g *protogen.GeneratedFile) error {
@@ -139,7 +140,8 @@ func (s *serviceDesc) execute(g *protogen.GeneratedFile) error {
 			g.P("		}")
 			if len(m.QueryParams) > 0 {
 				g.P("params := r.URL.Query()")
-				for key, fields := range m.QueryParams {
+				for _, key := range m.QueryParamKeys {
+					fields := m.QueryParams[key]
 					for _, name := range fields {
 						names := strings.Split(name, ".")
 						field, err := getField(names[0], m.Meta.Input.Fields)
