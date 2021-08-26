@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"sort"
 	"strings"
 
 	"github.com/erda-project/erda-infra/pkg/transport/http/httprule"
@@ -155,6 +156,7 @@ func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *prot
 func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path string) (*methodDesc, error) {
 	queryString, idx := "", strings.Index(path, "?")
 	var queryParams map[string][]string
+	var queryParamKeys []string
 	if idx >= 0 {
 		queryString = path[idx+1:]
 		if len(queryString) > 0 {
@@ -172,6 +174,10 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 				}
 			}
 			queryParams = values
+			for key := range queryParams {
+				queryParamKeys = append(queryParamKeys, key)
+			}
+			sort.Strings(queryParamKeys)
 		}
 		path = path[0:idx]
 	}
@@ -190,15 +196,16 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		}
 	}
 	return &methodDesc{
-		Name:        m.GoName,
-		Comment:     m.Comments.Leading.String(),
-		Path:        path,
-		Method:      method,
-		QueryParams: queryParams,
-		PathParams:  pathParams,
-		Request:     g.QualifiedGoIdent(m.Input.GoIdent),
-		Response:    g.QualifiedGoIdent(m.Output.GoIdent),
-		Meta:        m,
+		Name:           m.GoName,
+		Comment:        m.Comments.Leading.String(),
+		Path:           path,
+		Method:         method,
+		QueryParams:    queryParams,
+		QueryParamKeys: queryParamKeys,
+		PathParams:     pathParams,
+		Request:        g.QualifiedGoIdent(m.Input.GoIdent),
+		Response:       g.QualifiedGoIdent(m.Output.GoIdent),
+		Meta:           m,
 	}, nil
 }
 

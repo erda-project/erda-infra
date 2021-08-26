@@ -190,6 +190,16 @@ func Test_buildGoogleAPIsPath(t *testing.T) {
 				params: map[string]string{"def": "123", "h": "xx/123/456"},
 			},
 		},
+		{
+			args: args{
+				path: "/abc/{_}/d",
+				url:  "/abc/123/d",
+			},
+			want: want{
+				path:   "/abc/:_/d",
+				params: map[string]string{"_": "123"},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
