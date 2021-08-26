@@ -27,7 +27,7 @@ import (
 	_ "github.com/erda-project/erda-infra/providers/serviceregister"
 
 	// components
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demotable"
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/components"
 )
 
 //go:embed scenarios
@@ -128,74 +128,6 @@ func main() {
 //            {
 //              "helloMsg": "你好 克里托斯",
 //              "name": "克里托斯",
-//              "sn": "2"
-//            }
-//          ]
-//        }
-//      }
-//    },
-//    "rendering": {
-//      "__DefaultRendering__": [
-//        {
-//          "name": "demoTable",
-//          "state": []
-//        }
-//      ]
-//    }
-//  }
-//}
-
-// COMMAND: curl -s -XPOST localhost:8080/api/component-protocol/actions/render -H "Content-Type: application/json" \
-//               -H "lang: en" -d '{"scenario":{"scenarioType":"demo","scenarioKey":"demo"}}' | jq
-// HTTP RESPONSE OUTPUT:
-// {
-//  "scenario": {
-//    "scenarioKey": "demo"
-//  },
-//  "protocol": {
-//    "scenario": "demo",
-//    "hierarchy": {
-//      "root": "demoTable",
-//      "structure": {
-//        "demoTable": []
-//      }
-//    },
-//    "components": {
-//      "demoTable": {
-//        "type": "Table",
-//        "name": "demoTable",
-//        "props": {
-//          "columns": [
-//            {
-//              "dataIndex": "sn",
-//              "title": "SN"
-//            },
-//            {
-//              "dataIndex": "name",
-//              "title": "Name"
-//            },
-//            {
-//              "dataIndex": "helloMsg",
-//              "title": "Hello Message"
-//            }
-//          ],
-//          "pageSizeOptions": [
-//            "10",
-//            "20",
-//            "1000"
-//          ],
-//          "rowKey": "sn"
-//        },
-//        "data": {
-//          "list": [
-//            {
-//              "helloMsg": "hello my friend: zhangsan (666)",
-//              "name": "zhangsan",
-//              "sn": "1"
-//            },
-//            {
-//              "helloMsg": "hello my friend kratos",
-//              "name": "kratos",
 //              "sn": "2"
 //            }
 //          ]

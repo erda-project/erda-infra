@@ -45,7 +45,7 @@ func getScenarioRenders(scenario string) (*ScenarioRender, error) {
 	if !ok {
 		return nil, fmt.Errorf("failed to get scenario renders, default protocol not exist, scenario: %s", scenario)
 	}
-	for compName := range p.Components {
+	for compName, comp := range p.Components {
 		// skip if scenario-level component render exist
 		_, renderExist := (*renders)[compName]
 		if renderExist {
@@ -57,8 +57,8 @@ func getScenarioRenders(scenario string) (*ScenarioRender, error) {
 			(*renders)[compName] = defaultCompRender
 			continue
 		}
-		// build-in component renders
-		switch compName {
+		// built-in component renders
+		switch comp.Type {
 		case "Container", "LRContainer", "RowContainer", "SplitPage", "Popover", "Title", "Drawer":
 			(*renders)[compName] = &CompRenderSpec{RenderC: emptyRenderFunc}
 			continue
