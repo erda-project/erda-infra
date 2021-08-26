@@ -20,14 +20,13 @@ import (
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/component-protocol"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol"
+	componentprotocol "github.com/erda-project/erda-infra/providers/component-protocol"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 	"github.com/erda-project/erda-infra/providers/i18n"
 	_ "github.com/erda-project/erda-infra/providers/serviceregister"
 
 	// components
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/components"
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components"
 )
 
 //go:embed scenarios

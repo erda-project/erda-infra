@@ -21,4 +21,3 @@ func getProtoInParamsValue(inParams map[string]interface{}, key string) interfac
 	}
 	return inParams[key]
 }
-

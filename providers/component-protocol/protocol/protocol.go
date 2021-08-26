@@ -85,10 +85,10 @@ func RegisterDefaultProtocolsFromBasePath(basePath string) {
 }
 
 // getDefaultProtocol get default protocol by scenario.
-func getDefaultProtocol(scenario string) (cptype.ComponentProtocol, error) {
+func getDefaultProtocol(ctx context.Context, scenario string) (cptype.ComponentProtocol, error) {
 	s, ok := defaultProtocols[scenario]
 	if !ok {
-		return cptype.ComponentProtocol{}, fmt.Errorf("${default.protocol.not.exist}, ${scenario}: %s", scenario)
+		return cptype.ComponentProtocol{}, fmt.Errorf(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
 	}
 	return s, nil
 }

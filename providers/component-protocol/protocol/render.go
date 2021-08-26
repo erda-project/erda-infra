@@ -40,7 +40,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 	var useDefaultProtocol bool
 	if req.Protocol == nil || req.Event.Component == "" {
 		useDefaultProtocol = true
-		p, err := getDefaultProtocol(sk)
+		p, err := getDefaultProtocol(ctx, sk)
 		if err != nil {
 			return err
 		}
@@ -151,4 +151,3 @@ func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions
 	}
 	return result
 }
-

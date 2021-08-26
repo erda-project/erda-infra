@@ -148,4 +148,3 @@ func protoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r c
 	}
 	return nil
 }
-

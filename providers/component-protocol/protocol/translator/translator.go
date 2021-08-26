@@ -14,11 +14,11 @@
 
 // TODO switch to servicehub listener mechanism later, now this mechanism is missing.
 
-package cptype
+package translator
 
 import (
 	"bytes"
-	_ "embed"
+	_ "embed" // embed
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -33,14 +33,17 @@ import (
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
 
+// InternalI18nConfigs contains all protocl internal i18n configs.
 //go:embed i18n-cp-internal.yaml
 var InternalI18nConfigs string
 
-type tran struct {
+// Tran is a translator.
+type Tran struct {
 	dic map[string]map[string]string
 }
 
-func NewTranslator() *tran {
+// NewInternalTranslator .
+func NewInternalTranslator() *Tran {
 	// make embed content as a temp file
 	f, _ := ioutil.TempFile(os.TempDir(), "*.yaml")
 	defer func() {
@@ -66,10 +69,11 @@ func NewTranslator() *tran {
 	if err := loadToDic(fPath, dic); err != nil {
 		panic(err)
 	}
-	return &tran{dic: dic}
+	return &Tran{dic: dic}
 }
 
-func (t *tran) Get(lang i18n.LanguageCodes, key, def string) string {
+// Get .
+func (t *Tran) Get(lang i18n.LanguageCodes, key, def string) string {
 	text := t.getText(lang, key)
 	if len(text) > 0 {
 		return text
@@ -77,7 +81,8 @@ func (t *tran) Get(lang i18n.LanguageCodes, key, def string) string {
 	return def
 }
 
-func (t *tran) Text(lang i18n.LanguageCodes, key string) string {
+// Text .
+func (t *Tran) Text(lang i18n.LanguageCodes, key string) string {
 	text := t.getText(lang, key)
 	if len(text) > 0 {
 		return text
@@ -85,11 +90,12 @@ func (t *tran) Text(lang i18n.LanguageCodes, key string) string {
 	return key
 }
 
-func (t *tran) Sprintf(lang i18n.LanguageCodes, key string, args ...interface{}) string {
+// Sprintf .
+func (t *Tran) Sprintf(lang i18n.LanguageCodes, key string, args ...interface{}) string {
 	return fmt.Sprintf(t.escape(lang, key), args...)
 }
 
-func (t *tran) getText(langs i18n.LanguageCodes, key string) string {
+func (t *Tran) getText(langs i18n.LanguageCodes, key string) string {
 	key = strings.ToLower(key)
 	for _, lang := range langs {
 		if t.dic != nil {
@@ -112,7 +118,7 @@ func (t *tran) getText(langs i18n.LanguageCodes, key string) string {
 
 var regExp = regexp.MustCompile(`\$\{([^:}]*)(:[^}]*)?\}`)
 
-func (t *tran) escape(lang i18n.LanguageCodes, text string) string {
+func (t *Tran) escape(lang i18n.LanguageCodes, text string) string {
 	contents := reflectx.StringToBytes(text)
 	params := regExp.FindAllSubmatch(contents, -1)
 	for _, param := range params {

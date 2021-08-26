@@ -17,18 +17,23 @@ package protocol
 import (
 	"context"
 
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol/translator"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 	pi18n "github.com/erda-project/erda-infra/providers/i18n"
 )
 
-var Tran pi18n.Translator
+var tran pi18n.Translator
+
+func init() {
+	tran = translator.NewInternalTranslator()
+}
 
 func i18n(ctx context.Context, key string, args ...interface{}) string {
 	if len(args) == 0 {
-		try := Tran.Text(cputil.Language(ctx), key)
+		try := tran.Text(cputil.Language(ctx), key)
 		if try != key {
 			return try
 		}
 	}
-	return Tran.Sprintf(cputil.Language(ctx), key, args...)
+	return tran.Sprintf(cputil.Language(ctx), key, args...)
 }

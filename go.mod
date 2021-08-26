@@ -27,6 +27,7 @@ require (
 	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/jinzhu/gorm v1.9.16
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/mwitkow/go-proto-validators v0.3.2
 	github.com/olivere/elastic v6.2.35+incompatible
 	github.com/onsi/ginkgo v1.15.2 // indirect
 	github.com/onsi/gomega v1.11.0 // indirect

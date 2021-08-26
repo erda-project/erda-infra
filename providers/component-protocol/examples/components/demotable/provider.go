@@ -21,6 +21,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 )
 
+// Interface export ability for demotable
 type Interface interface {
 	protocol.CompRender
 }

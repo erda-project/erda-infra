@@ -31,4 +31,3 @@ func checkDebugOptions(ctx context.Context, debugOptions *cptype.ComponentProtoc
 	}
 	return nil
 }
-

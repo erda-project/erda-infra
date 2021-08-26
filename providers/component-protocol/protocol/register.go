@@ -39,6 +39,7 @@ func newFile(fullPath string, data []byte) *file {
 	return &file{isDir: false, name: filepath.Base(fullPath), fullPath: fullPath, data: data}
 }
 
+// MustRegisterProtocolsFromFS registry protocols from embed fs.
 func MustRegisterProtocolsFromFS(rootFS embed.FS) {
 	var files []*file
 	walkEmbedFS(rootFS, ".", &files)

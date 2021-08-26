@@ -17,20 +17,35 @@ package cptype
 // GlobalInnerCtxKey .
 type GlobalInnerCtxKey string
 
+// String .
 func (k GlobalInnerCtxKey) String() string { return string(k) }
 
+// GlobalInnerKeyCtxSDK .
 const (
-	GlobalInnerKeyCtxSDK   GlobalInnerCtxKey = "_sdk_"
-	GlobalInnerKeyUserIDs  GlobalInnerCtxKey = "_userIDs_"
+	// GlobalInnerKeyCtxSDK .
+	GlobalInnerKeyCtxSDK GlobalInnerCtxKey = "_sdk_"
+
+	// GlobalInnerKeyUserIDs .
+	GlobalInnerKeyUserIDs GlobalInnerCtxKey = "_userIDs_"
+
+	// GlobalInnerKeyIdentity .
 	GlobalInnerKeyIdentity GlobalInnerCtxKey = "_identity_"
-	GlobalInnerKeyError    GlobalInnerCtxKey = "_error_"
+
+	// GlobalInnerKeyError .
+	GlobalInnerKeyError GlobalInnerCtxKey = "_error_"
 )
 
+// DefaultRenderingKey .
 const (
-	DefaultRenderingKey     = "__DefaultRendering__"
+	// DefaultRenderingKey .
+	DefaultRenderingKey = "__DefaultRendering__"
+
+	// InParamsStateBindingKey .
 	InParamsStateBindingKey = "__InParams__"
 )
 
+// DefaultComponentNamespace .
 const (
+	// DefaultComponentNamespace contains all common components.
 	DefaultComponentNamespace = "__DefaultComponentNamespace__"
 )
