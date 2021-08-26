@@ -1,0 +1,20 @@
+zh:
+  column_serialNumber: 编号
+  column_name: 名字
+  column_helloMsg: 欢迎消息
+
+  nameOfSN1: 张三
+  nameOfSN2: 克里托斯
+  helloMsg: 你好
+
+en:
+  column_serialNumber: SN
+  column_name: Name
+  column_helloMsg: Hello Message
+
+  nameOfSN1: zhangsan
+  nameOfSN2: kratos
+  helloMsg: hello my friend
+
+jp:
+  nameOfSN1: jpjpjpname

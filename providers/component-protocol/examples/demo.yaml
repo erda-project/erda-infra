@@ -1,0 +1,19 @@
+demo:
+
+# component-protocol framework
+erda.cp:
+
+# components
+erda.cp.components.table.demo:
+  scenario: demo
+erda.cp.components.table.demo@demoTable2: # multi-instances
+
+service-register:
+http-server:
+  addr: ":8080"
+grpc-server:
+  addr: ":8081"
+
+i18n:
+  files:
+    - dic.yaml
