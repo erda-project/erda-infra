@@ -30,6 +30,7 @@ import (
 	_ "github.com/erda-project/erda-infra/providers/kubernetes"      //
 	_ "github.com/erda-project/erda-infra/providers/mysql"           //
 	_ "github.com/erda-project/erda-infra/providers/pprof"           //
+	_ "github.com/erda-project/erda-infra/providers/prometheus"      //
 	_ "github.com/erda-project/erda-infra/providers/redis"           //
 	_ "github.com/erda-project/erda-infra/providers/serviceregister" //
 	// _ "github.com/erda-project/erda-infra/providers/zk-master-election"   //
