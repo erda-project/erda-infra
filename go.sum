@@ -500,6 +500,7 @@ github.com/prometheus/procfs v0.1.3/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4O
 github.com/prometheus/procfs v0.6.0 h1:mxy4L2jP6qMonqmq+aTtOx1ifVWUgG/TAmntgbh3xv4=
 github.com/prometheus/procfs v0.6.0/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1xBZuNvfVA=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
+github.com/recallsong/go-utils v1.1.1/go.mod h1:NARLokMUOzyJ55oYXvPcxQh3rBoTBAbolNfqou6AqdY=
 github.com/recallsong/go-utils v1.1.2-0.20210826100715-fce05eefa294 h1:1CONHJOaZVu3fJv11U+/KSstXi4KK3PvdFNPyf6MjYA=
 github.com/recallsong/go-utils v1.1.2-0.20210826100715-fce05eefa294/go.mod h1:NARLokMUOzyJ55oYXvPcxQh3rBoTBAbolNfqou6AqdY=
 github.com/recallsong/unmarshal v1.0.0 h1:y18hJihfxJ6vIkXAYROKPh9i3xKmZHH9wTiRvshY9bQ=

@@ -32,3 +32,15 @@ func SDK(ctx context.Context) (sdk *cptype.SDK) {
 	}
 	return vv
 }
+
+// GetInParamByKey return cp inParam by key for easy use.
+func GetInParamByKey(ctx context.Context, key string) interface{} {
+	sdk := SDK(ctx)
+	if sdk == nil {
+		return nil
+	}
+	if sdk.InParams == nil {
+		return nil
+	}
+	return sdk.InParams[key]
+}
