@@ -31,7 +31,7 @@ type config struct {
 type provider struct {
 	server *http.Server
 	Cfg    *config
-	Router httpserver.Router `autowire:"http-server"`
+	Router httpserver.Router `autowire:"http-server@admin"`
 }
 
 // Init .

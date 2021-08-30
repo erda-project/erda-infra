@@ -37,7 +37,6 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
-	// routes := ctx.Service("http-server@admin").(httpserver.Router)
 	p.Router.Any("/debug/pprof/**", mux)
 	return nil
 }
