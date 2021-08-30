@@ -124,7 +124,7 @@ func protoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r c
 		// parse state bound info
 		stateFrom, stateFromKey, err := parseStateBound(state.Value)
 		if err != nil {
-			logrus.Errorf("parse component state bound failed, component:%s, state bound:%+v", pc.Name, state)
+			logrus.Errorf("failed to parse component state bound, component: %s, state bound: %#v", pc.Name, state)
 			return err
 		}
 		var stateFromValue interface{}
@@ -135,14 +135,14 @@ func protoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r c
 			// get bound key value
 			stateFromValue, err = getProtoCompStateValue(ctx, p, stateFrom, stateFromKey)
 			if err != nil {
-				logrus.Errorf("get protocol component state value failed, component:%s, key:%s", stateFrom, stateFromKey)
+				logrus.Errorf("failed to get component state value, component: %s, key: %s", stateFrom, stateFromKey)
 				return err
 			}
 		}
 		// set component state value
 		err = setCompStateValueFromComps(pc, state.Name, stateFromValue)
 		if err != nil {
-			logrus.Errorf("set component state failed, component:%s, state key:%s, value:%+v", pc.Name, state.Name, stateFromValue)
+			logrus.Errorf("failed to set component state, component: %s, state key: %s, value: %#v", pc.Name, state.Name, stateFromValue)
 			return err
 		}
 	}
