@@ -15,7 +15,6 @@
 package prometheus
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -38,7 +37,6 @@ type provider struct {
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	routes := ctx.Service(p.Cfg.HTTPServerServiceName).(httpserver.Router)
-	fmt.Println(routes)
 	routes.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
 }
