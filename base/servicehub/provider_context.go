@@ -297,6 +297,16 @@ func (c *providerContext) Label() string {
 	return c.label
 }
 
+// Key .
+func (c *providerContext) Key() string {
+	return c.key
+}
+
+// Provider .
+func (c *providerContext) Provider() Provider {
+	return c.provider
+}
+
 // WithTaskName .
 func WithTaskName(name string) TaskOption {
 	return func(t *task) {

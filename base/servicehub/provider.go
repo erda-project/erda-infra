@@ -99,7 +99,9 @@ type Context interface {
 	Logger() logs.Logger
 	Service(name string, options ...interface{}) interface{}
 	AddTask(task func(context.Context) error, options ...TaskOption)
+	Key() string
 	Label() string
+	Provider() Provider
 }
 
 // TaskOption .

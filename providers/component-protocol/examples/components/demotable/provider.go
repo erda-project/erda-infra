@@ -56,7 +56,7 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 
 func init() {
 	interfaceType := reflect.TypeOf((*Interface)(nil)).Elem()
-	servicehub.Register("erda.cp.components.table.demo", &servicehub.Spec{
+	servicehub.Register("component-protocol.components.demo.table", &servicehub.Spec{
 		Types: []reflect.Type{interfaceType},
 		ConfigFunc: func() interface{} {
 			return &config{}
