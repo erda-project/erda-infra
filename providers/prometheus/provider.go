@@ -15,7 +15,6 @@
 package prometheus
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -25,22 +24,19 @@ import (
 )
 
 type config struct {
-	MetricsPath           string `file:"metrics_path" default:"/metrics"`
+	MetricsPath string `file:"metrics_path" default:"/metrics"`
 }
 
 // provider .
 type provider struct {
 	server *http.Server
 	Cfg    *config
+	Router httpserver.Router `autowire:"http-server"`
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	routes, ok := ctx.Service("http-server").(httpserver.Router)
-	if !ok {
-		return fmt.Errorf("unable to find http service http-server, check your configuration")
-	}
-	routes.GET(p.Cfg.MetricsPath, promhttp.Handler())
+	p.Router.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
 }
 

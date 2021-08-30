@@ -45,6 +45,7 @@ type config struct {
 
 type provider struct {
 	Cfg          *config
+	Router       httpserver.Router `autowire:"http-server"`
 	names        []string
 	checkers     map[string][]Checker
 	healthBody   []byte
@@ -52,9 +53,8 @@ type provider struct {
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	routes := ctx.Service("http-server").(httpserver.Router)
 	for _, path := range p.Cfg.Path {
-		routes.GET(path, p.handler)
+		p.Router.GET(path, p.handler)
 	}
 	p.healthBody = []byte(p.Cfg.HealthBody)
 	p.unhealthBody = []byte(p.Cfg.UnhealthBody)
