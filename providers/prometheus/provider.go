@@ -25,7 +25,6 @@ import (
 )
 
 type config struct {
-	HTTPServerServiceName string `file:"http_server_service_name" default:"http-server"`
 	MetricsPath           string `file:"metrics_path" default:"/metrics"`
 }
 
@@ -37,9 +36,9 @@ type provider struct {
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	routes, ok := ctx.Service(p.Cfg.HTTPServerServiceName).(httpserver.Router)
+	routes, ok := ctx.Service("http-server").(httpserver.Router)
 	if !ok {
-		return fmt.Errorf("unable to find http service %s, check your configuration", p.Cfg.HTTPServerServiceName)
+		return fmt.Errorf("unable to find http service http-server, check your configuration")
 	}
 	routes.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
