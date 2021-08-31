@@ -44,6 +44,7 @@ func init() {
 	servicehub.Register("prometheus", &servicehub.Spec{
 		Services:     []string{"prometheus"},
 		Description:  "bind prometheus endpoint to http-server",
+		Dependencies: []string{"http-server"},
 		ConfigFunc:   func() interface{} { return &config{} },
 		Creator:      func() servicehub.Provider { return &provider{} },
 	})
