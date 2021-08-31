@@ -12,40 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pprof
+package prometheus
 
 import (
 	"net/http"
-	"net/http/pprof"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/httpserver"
 )
 
+type config struct {
+	MetricsPath string `file:"metrics_path" default:"/metrics"`
+}
+
 // provider .
 type provider struct {
 	server *http.Server
+	Cfg    *config
 	Router httpserver.Router `autowire:"http-server@admin"`
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-
-	p.Router.Any("/debug/pprof/**", mux)
+	p.Router.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
 }
 
 func init() {
-	servicehub.Register("pprof", &servicehub.Spec{
-		Services:     []string{"pprof"},
+	servicehub.Register("prometheus", &servicehub.Spec{
+		Services:     []string{"prometheus"},
 		Dependencies: []string{"http-server"},
-		Description:  "start pprof http server",
+		Description:  "bind prometheus endpoint to http-server",
+		ConfigFunc:   func() interface{} { return &config{} },
 		Creator:      func() servicehub.Provider { return &provider{} },
 	})
 }

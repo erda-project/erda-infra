@@ -28,6 +28,7 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/olivere/elastic v6.2.35+incompatible
+	github.com/prometheus/client_golang v1.10.0
 	github.com/recallsong/go-utils v1.1.2-0.20210826100715-fce05eefa294
 	github.com/recallsong/unmarshal v1.0.0
 	github.com/satori/go.uuid v1.2.0
