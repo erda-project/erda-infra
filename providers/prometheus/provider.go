@@ -31,7 +31,7 @@ type config struct {
 type provider struct {
 	server *http.Server
 	Cfg    *config
-	Router httpserver.Router `autowire:"http-server@admin"`
+	Router httpserver.Router `autowired:"http-server@admin"`
 }
 
 // Init .
@@ -43,8 +43,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 func init() {
 	servicehub.Register("prometheus", &servicehub.Spec{
 		Services:     []string{"prometheus"},
-		Dependencies: []string{"http-server"},
 		Description:  "bind prometheus endpoint to http-server",
+		Dependencies: []string{"http-server"},
 		ConfigFunc:   func() interface{} { return &config{} },
 		Creator:      func() servicehub.Provider { return &provider{} },
 	})

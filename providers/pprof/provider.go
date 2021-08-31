@@ -25,7 +25,7 @@ import (
 // provider .
 type provider struct {
 	server *http.Server
-	Router httpserver.Router `autowire:"http-server@admin"`
+	Router httpserver.Router `autowired:"http-server@admin"`
 }
 
 // Init .

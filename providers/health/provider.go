@@ -45,7 +45,7 @@ type config struct {
 
 type provider struct {
 	Cfg          *config
-	Router       httpserver.Router `autowire:"http-server"`
+	Router       httpserver.Router `autowired:"http-server"`
 	names        []string
 	checkers     map[string][]Checker
 	healthBody   []byte
