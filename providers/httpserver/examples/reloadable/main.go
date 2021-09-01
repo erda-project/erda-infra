@@ -22,6 +22,7 @@ import (
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	_ "github.com/erda-project/erda-infra/providers/health"
 	"github.com/erda-project/erda-infra/providers/httpserver"
 )
 

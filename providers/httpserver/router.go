@@ -82,6 +82,7 @@ type (
 		done         bool
 		err          error
 		updateRoutes func(map[routeKey]*route)
+		reportError  func(err error)
 		tx           server.RouterTx
 		pathFormater *pathFormater
 		routes       map[routeKey]*route
@@ -107,6 +108,9 @@ func (r *router) Add(method, path string, handler interface{}, options ...interf
 		} else {
 			r.err = fmt.Errorf("httpserver routes [%s %s] conflict in group %s",
 				key.method, key.path, rt.group)
+		}
+		if r.lock == nil {
+			r.reportError(r.err)
 		}
 		return r.err
 	}
@@ -293,6 +297,7 @@ func (r *router) Commit() error {
 		}
 		r.done = true
 		if r.err != nil {
+			r.reportError(r.err)
 			r.lock.Unlock()
 			return r.err
 		}
@@ -300,7 +305,7 @@ func (r *router) Commit() error {
 		r.updateRoutes(r.routes)
 		r.lock.Unlock()
 	}
-	return nil
+	return r.err
 }
 
 // Rollback .
@@ -373,6 +378,7 @@ func (p *provider) printRoutes(routes map[routeKey]*route) {
 
 type routerManager struct {
 	group string
+	reset bool
 	opts  []interface{}
 	p     *provider
 }
@@ -381,7 +387,73 @@ func (rm *routerManager) NewRouter(opts ...interface{}) RouterTx {
 	args := make([]interface{}, len(rm.opts)+len(opts))
 	copy(args, rm.opts)
 	copy(args[len(rm.opts):], opts)
-	return rm.p.newRouter(rm.group, args...)
+	return rm.p.newRouterTx(rm.reset, rm.group, args...)
 }
 
 func (rm *routerManager) Reloadable() bool { return rm.p.Cfg.Reloadable }
+
+type autoCommitRouter struct {
+	tx     RouterManager
+	routes []route
+}
+
+var _ Router = (*autoCommitRouter)(nil)
+
+func (r *autoCommitRouter) add(method, path string, handler interface{}, options ...interface{}) {
+	tx := r.tx.NewRouter()
+	tx.Add(method, path, handler, options...)
+	r.commit(tx)
+}
+func (r *autoCommitRouter) commit(tx RouterTx) {
+	err := tx.Commit()
+	if err != nil {
+		panic(err)
+	}
+}
+func (r *autoCommitRouter) GET(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodGet, path, handler, options...)
+}
+func (r *autoCommitRouter) POST(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodPost, path, handler, options...)
+}
+func (r *autoCommitRouter) DELETE(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodDelete, path, handler, options...)
+}
+func (r *autoCommitRouter) PUT(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodPut, path, handler, options...)
+}
+func (r *autoCommitRouter) PATCH(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodPatch, path, handler, options...)
+}
+func (r *autoCommitRouter) HEAD(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodHead, path, handler, options...)
+}
+func (r *autoCommitRouter) CONNECT(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodConnect, path, handler, options...)
+}
+func (r *autoCommitRouter) OPTIONS(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodOptions, path, handler, options...)
+}
+func (r *autoCommitRouter) TRACE(path string, handler interface{}, options ...interface{}) {
+	r.add(http.MethodTrace, path, handler, options...)
+}
+func (r *autoCommitRouter) Any(path string, handler interface{}, options ...interface{}) {
+	tx := r.tx.NewRouter()
+	tx.Any(path, handler, options...)
+	r.commit(tx)
+}
+func (r *autoCommitRouter) Static(prefix, root string, options ...interface{}) {
+	tx := r.tx.NewRouter()
+	tx.Static(prefix, root, options...)
+	r.commit(tx)
+}
+func (r *autoCommitRouter) File(path, filepath string, options ...interface{}) {
+	tx := r.tx.NewRouter()
+	tx.File(path, filepath, options...)
+	r.commit(tx)
+}
+func (r *autoCommitRouter) Add(method, path string, handler interface{}, options ...interface{}) error {
+	tx := r.tx.NewRouter()
+	tx.GET(path, handler, options...)
+	return tx.Commit()
+}
