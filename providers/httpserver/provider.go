@@ -40,6 +40,7 @@ type provider struct {
 	server server.Server
 	lock   sync.Mutex
 	routes map[routeKey]*route
+	err    error
 }
 
 // Init .
@@ -64,6 +65,9 @@ func (p *provider) Init(ctx servicehub.Context) error {
 
 // Start .
 func (p *provider) Start() error {
+	if p.err != nil {
+		return p.err
+	}
 	if p.Cfg.PrintRoutes {
 		if p.Cfg.Reloadable {
 			p.lock.Lock()
@@ -88,16 +92,25 @@ func (p *provider) Close() error {
 // Provide .
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	if ctx.Service() == "http-router-manager" || ctx.Type() == routerManagerType {
-		return &routerManager{
-			group: ctx.Caller(),
-			opts:  args,
-			p:     p,
+		return p.newRouterManager(true, ctx.Caller(), args...)
+	} else if p.Cfg.Reloadable && (ctx.Service() != "http-router-tx" || ctx.Type() == routerType) {
+		return &autoCommitRouter{
+			tx: p.newRouterManager(false, ctx.Caller(), args...),
 		}
 	}
-	return p.newRouter(ctx.Caller(), args...)
+	return p.newRouterTx(true, ctx.Caller(), args...)
 }
 
-func (p *provider) newRouter(group string, opts ...interface{}) RouterTx {
+func (p *provider) newRouterManager(reset bool, group string, opts ...interface{}) RouterManager {
+	return &routerManager{
+		group: group,
+		reset: reset,
+		opts:  opts,
+		p:     p,
+	}
+}
+
+func (p *provider) newRouterTx(reset bool, group string, opts ...interface{}) RouterTx {
 	interceptors := getInterceptors(opts)
 	r := &router{
 		tx:           p.server.NewRouter(),
@@ -110,22 +123,31 @@ func (p *provider) newRouter(group string, opts ...interface{}) RouterTx {
 		r.lock.Lock()
 		r.routes = make(map[routeKey]*route)
 		for key, route := range p.routes {
-			if route.group != r.group {
+			if !reset || route.group != r.group {
 				r.routes[key] = route
 				if route.handler != nil {
 					r.tx.Add(route.method, route.path, route.handler)
 				}
 			}
 		}
+		r.reportError = func(err error) {}
 		r.updateRoutes = func(routes map[routeKey]*route) {
 			p.routes = routes
-
+			diff := make(map[routeKey]*route)
+			for key, route := range p.routes {
+				if route.group == r.group {
+					diff[key] = route
+				}
+			}
 			if p.Cfg.PrintRoutes {
-				p.printRoutes(routes)
+				p.printRoutes(diff)
 			}
 		}
 	} else {
 		r.routes = p.routes
+		r.reportError = func(err error) {
+			p.err = err
+		}
 	}
 	return r
 }
@@ -138,7 +160,7 @@ var (
 
 func init() {
 	servicehub.Register("http-server", &servicehub.Spec{
-		Services: []string{"http-server", "http-routes", "http-router", "http-router-manager"},
+		Services: []string{"http-server", "http-router", "http-router-manager", "http-router-tx"},
 		Types: []reflect.Type{
 			routerType,
 			routerTxType,

@@ -1,6 +1,7 @@
 http-server:
     addr: ":8080"
     reloadable: true
+health:
 
 hello:
 hello2:

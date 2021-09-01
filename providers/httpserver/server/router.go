@@ -87,7 +87,7 @@ func (r *fixedRouterManager) Commit()             {}
 
 func newFixedRouterManager(e *echo.Echo) routerManager {
 	return &fixedRouterManager{
-		Router: newRouter(nil, e.Binder, e.Validator),
+		Router: newRouter(e, e.Binder, e.Validator),
 	}
 }
 
