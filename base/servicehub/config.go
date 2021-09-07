@@ -115,7 +115,6 @@ func (h *Hub) loadProviders(config map[string]interface{}) error {
 
 func (h *Hub) doLoadProviders(config map[string]interface{}, filter string) error {
 	for key, cfg := range config {
-		key = strings.ReplaceAll(key, "_", "-")
 		if key == filter {
 			continue
 		}
