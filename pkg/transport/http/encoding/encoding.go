@@ -40,12 +40,12 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 	if out == nil {
 		return nil
 	}
-	if _, ok := out.(*[]byte); ok {
+	if bytesPtr, ok := out.(*[]byte); ok {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return err
 		}
-		out = &body
+		*bytesPtr = body
 		return nil
 	}
 	contentType := r.Header.Get("Content-Type")
