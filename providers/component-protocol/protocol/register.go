@@ -47,11 +47,6 @@ func MustRegisterProtocolsFromFS(rootFS embed.FS) {
 	for _, file := range files {
 		logrus.Infof("register ptorocols from fs: fullPath: %s, isDir: %t", file.fullPath, file.isDir)
 	}
-	// map
-	fileMapByFullPath := make(map[string]*file)
-	for _, file := range files {
-		fileMapByFullPath[file.fullPath] = file
-	}
 	// register all protocols
 	registerAllProtocolsFromRootFSFiles(files)
 }
@@ -77,7 +72,6 @@ func walkEmbedFS(rootFS embed.FS, fullPath string, files *[]*file) {
 }
 
 func registerAllProtocolsFromRootFSFiles(files []*file) {
-	var protocols [][]byte
 	for _, file := range files {
 		if file.isDir {
 			continue
@@ -85,7 +79,6 @@ func registerAllProtocolsFromRootFSFiles(files []*file) {
 		if !strutil.HasSuffixes(file.name, ".yml", ".yaml") {
 			continue
 		}
-		protocols = append(protocols, file.data)
+		RegisterDefaultProtocols(file.data)
 	}
-	RegisterDefaultProtocols(protocols...)
 }
