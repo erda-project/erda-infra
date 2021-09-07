@@ -24,6 +24,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/mux v1.7.3
+	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493
 	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/jinzhu/gorm v1.9.16
 	github.com/labstack/echo v3.3.10+incompatible
