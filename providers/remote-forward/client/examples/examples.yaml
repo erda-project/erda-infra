@@ -1,0 +1,10 @@
+remote-forward-client:
+    remote_addr: ":4050"
+    remote_shadow_addr: ":62975"
+    target_addr: ":8080"
+
+http-server:
+    addr: ":8080"
+health:
+
+example:
