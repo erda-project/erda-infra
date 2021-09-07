@@ -15,6 +15,7 @@
 package encoding
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"testing"
@@ -22,24 +23,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockReadCloser struct {
-}
-
-func (r mockReadCloser) Read(p []byte) (n int, err error) {
-	p[0] = 't'
-	p[1] = 'e'
-	p[2] = 's'
-	p[3] = 't'
-	return 4, io.EOF
-}
-
-func (r mockReadCloser) Close() error {
-	return nil
-}
-
 func makeMockRequest() *http.Request {
 	r := &http.Request{}
-	r.Body = mockReadCloser{}
+	r.Body = io.NopCloser(bytes.NewReader([]byte("test")))
 	return r
 }
 
