@@ -80,10 +80,10 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			return un.UnmarshalURLValues("", r.Form)
 		}
 	default:
+		if r.ContentLength <= 0 {
+			return nil
+		}
 		if mtype == "application/json" || (strings.HasPrefix(mtype, "application/vnd.") && strings.HasSuffix(mtype, "+json")) {
-			if r.ContentLength <= 0 {
-				return nil
-			}
 			if um, ok := out.(json.Unmarshaler); ok {
 				body, err := ioutil.ReadAll(r.Body)
 				if err != nil {

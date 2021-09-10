@@ -50,7 +50,7 @@ type HandleOptions struct {
 func WithInterceptor(o interceptor.Interceptor) HandleOption {
 	return func(opts *HandleOptions) {
 		if opts.Interceptor != nil {
-			opts.Interceptor = interceptor.Chain(o, opts.Interceptor)
+			opts.Interceptor = interceptor.Chain(opts.Interceptor, o)
 		} else {
 			opts.Interceptor = o
 		}
