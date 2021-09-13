@@ -16,11 +16,13 @@ package mutex
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"reflect"
 	"sync"
 	"time"
 
+	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/concurrency"
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -39,6 +41,9 @@ type Interface interface {
 	NewWithTTL(ctx context.Context, key string, ttl time.Duration) (Mutex, error)
 	New(ctx context.Context, key string) (Mutex, error)
 }
+
+// ErrClosed mutex already closed
+var ErrClosed = errors.New("mutex closed")
 
 var mutexType = reflect.TypeOf((*Mutex)(nil)).Elem()
 
@@ -64,25 +69,24 @@ func (p *provider) Init(ctx servicehub.Context) error {
 
 // NewWithTTL .
 func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration) (Mutex, error) {
+	ctx, cannel := context.WithCancel(ctx)
 	opts := []concurrency.SessionOption{concurrency.WithContext(ctx)}
 	seconds := int(ttl.Seconds())
 	if seconds > 0 {
 		opts = append(opts, concurrency.WithTTL(seconds))
 	}
-	session, err := concurrency.NewSession(p.etcd.Client(), opts...)
-	if err != nil {
-		return nil, err
-	}
-	key = filepath.Clean(filepath.Join(p.Cfg.RootPath, key))
-	mutex := concurrency.NewMutex(session, key)
 	return &etcdMutex{
-		log: p.Log,
-		key: key,
-		s:   session,
-		mu:  mutex,
+		log:        p.Log,
+		key:        filepath.Clean(filepath.Join(p.Cfg.RootPath, key)),
+		client:     p.etcd.Client(),
+		opts:       opts,
+		inProcLock: make(chan struct{}, 1),
+		ctx:        ctx,
+		cannel:     cannel,
 	}, nil
 }
 
+// New .
 func (p *provider) New(ctx context.Context, key string) (Mutex, error) {
 	return p.NewWithTTL(ctx, key, time.Duration(0))
 }
@@ -91,10 +95,11 @@ func (p *provider) New(ctx context.Context, key string) (Mutex, error) {
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	if ctx.Type() == mutexType {
 		key := ctx.Tags().Get("mutex-key")
-		if len(key) < 0 {
+		if len(key) <= 0 {
 			key = p.Cfg.DefaultKey
 		}
-		if len(key) < 0 {
+		if len(key) <= 0 {
+			p.Log.Debugf("in-proc mutex for provider %q", ctx.Caller())
 			return p.inProcMutex
 		}
 		m, err := p.New(context.Background(), key)
@@ -107,48 +112,167 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 type etcdMutex struct {
-	log  logs.Logger
-	key  string
-	s    *concurrency.Session
-	mu   *concurrency.Mutex
-	lock sync.Mutex
+	log    logs.Logger
+	key    string
+	client *clientv3.Client
+	opts   []concurrency.SessionOption
+	ctx    context.Context
+	cannel context.CancelFunc
+
+	lock       sync.Mutex
+	s          *concurrency.Session
+	mu         *concurrency.Mutex
+	inProcLock chan struct{}
 }
 
-func (m *etcdMutex) Lock(ctx context.Context) error {
-	m.lock.Lock()
-	err := m.mu.Lock(ctx)
-	if err == nil {
+func (m *etcdMutex) resetSession() (*concurrency.Mutex, error) {
+	m.close()
+	s, mu, err := m.newSession()
+	if err != nil {
+		return nil, err
+	}
+	m.s, m.mu = s, mu
+	return mu, nil
+}
+
+func (m *etcdMutex) newSession() (*concurrency.Session, *concurrency.Mutex, error) {
+	session, err := concurrency.NewSession(m.client, m.opts...)
+	if err != nil {
+		m.log.Debugf("failed to new session for key %q: %s", m.key, err)
+		return nil, nil, err
+	}
+	m.log.Debugf("new session for key %q", m.key)
+	return session, concurrency.NewMutex(session, m.key), nil
+}
+
+func (m *etcdMutex) Lock(ctx context.Context) (err error) {
+	d := time.Second
+	sleep := func() bool {
+		select {
+		case <-time.After(d):
+		case <-ctx.Done():
+			return false
+		}
+		if d < 8*time.Second {
+			d = d * 2
+		}
+		return true
+	}
+
+	select {
+	case m.inProcLock <- struct{}{}:
+	case <-m.ctx.Done():
+		return ErrClosed
+	case <-ctx.Done():
+		return context.Canceled
+	}
+
+	for {
+		m.lock.Lock()
+		select {
+		case <-m.ctx.Done():
+			m.lock.Unlock()
+			return ErrClosed
+		case <-ctx.Done():
+			m.lock.Unlock()
+			return context.Canceled
+		default:
+		}
+		mu := m.mu
+		if err != nil || mu == nil {
+			mu, err = m.resetSession()
+			if err != nil {
+				m.lock.Unlock()
+				if errors.Is(err, context.Canceled) {
+					return err
+				}
+				sleep()
+				continue
+			}
+		}
+		m.lock.Unlock()
+
+		err = mu.Lock(ctx)
+		if err != nil {
+			m.log.Errorf("failed to lock key %q: %s", m.key, err)
+			if errors.Is(err, context.Canceled) {
+				return err
+			}
+			continue
+		}
 		m.log.Debugf("locked key %q", m.key)
-	} else {
-		m.log.Errorf("fail to lock key %q", m.key)
+		return nil
 	}
-	return err
 }
 
-func (m *etcdMutex) Unlock(ctx context.Context) error {
+func (m *etcdMutex) Unlock(ctx context.Context) (err error) {
+	select {
+	case <-m.inProcLock:
+	case <-m.ctx.Done():
+		return ErrClosed
+	case <-ctx.Done():
+		return context.Canceled
+	}
+
+	m.lock.Lock()
+	mu := m.mu
+	if mu != nil {
+		err = m.mu.Unlock(ctx)
+	}
 	m.lock.Unlock()
-	err := m.mu.Unlock(ctx)
-	if err == nil {
-		m.log.Debugf("unlocked key %q", m.key)
-	} else {
-		m.log.Errorf("fail to unlock key %q", m.key)
+
+	if err != nil {
+		m.log.Errorf("failed to unlock key %q: %s", m.key, err)
+		return err
 	}
+	m.log.Debugf("unlocked key %q", m.key)
 	return err
 }
 
-func (m *etcdMutex) Close() error { return m.s.Close() }
+func (m *etcdMutex) Close() error {
+	m.lock.Lock()
+	select {
+	case <-m.ctx.Done():
+		m.lock.Unlock()
+		return nil
+	default:
+		m.cannel()
+	}
+	err := m.close()
+	if errors.Is(err, context.Canceled) {
+		err = nil
+	}
+	m.lock.Unlock()
+	return err
+}
+
+func (m *etcdMutex) close() (err error) {
+	if m.s != nil {
+		err = m.s.Close()
+		m.s, m.mu = nil, nil
+	}
+	return err
+}
 
 type inProcMutex struct {
-	lock sync.Mutex
+	lock chan struct{}
 }
 
 func (m *inProcMutex) Lock(ctx context.Context) error {
-	m.lock.Lock()
+	select {
+	case m.lock <- struct{}{}:
+	case <-ctx.Done():
+		return context.Canceled
+	}
 	return nil
 }
 
 func (m *inProcMutex) Unlock(ctx context.Context) error {
-	m.lock.Unlock()
+	select {
+	case <-m.lock:
+	case <-ctx.Done():
+		return context.Canceled
+	}
 	return nil
 }
 
@@ -167,7 +291,7 @@ func init() {
 		Creator: func() servicehub.Provider {
 			return &provider{
 				instances:   make(map[string]Mutex),
-				inProcMutex: &inProcMutex{},
+				inProcMutex: &inProcMutex{lock: make(chan struct{}, 1)},
 			}
 		},
 	})
