@@ -290,6 +290,9 @@ func (t *translator) escape(lang LanguageCodes, text string) string {
 		if len(val) <= 0 {
 			val = strings.Trim(reflectx.BytesToString(defval), `"`)
 		}
+		if len(val) <= 0 {
+			val = k
+		}
 		contents = bytes.Replace(contents, param[0], reflectx.StringToBytes(val), 1)
 	}
 	return reflectx.BytesToString(contents)
