@@ -26,25 +26,25 @@ const (
 	SupportPackageIsVersion1 = true
 )
 
-// DecodeRequestFunc is decode request func.
-type DecodeRequestFunc func(*http.Request, interface{}) error
-
-// EncodeResponseFunc is encode response func.
-type EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) error
-
-// EncodeErrorFunc is encode error func.
-type EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
-
-// HandleOption is handle option.
-type HandleOption func(*HandleOptions)
-
-// HandleOptions is handle options.
-type HandleOptions struct {
-	Decode      DecodeRequestFunc
-	Encode      EncodeResponseFunc
-	Error       EncodeErrorFunc
-	Interceptor interceptor.Interceptor
-}
+type (
+	// DecodeRequestFunc is decode request func.
+	DecodeRequestFunc func(*http.Request, interface{}) error
+	// EncodeResponseFunc is encode response func.
+	EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) error
+	// EncodeErrorFunc is encode error func.
+	EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
+	Interceptor     func(h http.HandlerFunc) http.HandlerFunc
+	// HandleOption is handle option.
+	HandleOption func(*HandleOptions)
+	// HandleOptions is handle options.
+	HandleOptions struct {
+		Decode          DecodeRequestFunc
+		Encode          EncodeResponseFunc
+		Error           EncodeErrorFunc
+		Interceptor     interceptor.Interceptor
+		HTTPInterceptor Interceptor
+	}
+)
 
 // WithInterceptor .
 func WithInterceptor(o interceptor.Interceptor) HandleOption {
@@ -53,6 +53,21 @@ func WithInterceptor(o interceptor.Interceptor) HandleOption {
 			opts.Interceptor = interceptor.Chain(opts.Interceptor, o)
 		} else {
 			opts.Interceptor = o
+		}
+	}
+}
+
+// WithHTTPInterceptor .
+func WithHTTPInterceptor(i Interceptor) HandleOption {
+	return func(opts *HandleOptions) {
+		if opts.HTTPInterceptor != nil {
+			inter := opts.HTTPInterceptor
+			opts.HTTPInterceptor = func(h http.HandlerFunc) http.HandlerFunc {
+				h = i(h)
+				return inter(h)
+			}
+		} else {
+			opts.HTTPInterceptor = i
 		}
 	}
 }

@@ -25,20 +25,20 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// Register .
-type Register interface {
-	transhttp.Router
-	transgrpc.ServiceRegistrar
-}
-
-// ServiceOption .
-type ServiceOption func(*ServiceOptions)
-
-// ServiceOptions .
-type ServiceOptions struct {
-	HTTP []transhttp.HandleOption
-	GRPC []transgrpc.HandleOption
-}
+type (
+	// Register .
+	Register interface {
+		transhttp.Router
+		transgrpc.ServiceRegistrar
+	}
+	// ServiceOption .
+	ServiceOption func(*ServiceOptions)
+	// ServiceOptions .
+	ServiceOptions struct {
+		HTTP []transhttp.HandleOption
+		GRPC []transgrpc.HandleOption
+	}
+)
 
 // WithInterceptors .
 func WithInterceptors(o ...interceptor.Interceptor) ServiceOption {
