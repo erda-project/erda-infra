@@ -100,14 +100,14 @@ func (r *router) Add(method, path string, handler interface{}, options ...interf
 	path = pathFormater.format(path)
 	method = strings.ToUpper(method)
 
-	key := routeKey{method: method, path: path}
+	key := routeKey{method: method, path: removeParamName(path)}
 	if rt, ok := r.routes[key]; ok {
 		if rt.group != r.group {
 			r.err = fmt.Errorf("httpserver routes [%s %s] conflict between groups (%s, %s)",
-				key.method, key.path, rt.group, r.group)
+				rt.method, key.path, rt.group, r.group)
 		} else {
 			r.err = fmt.Errorf("httpserver routes [%s %s] conflict in group %s",
-				key.method, key.path, rt.group)
+				rt.method, key.path, rt.group)
 		}
 		if r.lock == nil {
 			r.reportError(r.err)
@@ -129,6 +129,26 @@ func (r *router) Add(method, path string, handler interface{}, options ...interf
 		route.handler = r.add(method, path, handler, interceptors, pathParser)
 	}
 	return nil
+}
+
+func removeParamName(path string) string {
+	sb := &strings.Builder{}
+	chars := []rune(path)
+	for i, n := 0, len(chars); i < n; i++ {
+		c := chars[i]
+		if c != ':' {
+			sb.WriteRune(c)
+			continue
+		}
+		sb.WriteRune('*')
+		i++
+		for ; i < n && chars[i] != '/'; i++ {
+		}
+		if i < n {
+			sb.WriteRune(chars[i])
+		}
+	}
+	return sb.String()
 }
 
 type routeOption func(r *route)
