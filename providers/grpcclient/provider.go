@@ -29,7 +29,7 @@ import (
 // Interface .
 type Interface interface {
 	Get() *grpc.ClientConn
-	NewConnect(opts ...grpc.DialOption) *grpc.ClientConn
+	NewConnect(opts ...grpc.DialOption) (*grpc.ClientConn, error)
 }
 
 var (

@@ -33,7 +33,8 @@ type (
 	EncodeResponseFunc func(http.ResponseWriter, *http.Request, interface{}) error
 	// EncodeErrorFunc is encode error func.
 	EncodeErrorFunc func(http.ResponseWriter, *http.Request, error)
-	Interceptor     func(h http.HandlerFunc) http.HandlerFunc
+	// Interceptor is the func to intercept request or response
+	Interceptor func(h http.HandlerFunc) http.HandlerFunc
 	// HandleOption is handle option.
 	HandleOption func(*HandleOptions)
 	// HandleOptions is handle options.
