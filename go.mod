@@ -27,6 +27,7 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493
 	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/jinzhu/gorm v1.9.16
+	github.com/json-iterator/go v1.1.10
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/olivere/elastic v6.2.35+incompatible
 	github.com/prometheus/client_golang v1.10.0
