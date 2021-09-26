@@ -15,13 +15,17 @@
 package componentprotocol
 
 import (
+	"net/http"
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/pkg/transport"
+	transhttp "github.com/erda-project/erda-infra/pkg/transport/http"
 	"github.com/erda-project/erda-infra/providers/i18n"
 	"github.com/erda-project/erda-proto-go/cp/pb"
+	jsi "github.com/json-iterator/go"
 )
 
 type config struct {
@@ -45,10 +49,70 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	p.customContextKVs = make(map[interface{}]interface{})
 	p.protocolService = &protocolService{p: p}
 	if p.Register != nil {
-		pb.RegisterCPServiceImp(p.Register, p.protocolService)
+		pb.RegisterCPServiceImp(p.Register, p.protocolService, transport.WithHTTPOptions(
+			transhttp.WithEncoder(func(rw http.ResponseWriter, r *http.Request, obj interface{}) error {
+				renderResp, ok := obj.(*pb.RenderResponse)
+				if !ok {
+					errResp, err := convertErrToResp(obj)
+					if err != nil {
+						return err
+					}
+					data, err := jsi.Marshal(errResp)
+					if err != nil {
+						return err
+					}
+					rw.Write(data)
+					return nil
+				}
+				if renderResp.Protocol != nil && renderResp.Protocol.GlobalState != nil &&
+					renderResp.Protocol.GlobalState["_userIDs_"] != nil {
+					rw.Header().Set("X-NEED-USER-INFO", "true")
+				}
+				resp := map[string]interface{}{
+					"success": true,
+					"data":    renderResp,
+					"err": map[string]interface{}{
+						"code": "",
+						"msg":  "",
+						"ctx":  nil,
+					},
+				}
+				data, err := jsi.Marshal(resp)
+				if err != nil {
+					return err
+				}
+				if _, err = rw.Write(data); err != nil {
+					return err
+				}
+				return nil
+			}),
+		))
 	}
 
 	return nil
+}
+
+type cpErrResponse struct {
+	Code int    `json:"code,omitempty"`
+	Err  string `json:"err,omitempty"`
+}
+
+func convertErrToResp(obj interface{}) (map[string]interface{}, error) {
+	data, err := jsi.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	var resp cpErrResponse
+	if err = jsi.Unmarshal(data, &resp); err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"success": false,
+		"err": map[string]interface{}{
+			"code": "Proxy Error: " + strutil.String(resp.Code),
+			"msg":  resp.Err,
+		},
+	}, err
 }
 
 // Provide .
