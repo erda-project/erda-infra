@@ -25,10 +25,11 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/concurrency"
 	"github.com/coreos/etcd/mvcc/mvccpb"
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/recallsong/go-utils/errorx"
 	uuid "github.com/satori/go.uuid"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
 // Node .
@@ -268,6 +269,7 @@ func (p *provider) resignLeader() error {
 	if err != nil {
 		errs.Append(err)
 	}
+	p.Log.Infof("Resign leader ! Node is %q", p.Cfg.NodeID)
 	return errs.MaybeUnwrap()
 }
 
