@@ -22,6 +22,7 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/integration"
+
 	"github.com/erda-project/erda-infra/base/logs/logrusx"
 )
 
@@ -29,7 +30,8 @@ var waitTime = 300 * time.Millisecond
 
 func TestElection(t *testing.T) {
 	cfg := integration.ClusterConfig{Size: 1}
-	clus := integration.NewClusterV3(nil, &cfg)
+	clus := integration.NewClusterV3(t, &cfg)
+	defer clus.Terminate(t)
 	endpoints := []string{clus.Client(0).Endpoints()[0]}
 	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
 	if err != nil {
@@ -82,7 +84,8 @@ func TestElection(t *testing.T) {
 
 func TestElectionOnClusterReboot(t *testing.T) {
 	cfg := integration.ClusterConfig{Size: 1}
-	clus := integration.NewClusterV3(nil, &cfg)
+	clus := integration.NewClusterV3(t, &cfg)
+	defer clus.Terminate(t)
 	endpoints := []string{clus.Client(0).Endpoints()[0]}
 	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
 	if err != nil {
