@@ -64,8 +64,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 					rw.Write(data)
 					return nil
 				}
-				if renderResp.Protocol != nil && renderResp.Protocol.GlobalState != nil &&
-					renderResp.Protocol.GlobalState["_userIDs_"] != nil {
+				if renderResp.Protocol != nil && len(renderResp.Protocol.GlobalState) > 0 {
 					rw.Header().Set("X-NEED-USER-INFO", "true")
 				}
 				resp := map[string]interface{}{
