@@ -91,6 +91,7 @@ func encoder(rw http.ResponseWriter, r *http.Request, obj interface{}) error {
 	if _, err = rw.Write(data); err != nil {
 		return err
 	}
+	rw.Header().Set("Content-Type", "application/json")
 	return nil
 }
 
