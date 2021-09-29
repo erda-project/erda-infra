@@ -128,6 +128,7 @@ func (h *Hub) Init(config map[string]interface{}, flags *pflag.FlagSet, args []s
 		os.Exit(0)
 	}
 	for _, ctx := range h.providers {
+		h.logger.Infof("provider %s is initializing", ctx.key)
 		err = ctx.Init()
 		if err != nil {
 			return err
