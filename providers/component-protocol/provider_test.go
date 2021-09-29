@@ -15,69 +15,101 @@
 package componentprotocol
 
 import (
-	"reflect"
+	"bytes"
+	"errors"
+	"net/http"
+	"strconv"
 	"testing"
 
-	"github.com/erda-project/erda-infra/pkg/transport/http"
-	"google.golang.org/grpc"
+	"github.com/erda-project/erda-proto-go/cp/pb"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
-type MockRouter struct {
-
+type MockResponseWriter struct {
+	Head http.Header
+	Data bytes.Buffer
 }
 
-func (m *MockRouter) Add(method, path string, handler http.HandlerFunc) {
+func (m *MockResponseWriter) Header() http.Header {
+	return m.Head
 }
 
-func (m *MockRouter) RegisterService(desc *grpc.ServiceDesc, impl interface{}) {
+func (m *MockResponseWriter) Write(data []byte) (int, error) {
+	return m.Data.Write(data)
 }
 
-func TestInit(t *testing.T) {
-	p := provider{Register: &MockRouter{}}
-	if err := p.Init(nil); err != nil {
-		t.Error(err)
+func (m *MockResponseWriter) WriteHeader(statusCode int) {
+	m.Head["test"] = []string{
+		strconv.FormatInt(int64(statusCode), 10),
 	}
+	return
 }
 
-func TestConvertErrToResp(t *testing.T) {
+type mockStr struct {
+}
 
-
-	obj := cpErrResponse{
-		Code: 500,
-		Err:  "Failed",
+func TestEncoder(t *testing.T) {
+	rw := &MockResponseWriter{
+		Head: map[string][]string{},
+		Data: bytes.Buffer{},
 	}
-	resp, err := convertErrToResp(obj)
+	err := encoder(rw, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	success, ok := resp["success"].(bool)
-	if !ok {
-		t.Errorf("test failed, expected type of success field is bool, got %v", reflect.TypeOf(resp["success"].(bool)))
-	}
-	if success {
-		t.Error("test failed, expect values of success field is false, got true")
+
+	err = encoder(rw, nil, mockStr{})
+	if err != nil {
+		t.Error(err)
 	}
 
-	respErr, ok := resp["err"].(map[string]interface{})
-	if !ok {
-		t.Errorf("test failed, expected type of err field is map[string]interface{}, got %v", reflect.TypeOf(resp["err"]))
+	listValue, _ := structpb.NewList([]interface{}{"testUserID"})
+	resp := &pb.RenderResponse{
+		Scenario: &pb.Scenario{
+			ScenarioKey:  "testScenario",
+			ScenarioType: "testScenario",
+		},
+		Protocol: &pb.ComponentProtocol{
+			Version:  "0.1",
+			Scenario: "testScenario",
+			GlobalState: map[string]*structpb.Value{
+				"_userIDs_": structpb.NewListValue(listValue),
+			},
+			Hierarchy: &pb.Hierarchy{
+				Root: "page",
+			},
+			Components: map[string]*pb.Component{
+				"testComponent": {
+					Type: "container",
+					Name: "test",
+				},
+			},
+		},
 	}
+	if err = encoder(rw, nil, resp); err != nil {
+		t.Error(err)
+	}
+}
 
-	code, ok := respErr["code"].(string)
-	if !ok {
-		t.Errorf("test failed, expected type of code field is string, got %v", reflect.TypeOf(respErr["code"]))
-	}
-	expectedCode := "Proxy Error: 500"
-	if code != expectedCode {
-		t.Errorf("test failed, expected values of code is %s, got %s", expectedCode, code)
-	}
+type MockError struct {
+}
 
-	msg, ok := respErr["msg"].(string)
-	if !ok {
-		t.Errorf("test failed, expected type of msg field is string, got %v", reflect.TypeOf(respErr["msg"]))
+func (e *MockError) HTTPStatus() int {
+	return 500
+}
+
+func (e *MockError) Error() string {
+	return ""
+}
+
+func TestErrorEncoder(t *testing.T) {
+	rw := &MockResponseWriter{
+		Head: map[string][]string{},
+		Data: bytes.Buffer{},
 	}
-	expectedMsg := "Failed"
-	if msg != expectedMsg {
-		t.Errorf("test failed, expected values of msg field is %s, got %s", expectedMsg, msg)
+	errorEncoder(rw, nil, &MockError{})
+	if rw.Head["test"][0] != "500" {
+		t.Errorf("test failed, expect head is 500, got %s", rw.Head["test"][0])
 	}
+	errorEncoder(rw, nil, errors.New("test"))
 }

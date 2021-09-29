@@ -20,12 +20,12 @@ import (
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/pkg/transport"
 	transhttp "github.com/erda-project/erda-infra/pkg/transport/http"
 	"github.com/erda-project/erda-infra/providers/i18n"
 	"github.com/erda-project/erda-proto-go/cp/pb"
 	jsi "github.com/json-iterator/go"
+	"github.com/sirupsen/logrus"
 )
 
 type config struct {
@@ -50,69 +50,67 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	p.protocolService = &protocolService{p: p}
 	if p.Register != nil {
 		pb.RegisterCPServiceImp(p.Register, p.protocolService, transport.WithHTTPOptions(
-			transhttp.WithEncoder(func(rw http.ResponseWriter, r *http.Request, obj interface{}) error {
-				renderResp, ok := obj.(*pb.RenderResponse)
-				if !ok {
-					errResp, err := convertErrToResp(obj)
-					if err != nil {
-						return err
-					}
-					data, err := jsi.Marshal(errResp)
-					if err != nil {
-						return err
-					}
-					rw.Write(data)
-					return nil
-				}
-				if renderResp.Protocol != nil && renderResp.Protocol.GlobalState != nil &&
-					renderResp.Protocol.GlobalState["_userIDs_"] != nil {
-					rw.Header().Set("X-NEED-USER-INFO", "true")
-				}
-				resp := map[string]interface{}{
-					"success": true,
-					"data":    renderResp,
-					"err": map[string]interface{}{
-						"code": "",
-						"msg":  "",
-						"ctx":  nil,
-					},
-				}
-				data, err := jsi.Marshal(resp)
-				if err != nil {
-					return err
-				}
-				if _, err = rw.Write(data); err != nil {
-					return err
-				}
-				return nil
-			}),
+			transhttp.WithEncoder(encoder),
+			transhttp.WithErrorEncoder(errorEncoder),
 		))
 	}
-
 	return nil
 }
 
-type cpErrResponse struct {
-	Code int    `json:"code,omitempty"`
-	Err  string `json:"err,omitempty"`
+// Error .
+type Error interface {
+	HTTPStatus() int
 }
 
-func convertErrToResp(obj interface{}) (map[string]interface{}, error) {
-	data, err := jsi.Marshal(obj)
+func encoder(rw http.ResponseWriter, r *http.Request, obj interface{}) error {
+	if obj == nil {
+		return nil
+	}
+	renderResp, ok := obj.(*pb.RenderResponse)
+	if !ok {
+		logrus.Errorf("response obj is not *pb.RenderResponse type")
+		return nil
+	}
+	if renderResp.Protocol != nil && renderResp.Protocol.GlobalState != nil &&
+		renderResp.Protocol.GlobalState["_userIDs_"] != nil {
+		rw.Header().Set("X-Need-User-Info", "true")
+	}
+	resp := map[string]interface{}{
+		"success": true,
+		"data":    renderResp,
+		"err": map[string]interface{}{
+			"code": "",
+			"msg":  "",
+			"ctx":  nil,
+		},
+	}
+	data, err := jsi.Marshal(resp)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	var resp cpErrResponse
-	if err = jsi.Unmarshal(data, &resp); err != nil {
-		return nil, err
+	if _, err = rw.Write(data); err != nil {
+		return err
 	}
-	return map[string]interface{}{
+	return nil
+}
+
+func errorEncoder(rw http.ResponseWriter, request *http.Request, err error) {
+	var status int
+	if e, ok := err.(Error); ok {
+		status = e.HTTPStatus()
+	} else {
+		status = http.StatusInternalServerError
+	}
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(status)
+	byts, _ := jsi.Marshal(map[string]interface{}{
 		"success": false,
 		"err": map[string]interface{}{
-			"code": "Proxy Error: " + strutil.String(resp.Code),
-			"msg":  resp.Err,
+			"code": status,
+			"msg":  err.Error(),
 		},
-	}, err
+	})
+	rw.Write(byts)
 }
 
 // Provide .
