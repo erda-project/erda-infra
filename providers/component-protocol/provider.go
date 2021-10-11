@@ -71,6 +71,7 @@ func encoder(rw http.ResponseWriter, r *http.Request, obj interface{}) error {
 		logrus.Errorf("response obj is not *pb.RenderResponse type")
 		return nil
 	}
+	rw.Header().Set("Content-Type", "application/json")
 	if renderResp.Protocol != nil && renderResp.Protocol.GlobalState != nil &&
 		renderResp.Protocol.GlobalState["_userIDs_"] != nil {
 		rw.Header().Set("X-Need-User-Info", "true")
@@ -91,7 +92,6 @@ func encoder(rw http.ResponseWriter, r *http.Request, obj interface{}) error {
 	if _, err = rw.Write(data); err != nil {
 		return err
 	}
-	rw.Header().Set("Content-Type", "application/json")
 	return nil
 }
 
