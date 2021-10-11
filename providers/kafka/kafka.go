@@ -25,6 +25,7 @@ import (
 
 // Interface .
 type Interface interface {
+	NewBatchReader(c *BatchReaderConfig, options ...BatchReaderOption) (BatchReader, error)
 	NewConsumer(c *ConsumerConfig, handler ConsumerFunc, options ...ConsumerOption) error
 	NewConsumerWitchCreator(c *ConsumerConfig, creator func(i int) (ConsumerFunc, error), options ...ConsumerOption) error
 	NewProducer(c *ProducerConfig, options ...ProducerOption) (writer.Writer, error)

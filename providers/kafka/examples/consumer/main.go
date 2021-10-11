@@ -32,7 +32,7 @@ type config struct {
 type provider struct {
 	Cfg   *config
 	Log   logs.Logger
-	Kafka kafka.Interface
+	Kafka kafka.Interface `autowired:"kafka-consumer"`
 }
 
 func (p *provider) Run(ctx context.Context) error {
@@ -52,9 +52,8 @@ func (p *provider) invoke(key []byte, value []byte, topic *string, timestamp tim
 
 func init() {
 	servicehub.Register("examples", &servicehub.Spec{
-		Services:     []string{"hello"},
-		Dependencies: []string{"kafka"},
-		ConfigFunc:   func() interface{} { return &config{} },
+		Services:   []string{"hello"},
+		ConfigFunc: func() interface{} { return &config{} },
 		Creator: func() servicehub.Provider {
 			return &provider{}
 		},

@@ -1,0 +1,8 @@
+kafka:
+    servers: "addon-kafka.default.svc.cluster.local:9092"
+
+examples:
+    input:
+        topics: "example-topic"
+        group: "example-topic-group"
+
