@@ -26,23 +26,45 @@ import (
 	"github.com/olivere/elastic"
 )
 
-// WriterConfig .
-type WriterConfig struct {
-	Type        string `file:"type" desc:"index type"`
-	Parallelism uint64 `file:"parallelism" default:"4" desc:"parallelism"`
-	Batch       struct {
-		Size    uint64        `file:"size" default:"100" desc:"batch size"`
-		Timeout time.Duration `file:"timeout" default:"30s" desc:"timeout to flush buffer for batch write"`
-	} `file:"batch"`
-	Retry int `file:"retry" desc:"retry if fail to write"`
-}
-
 // Interface .
 type Interface interface {
 	URL() string
 	Client() *elastic.Client
-	NewBatchWriter(*WriterConfig) writer.Writer
+	NewBatchWriter(*BatchWriterConfig) writer.Writer
+	NewBatchWriterWithOptions(c *WriterConfig, opts ...BatchWriteOption) writer.Writer
+	NewWriter(opts *WriteOptions) *Writer
 }
+
+type (
+	// BatchWriterConfig .
+	BatchWriterConfig struct {
+		Type        string `file:"type" desc:"index type"`
+		Parallelism uint64 `file:"parallelism" default:"4" desc:"parallelism"`
+		Batch       struct {
+			Size    uint64        `file:"size" default:"100" desc:"batch size"`
+			Timeout time.Duration `file:"timeout" default:"30s" desc:"timeout to flush buffer for batch write"`
+		} `file:"batch"`
+		Retry int `file:"retry" desc:"retry if fail to write"`
+	}
+	// WriterConfig deprecated, use BatchWriterConfig instead of
+	WriterConfig = BatchWriterConfig
+
+	// BatchWriteOptions .
+	BatchWriteOptions struct {
+		ErrorHandler func(error) error
+	}
+	// BatchWriteOption .
+	BatchWriteOption func(opts *BatchWriteOptions)
+
+	// EncodeFunc .
+	EncodeFunc func(data interface{}) (index, id, typ string, body interface{})
+
+	// WriteOptions .
+	WriteOptions struct {
+		Timeout time.Duration
+		Enc     EncodeFunc
+	}
+)
 
 var clientType = reflect.TypeOf((*elastic.Client)(nil))
 
@@ -71,7 +93,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	}
 	client, err := elastic.NewClient(options...)
 	if err != nil {
-		return fmt.Errorf("fail to create elasticsearch client: %s", err)
+		return fmt.Errorf("failed to create elasticsearch client: %s", err)
 	}
 	p.client = client
 	return nil
@@ -99,7 +121,11 @@ func (s *service) URL() string {
 	return strings.Split(s.p.Cfg.URLs, ",")[0]
 }
 
-func (s *service) NewBatchWriter(c *WriterConfig) writer.Writer {
+func (s *service) NewBatchWriterWithOptions(c *WriterConfig, opts ...BatchWriteOption) writer.Writer {
+	options := s.newDefaultBatchWriteOptions()
+	for _, opt := range opts {
+		opt(options)
+	}
 	return writer.ParallelBatch(func(uint64) writer.Writer {
 		return &batchWriter{
 			client:        s.p.client,
@@ -109,12 +135,37 @@ func (s *service) NewBatchWriter(c *WriterConfig) writer.Writer {
 			retryDuration: 3 * time.Second,
 			timeout:       fmt.Sprintf("%dms", c.Batch.Timeout.Milliseconds()),
 		}
-	}, c.Parallelism, c.Batch.Size, c.Batch.Timeout, s.batchWriteError)
+	}, c.Parallelism, c.Batch.Size, c.Batch.Timeout, options.ErrorHandler)
+}
+
+func (s *service) NewBatchWriter(c *WriterConfig) writer.Writer {
+	return s.NewBatchWriterWithOptions(c)
+}
+
+func (s *service) newDefaultBatchWriteOptions() *BatchWriteOptions {
+	return &BatchWriteOptions{
+		ErrorHandler: s.batchWriteError,
+	}
 }
 
 func (s *service) batchWriteError(err error) error {
-	s.log.Errorf("fail to write elasticsearch: %s", err)
+	s.log.Errorf("failed to write elasticsearch: %s", err)
 	return nil // skip error
+}
+
+// WithBatchErrorHandler .
+func WithBatchErrorHandler(eh func(error) error) BatchWriteOption {
+	return func(opts *BatchWriteOptions) {
+		opts.ErrorHandler = eh
+	}
+}
+
+func (s *service) NewWriter(opts *WriteOptions) *Writer {
+	timeout := opts.Timeout
+	if timeout <= 0 {
+		timeout = 30 * time.Second
+	}
+	return NewWriter(s.p.client, timeout, opts.Enc)
 }
 
 func init() {
