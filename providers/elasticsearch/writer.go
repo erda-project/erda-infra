@@ -113,8 +113,10 @@ type Writer struct {
 	timeout string
 }
 
+// Close .
 func (w *Writer) Close() error { return nil }
 
+// Write .
 func (w *Writer) Write(data interface{}) error {
 	index, id, typ, body := w.enc(data)
 	_, err := w.client.Index().
@@ -123,6 +125,7 @@ func (w *Writer) Write(data interface{}) error {
 	return err
 }
 
+// WriteN .
 func (w *Writer) WriteN(list ...interface{}) (int, error) {
 	if len(list) <= 0 {
 		return 0, nil
@@ -174,6 +177,7 @@ type BatchWriteError struct {
 	Errors []error
 }
 
+// Error .
 func (e *BatchWriteError) Error() string {
 	if len(e.Errors) <= 0 {
 		return ""

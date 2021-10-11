@@ -34,10 +34,10 @@ type BatchReaderConfig struct {
 	Options map[string]interface{} `file:"options" desc:"options"`
 }
 
-// ConsumerOption .
+// BatchReaderOption .
 type BatchReaderOption interface{}
 
-// WithConsumerListener .
+// WithReaderDecoder .
 func WithReaderDecoder(dec Decoder) BatchReaderOption {
 	return BatchReaderOption(dec)
 }
