@@ -70,11 +70,11 @@ func (w *batchWriter) WriteN(data ...interface{}) (int, error) {
 		res, err := w.client.Bulk().Add(requests...).Timeout(w.timeout).Do(context.Background())
 		if err != nil {
 			if i < w.retry {
-				w.log.Warnf("failed to write batch(%d) to elasticsearch and retry after %s: %s", len(data), w.retryDuration.String(), err)
+				w.log.Warnf("failed to write batch(%d) to elasticsearch and retry after %s: %s", len(requests), w.retryDuration.String(), err)
 				time.Sleep(w.retryDuration)
 				continue
 			}
-			w.log.Errorf("failed to write batch(%d) to elasticsearch: %s", len(data), err)
+			w.log.Errorf("failed to write batch(%d) to elasticsearch: %s", len(requests), err)
 			break
 		}
 		if res.Errors {
