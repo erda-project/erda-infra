@@ -69,7 +69,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 
 // NewWithTTL .
 func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration) (Mutex, error) {
-	ctx, cannel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(ctx)
 	opts := []concurrency.SessionOption{concurrency.WithContext(ctx)}
 	seconds := int(ttl.Seconds())
 	if seconds > 0 {
@@ -82,7 +82,7 @@ func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration
 		opts:       opts,
 		inProcLock: make(chan struct{}, 1),
 		ctx:        ctx,
-		cannel:     cannel,
+		cancel:     cancel,
 	}, nil
 }
 
@@ -117,7 +117,7 @@ type etcdMutex struct {
 	client *clientv3.Client
 	opts   []concurrency.SessionOption
 	ctx    context.Context
-	cannel context.CancelFunc
+	cancel context.CancelFunc
 
 	lock       sync.Mutex
 	s          *concurrency.Session
@@ -236,7 +236,7 @@ func (m *etcdMutex) Close() error {
 		m.lock.Unlock()
 		return nil
 	default:
-		m.cannel()
+		m.cancel()
 	}
 	err := m.close()
 	if errors.Is(err, context.Canceled) {
