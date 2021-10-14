@@ -85,10 +85,12 @@ func encoder(rw http.ResponseWriter, r *http.Request, obj interface{}) error {
 			"ctx":  nil,
 		},
 	}
+	logrus.Infof("[DEBUG] start marshal in encoder")
 	data, err := jsi.Marshal(resp)
 	if err != nil {
 		return err
 	}
+	logrus.Infof("[DEBUG] end marshal in encoder")
 	if _, err = rw.Write(data); err != nil {
 		return err
 	}
