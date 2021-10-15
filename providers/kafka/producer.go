@@ -142,20 +142,41 @@ func (p *producer) EventsChannelSize() int {
 }
 
 func (p *producer) Write(data interface{}) error {
-	return p.publish(data)
+	delivery := make(chan kafka.Event)
+	if err := p.publish(data, delivery); err != nil {
+		return err
+	}
+	select {
+	case <-delivery:
+		return nil
+	default:
+		// wait 1s
+		p.kp.Flush(1000)
+	}
+	return nil
 }
 
 func (p *producer) WriteN(data ...interface{}) (int, error) {
+	delivery := make(chan kafka.Event)
 	for i, item := range data {
-		err := p.publish(item)
+		err := p.publish(item, delivery)
 		if err != nil {
 			return i, err
+		}
+	}
+	for i := 0; i < len(data); {
+		select {
+		case <-delivery:
+			i++
+		default:
+			// wait 1s
+			p.kp.Flush(1000)
 		}
 	}
 	return len(data), nil
 }
 
-func (p *producer) publish(data interface{}) error {
+func (p *producer) publish(data interface{}, delivery chan kafka.Event) error {
 	var (
 		bytes []byte
 		key   []byte
@@ -184,12 +205,11 @@ func (p *producer) publish(data interface{}) error {
 		}
 		bytes = data
 	}
-	p.kp.ProduceChannel() <- &kafka.Message{
+	return p.kp.Produce(&kafka.Message{
 		Value:          bytes,
 		Key:            key,
 		TopicPartition: kafka.TopicPartition{Topic: topic, Partition: kafka.PartitionAny},
-	}
-	return nil
+	}, delivery)
 }
 
 func (p *producer) Close() error {
