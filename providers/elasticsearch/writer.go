@@ -118,8 +118,11 @@ func (w *Writer) Close() error { return nil }
 
 // Write .
 func (w *Writer) Write(data interface{}) error {
-	index, id, typ, body := w.enc(data)
-	_, err := w.client.Index().
+	index, id, typ, body, err := w.enc(data)
+	if err != nil {
+		return err
+	}
+	_, err = w.client.Index().
 		Index(index).Id(id).Type(typ).
 		BodyJson(body).Timeout(w.timeout).Do(context.Background())
 	return err
@@ -132,7 +135,10 @@ func (w *Writer) WriteN(list ...interface{}) (int, error) {
 	}
 	bulk := w.client.Bulk()
 	for _, data := range list {
-		index, id, typ, body := w.enc(data)
+		index, id, typ, body, err := w.enc(data)
+		if err != nil {
+			return 0, err
+		}
 		req := elastic.NewBulkIndexRequest().Index(index).Id(id).Type(typ).Doc(body)
 		bulk.Add(req)
 	}

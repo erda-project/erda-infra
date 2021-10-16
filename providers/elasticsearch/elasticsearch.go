@@ -57,7 +57,7 @@ type (
 	BatchWriteOption func(opts *BatchWriteOptions)
 
 	// EncodeFunc .
-	EncodeFunc func(data interface{}) (index, id, typ string, body interface{})
+	EncodeFunc func(data interface{}) (index, id, typ string, body interface{}, err error)
 
 	// WriteOptions .
 	WriteOptions struct {
