@@ -16,6 +16,11 @@ package protocol
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
+
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 func Test_getCompNameAndInstanceName(t *testing.T) {
@@ -57,5 +62,51 @@ func Test_getCompNameAndInstanceName(t *testing.T) {
 				t.Errorf("getCompNameAndInstanceName() gotInstanceName = %v, want %v", gotInstanceName, tt.wantInstanceName)
 			}
 		})
+	}
+}
+
+func Test_calculateDefaultRenderOrderByHierarchy(t *testing.T) {
+	py := `
+hierarchy:
+  root: page
+  structure:
+    page:
+      - filter
+      - overview_group
+      - blocks
+    overview_group:
+      - quality_chart
+      - blocks
+    blocks:
+      - mt_block
+      - at_block
+    mt_block:
+      - mt_block_header
+      - mt_block_detail
+    mt_block_header:
+      right: mt_block_header_filter
+      left: mt_block_header_title
+`
+	var p cptype.ComponentProtocol
+	assert.NoError(t, yaml.Unmarshal([]byte(py), &p))
+	orders := calculateDefaultRenderOrderByHierarchy(&p)
+	expected := []string{"page", "filter", "overview_group", "quality_chart", "blocks", "mt_block",
+		"mt_block_header", "mt_block_header_title", "mt_block_header_filter",
+		"mt_block_detail", "at_block"}
+	for i := range expected {
+		assert.True(t,true, expected[i] == orders[i])
+	}
+}
+
+func Test_recursiveWalkCompOrder(t *testing.T) {
+	// recursive walk from root
+	var result []string
+	allCompSubMap := make(map[string][]string)
+	allCompSubMap["page"] = []string{"title", "overview", "filter"}
+	allCompSubMap["overview"] = []string{"quality_chart", "blocks"}
+	recursiveWalkCompOrder("page", &result, allCompSubMap)
+	expected := []string{"page", "title", "overview", "quality_chart", "blocks", "filter"}
+	for i := range expected {
+		assert.True(t,true, expected[i] == result[i])
 	}
 }
