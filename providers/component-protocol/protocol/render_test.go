@@ -30,19 +30,19 @@ func Test_getCompNameAndInstanceName(t *testing.T) {
 	}{
 		{
 			name:             "with @",
-			args:             args{ name: "mt_block_detail_item@mt_case_num_total" },
+			args:             args{name: "mt_block_detail_item@mt_case_num_total"},
 			wantCompName:     "mt_block_detail_item",
 			wantInstanceName: "mt_case_num_total",
 		},
 		{
 			name:             "without @",
-			args:             args{ name: "mt_case_num_total"},
+			args:             args{name: "mt_case_num_total"},
 			wantCompName:     "mt_case_num_total",
 			wantInstanceName: "mt_case_num_total",
 		},
 		{
 			name:             "with @@",
-			args:             args{ name: "a@@b"},
+			args:             args{name: "a@@b"},
 			wantCompName:     "a",
 			wantInstanceName: "@b",
 		},

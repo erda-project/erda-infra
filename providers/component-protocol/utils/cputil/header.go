@@ -20,7 +20,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/erda-project/erda-infra/pkg/transport"
-	commonpb "github.com/erda-project/erda-proto-go/common/pb"
+	commonpb "github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/common/pb"
 )
 
 // GetOrgID .
