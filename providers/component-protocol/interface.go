@@ -17,8 +17,8 @@ package componentprotocol
 import (
 	"context"
 
+	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 	"github.com/erda-project/erda-infra/providers/i18n"
-	"github.com/erda-project/erda-proto-go/cp/pb"
 )
 
 // Interface wrap CPService and other logic.

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/erda-project/erda-proto-go/cp/pb"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 )
 
 func TestA(t *testing.T) {
