@@ -16,6 +16,7 @@ package protocol
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -61,21 +62,12 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 	var compRending []cptype.RendingItem
 	if useDefaultProtocol {
-		// 如果是加载默认协议，则渲染所有组件，不存在组件及状态依赖
 		crs, ok := req.Protocol.Rendering[cptype.DefaultRenderingKey]
 		if !ok {
-			// 如果不存在默认DefaultRenderingKey，则随机从map中获取各组件key，渲染所有组件，无state绑定
-			for k := range *sr {
-				if _, ok := req.Protocol.Components[k]; !ok {
-					continue
-				}
-				ri := cptype.RendingItem{
-					Name: k,
-				}
-				compRending = append(compRending, ri)
+			for compName := range req.Protocol.Components {
+				compRending = append(compRending, cptype.RendingItem{Name: compName})
 			}
 		} else {
-			// 如果存在默认DefaultRenderingKey，则获取默认定义的Rending
 			compRending = append(compRending, crs...)
 		}
 
@@ -127,6 +119,8 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		event := eventConvert(v.Name, req.Event)
 		// 运行组件渲染函数
 		start := time.Now() // 获取当前时间
+		_, instanceName := getCompNameAndInstanceName(v.Name)
+		c.Name = instanceName
 		err = wrapCompRender(cr.RenderC(), req.Protocol.Version).Render(ctx, c, req.Scenario, event, req.Protocol.GlobalState)
 		if err != nil {
 			logrus.Errorf("render component failed,err: %s, scenario:%+v, component:%s", err.Error(), req.Scenario, cr.CompName)
@@ -150,4 +144,17 @@ func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions
 		}
 	}
 	return result
+}
+
+func getCompNameAndInstanceName(name string) (compName, instanceName string) {
+	ss := strings.SplitN(name, "@", 2)
+	if len(ss) == 2 {
+		compName = ss[0]
+		instanceName = ss[1]
+		return
+	}
+	compName = name
+	// use name as instance name
+	instanceName = name
+	return
 }
