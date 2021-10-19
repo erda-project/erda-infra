@@ -19,6 +19,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/go-xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a // indirect
 	github.com/go-zookeeper/zk v1.0.2
 	github.com/gocql/gocql v0.0.0-20210707082121-9a3953d1826d
 	github.com/gofrs/uuid v4.0.0+incompatible
@@ -45,7 +46,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tealeg/xlsx v1.0.5 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be // indirect
+	github.com/xormplus/builder v0.0.0-20181220055446-b12ceebee76f // indirect
 	github.com/xormplus/core v0.0.0-20181016121923-6bfce2eb8867
 	github.com/xormplus/xorm v0.0.0-20181212020813-da46657160ff
 	github.com/ziutek/mymysql v1.5.4 // indirect
@@ -61,7 +62,7 @@ require (
 )
 
 replace (
-	github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.5
+	github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.6
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => github.com/kubernetes/api v0.18.3
 	k8s.io/apiextensions-apiserver => github.com/kubernetes/apiextensions-apiserver v0.18.3
