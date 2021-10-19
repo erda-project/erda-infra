@@ -71,9 +71,6 @@ func RegisterComponent(r *CompRenderSpec) error {
 	s := ScenarioRenders[r.Scenario]
 	if _, ok := (*s)[r.CompName]; !ok {
 		(*s)[r.CompName] = r
-	} else {
-		err := fmt.Errorf("register render failed, component [%s] already exist", r.CompName)
-		return err
 	}
 	logrus.Infof("register component render success, scenario: %s, component: %s", r.Scenario, r.CompName)
 	return nil
@@ -96,6 +93,7 @@ func getCompRender(ctx context.Context, r ScenarioRender, compName, typ string) 
 	if compName == "" {
 		return nil, fmt.Errorf(i18n(ctx, "component.name.is.empty"))
 	}
+	compName, _ = getCompNameAndInstanceName(compName)
 	var c *CompRenderSpec
 	if _, ok := r[compName]; !ok {
 		// component not exist
