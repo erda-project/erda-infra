@@ -15,6 +15,7 @@
 package protocol
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -110,5 +111,57 @@ func Test_recursiveWalkCompOrder(t *testing.T) {
 	expected := []string{"page", "title", "overview", "quality_chart", "blocks", "filter"}
 	for i := range expected {
 		assert.True(t,true, expected[i] == result[i])
+	}
+}
+
+func Test_getDefaultHierarchyRenderOrderFromCompExclude(t *testing.T) {
+	type args struct {
+		fullOrders           []string
+		startFromCompExclude string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "not found, return nil",
+			args: args{
+				fullOrders:           []string{"root", "page", "overview", "split"},
+				startFromCompExclude: "not",
+			},
+			want: []string{},
+		},
+		{
+			name: "found in center",
+			args: args{
+				fullOrders:           []string{"root", "page", "overview", "split"},
+				startFromCompExclude: "page",
+			},
+			want: []string{"overview", "split"},
+		},
+		{
+			name: "found in the beginning",
+			args: args{
+				fullOrders:           []string{"root", "page", "overview", "split"},
+				startFromCompExclude: "root",
+			},
+			want: []string{"page", "overview", "split"},
+		},
+		{
+			name: "found in the last",
+			args: args{
+				fullOrders:           []string{"root", "page", "overview", "split"},
+				startFromCompExclude: "split",
+			},
+			want: []string{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getDefaultHierarchyRenderOrderFromCompExclude(tt.args.fullOrders, tt.args.startFromCompExclude); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("getDefaultHierarchyRenderOrderFromCompExclude() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
