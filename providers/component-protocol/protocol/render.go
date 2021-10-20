@@ -21,6 +21,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
@@ -64,7 +65,12 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 	if useDefaultProtocol {
 		crs, ok := req.Protocol.Rendering[cptype.DefaultRenderingKey]
 		if !ok {
-			for compName := range req.Protocol.Components {
+			orders, err := calculateDefaultRenderOrderByHierarchy(req.Protocol)
+			if err != nil {
+				logrus.Errorf("failed to calculate default render order by hierarchy: %v", err)
+				return err
+			}
+			for _, compName := range orders {
 				compRending = append(compRending, cptype.RendingItem{Name: compName})
 			}
 		} else {
@@ -127,7 +133,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 			return err
 		}
 		elapsed := time.Since(start)
-		logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, cr.CompName, elapsed)
+		logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, v.Name, elapsed)
 	}
 	return nil
 }
@@ -157,4 +163,53 @@ func getCompNameAndInstanceName(name string) (compName, instanceName string) {
 	// use name as instance name
 	instanceName = name
 	return
+}
+
+func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]string, error) {
+	allCompSubMap := make(map[string][]string)
+	for k, v := range p.Hierarchy.Structure {
+		switch subs := v.(type) {
+		case []interface{}:
+			for i := range subs {
+				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(subs[i]))
+			}
+		case map[string]interface{}:
+			if l := subs["left"]; l != "" {
+				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(l))
+			}
+			if r := subs["right"]; r != "" {
+				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(r))
+			}
+			for _, compName := range subs {
+				if compName == "left" || compName == "right" {
+					continue
+				}
+				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(compName))
+			}
+		}
+		allCompSubMap[k] = strutil.DedupSlice(allCompSubMap[k], true)
+	}
+
+	root := p.Hierarchy.Root
+	var results []string
+	if walkErr := recursiveWalkCompOrder(root, &results, allCompSubMap); walkErr != nil {
+		return nil, walkErr
+	}
+	results = strutil.DedupSlice(results, true)
+	return results, nil
+}
+
+// recursiveWalkCompOrder
+// TODO check cycle visited
+func recursiveWalkCompOrder(current string, orders *[]string, allCompSubMap map[string][]string) error {
+	*orders = append(*orders, current)
+	subs := allCompSubMap[current]
+	for _, sub := range subs {
+		if err := recursiveWalkCompOrder(sub, orders, allCompSubMap); err != nil {
+			return err
+		}
+	}
+	*orders = strutil.DedupSlice(*orders, true)
+
+	return nil
 }

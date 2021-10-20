@@ -16,7 +16,6 @@ package protocol
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
@@ -47,10 +46,7 @@ func getScenarioRenders(scenario string) (*ScenarioRender, error) {
 		return nil, fmt.Errorf("failed to get scenario renders, default protocol not exist, scenario: %s", scenario)
 	}
 	for compName, comp := range p.Components {
-		ss := strings.SplitN(compName, "@", 2)
-		if len(ss) == 2 {
-			compName = ss[0]
-		}
+		compName, _ = getCompNameAndInstanceName(compName)
 		// skip if scenario-level component render exist
 		_, renderExist := (*renders)[compName]
 		if renderExist {
