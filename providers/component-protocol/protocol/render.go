@@ -85,7 +85,16 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 		crs, ok := req.Protocol.Rendering[compName]
 		if !ok {
-			logrus.Infof("empty protocol rending for component:%s", compName)
+			logrus.Infof("empty protocol rending for component: %s, use hierarchy and start from %s", compName, compName)
+			orders, err := calculateDefaultRenderOrderByHierarchy(req.Protocol)
+			if err != nil {
+				logrus.Errorf("failed to calculate default render order by hierarchy for empty rendering: %v", err)
+				return err
+			}
+			subRenderingOrders := getDefaultHierarchyRenderOrderFromCompExclude(orders, compName)
+			for _, comp := range subRenderingOrders {
+				compRending = append(compRending, cptype.RendingItem{Name: comp})
+			}
 		} else {
 			compRending = append(compRending, crs...)
 		}
@@ -212,4 +221,18 @@ func recursiveWalkCompOrder(current string, orders *[]string, allCompSubMap map[
 	*orders = strutil.DedupSlice(*orders, true)
 
 	return nil
+}
+
+func getDefaultHierarchyRenderOrderFromCompExclude(fullOrders []string, startFromCompExclude string) []string {
+	fromIdx := -1
+	for i, comp := range fullOrders {
+		if startFromCompExclude == comp {
+			fromIdx = i
+			break
+		}
+	}
+	if fromIdx == -1 {
+		return []string{}
+	}
+	return fullOrders[fromIdx+1:]
 }
