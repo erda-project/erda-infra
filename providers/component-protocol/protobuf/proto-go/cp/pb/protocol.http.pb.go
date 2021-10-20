@@ -5,10 +5,11 @@ package pb
 
 import (
 	context "context"
+	http1 "net/http"
+
 	transport "github.com/erda-project/erda-infra/pkg/transport"
 	http "github.com/erda-project/erda-infra/pkg/transport/http"
 	urlenc "github.com/erda-project/erda-infra/pkg/urlenc"
-	http1 "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -51,6 +52,12 @@ func RegisterCPServiceHandler(r http.Router, srv CPServiceHandler, opts ...http.
 		}
 		r.Add(method, path, encodeFunc(
 			func(w http1.ResponseWriter, r *http1.Request) (interface{}, error) {
+				ctx := http.WithRequest(r.Context(), r)
+				ctx = transport.WithHTTPHeaderForServer(ctx, r.Header)
+				if h.Interceptor != nil {
+					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, Render_info)
+				}
+				r = r.WithContext(ctx)
 				var in RenderRequest
 				if err := h.Decode(r, &in); err != nil {
 					return nil, err
@@ -60,11 +67,6 @@ func RegisterCPServiceHandler(r http.Router, srv CPServiceHandler, opts ...http.
 					if err := u.UnmarshalURLValues("", r.URL.Query()); err != nil {
 						return nil, err
 					}
-				}
-				ctx := http.WithRequest(r.Context(), r)
-				ctx = transport.WithHTTPHeaderForServer(ctx, r.Header)
-				if h.Interceptor != nil {
-					ctx = context.WithValue(ctx, transport.ServiceInfoContextKey, Render_info)
 				}
 				out, err := handler(ctx, &in)
 				if err != nil {
