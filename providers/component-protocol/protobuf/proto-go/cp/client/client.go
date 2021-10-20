@@ -4,12 +4,11 @@
 package client
 
 import (
-	"context"
+	context "context"
 
+	grpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
+	pb "github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 	grpc1 "google.golang.org/grpc"
-
-	"github.com/erda-project/erda-infra/pkg/transport/grpc"
-	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 )
 
 // Client provide all service clients.

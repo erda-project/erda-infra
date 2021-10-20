@@ -5,10 +5,11 @@ package pb
 
 import (
 	json "encoding/json"
-	urlenc "github.com/erda-project/erda-infra/pkg/urlenc"
-	structpb "google.golang.org/protobuf/types/known/structpb"
 	url "net/url"
 	strings "strings"
+
+	urlenc "github.com/erda-project/erda-infra/pkg/urlenc"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -21,6 +22,7 @@ var _ urlenc.URLValuesUnmarshaler = (*ComponentEvent)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*DebugOptions)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*RenderRequest)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*RenderResponse)(nil)
+var _ urlenc.URLValuesUnmarshaler = (*IdentityInfo)(nil)
 
 // ComponentProtocol implement urlenc.URLValuesUnmarshaler.
 func (m *ComponentProtocol) UnmarshalURLValues(prefix string, values url.Values) error {
@@ -266,8 +268,23 @@ func (m *RenderResponse) UnmarshalURLValues(prefix string, values url.Values) er
 					m.Protocol.Hierarchy = &Hierarchy{}
 				}
 				m.Protocol.Hierarchy.Root = vals[0]
-			case "userIDs":
-				m.UserIDs = vals
+			}
+		}
+	}
+	return nil
+}
+
+// IdentityInfo implement urlenc.URLValuesUnmarshaler.
+func (m *IdentityInfo) UnmarshalURLValues(prefix string, values url.Values) error {
+	for key, vals := range values {
+		if len(vals) > 0 {
+			switch prefix + key {
+			case "userID":
+				m.UserID = vals[0]
+			case "internalClient":
+				m.InternalClient = vals[0]
+			case "orgID":
+				m.OrgID = vals[0]
 			}
 		}
 	}

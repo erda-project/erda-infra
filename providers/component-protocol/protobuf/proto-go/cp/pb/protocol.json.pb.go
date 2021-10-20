@@ -6,6 +6,7 @@ package pb
 import (
 	bytes "bytes"
 	json "encoding/json"
+
 	jsonpb "github.com/erda-project/erda-infra/pkg/transport/http/encoding/jsonpb"
 	protojson "google.golang.org/protobuf/encoding/protojson"
 )
@@ -28,6 +29,8 @@ var _ json.Marshaler = (*RenderRequest)(nil)
 var _ json.Unmarshaler = (*RenderRequest)(nil)
 var _ json.Marshaler = (*RenderResponse)(nil)
 var _ json.Unmarshaler = (*RenderResponse)(nil)
+var _ json.Marshaler = (*IdentityInfo)(nil)
+var _ json.Unmarshaler = (*IdentityInfo)(nil)
 
 // ComponentProtocol implement json.Marshaler.
 func (m *ComponentProtocol) MarshalJSON() ([]byte, error) {
@@ -168,6 +171,24 @@ func (m *RenderResponse) MarshalJSON() ([]byte, error) {
 
 // RenderResponse implement json.Marshaler.
 func (m *RenderResponse) UnmarshalJSON(b []byte) error {
+	return (&protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+	}).Unmarshal(b, m)
+}
+
+// IdentityInfo implement json.Marshaler.
+func (m *IdentityInfo) MarshalJSON() ([]byte, error) {
+	buf := &bytes.Buffer{}
+	err := (&jsonpb.Marshaler{
+		OrigName:     false,
+		EnumsAsInts:  false,
+		EmitDefaults: true,
+	}).Marshal(buf, m)
+	return buf.Bytes(), err
+}
+
+// IdentityInfo implement json.Marshaler.
+func (m *IdentityInfo) UnmarshalJSON(b []byte) error {
 	return (&protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}).Unmarshal(b, m)

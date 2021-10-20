@@ -20,7 +20,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/erda-project/erda-infra/pkg/transport"
-	commonpb "github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/common/pb"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 )
 
 // GetOrgID .
@@ -52,8 +52,8 @@ func GetAllHeaders(ctx context.Context) metadata.MD {
 }
 
 // GetIdentity get identity from ctx.
-func GetIdentity(ctx context.Context) *commonpb.IdentityInfo {
-	return &commonpb.IdentityInfo{
+func GetIdentity(ctx context.Context) *pb.IdentityInfo {
+	return &pb.IdentityInfo{
 		UserID: GetUserID(ctx),
 		OrgID:  GetOrgID(ctx),
 	}

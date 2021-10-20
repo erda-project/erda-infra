@@ -15,14 +15,14 @@
 package cptype
 
 import (
-	commonpb "github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/common/pb"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
 
 // SDK .
 type SDK struct {
 	Tran     i18n.Translator
-	Identity *commonpb.IdentityInfo
+	Identity *pb.IdentityInfo
 	InParams map[string]interface{}
 	Lang     i18n.LanguageCodes
 }
