@@ -11,7 +11,7 @@ require (
 	github.com/bndr/gotabulate v1.1.2 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/confluentinc/confluent-kafka-go v1.5.2
-	github.com/coreos/bbolt v0.0.0-00010101000000-000000000000 // indirect
+	github.com/coreos/bbolt v1.3.6 // indirect
 	github.com/coreos/etcd v3.3.25+incompatible
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
