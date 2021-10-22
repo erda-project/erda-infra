@@ -16,10 +16,16 @@ package set
 
 // Set defined set func, Set is used to store a collection of unique elements.
 type Set interface {
+
+	// Add element to set
 	Add(e interface{}) bool
+	// Remove remove element to set
 	Remove(e interface{})
+	// Contains Judge whether the set contains the specified elements, if anyone does not contain, return false, otherwise return true
 	Contains(e ...interface{}) bool
+	// Clear remove all from set
 	Clear()
+	// Len return the number of element
 	Len() int
 }
 
