@@ -14,6 +14,7 @@
 
 package set
 
+// Set defined set func, Set is used to store a collection of unique elements.
 type Set interface {
 	Add(e interface{}) bool
 	Remove(e interface{})

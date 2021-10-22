@@ -14,6 +14,7 @@
 
 package set
 
+// set Set data structure
 type set map[interface{}]struct{}
 
 func (set set) Add(element interface{}) bool {
