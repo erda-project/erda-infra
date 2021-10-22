@@ -287,7 +287,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				h.logger.Infof("provider %s task(%s) running ...", key, tname)
 				err := t.fn(ctx)
 				if err != nil {
-					h.logger.Errorf("failed to run provider %s task(%s): %s", key, err)
+					h.logger.Errorf("failed to run provider %s task(%s): %s", key, tname, err)
 				} else {
 					h.logger.Infof("provider %s task(%s) exit", key, tname)
 				}
