@@ -23,6 +23,7 @@ type Set interface {
 	Len() int
 }
 
+// NewSet Initialize a set
 func NewSet(e ...interface{}) Set {
 	set := newSet()
 	for _, item := range e {
