@@ -18,11 +18,11 @@ package set
 type Set interface {
 
 	// Add element to set
-	Add(e interface{}) bool
+	Add(element interface{}) bool
 	// Remove remove element to set
-	Remove(e interface{})
+	Remove(element interface{})
 	// Contains Judge whether the set contains the specified elements, if anyone does not contain, return false, otherwise return true
-	Contains(e ...interface{}) bool
+	Contains(elements ...interface{}) bool
 	// Clear remove all from set
 	Clear()
 	// Len return the number of element
@@ -35,5 +35,13 @@ func NewSet(e ...interface{}) Set {
 	for _, item := range e {
 		set.Add(item)
 	}
-	return set
+	return &set
+}
+
+func NewSyncSet(e ...interface{}) Set {
+	set := newSyncSet()
+	for _, item := range e {
+		set.Add(item)
+	}
+	return &set
 }

@@ -17,9 +17,6 @@ package set
 import "testing"
 
 func Test_set_Add(t *testing.T) {
-	s := NewSet("test_element")
-	s.Contains("test_element")
-
 	type args struct {
 		element interface{}
 	}

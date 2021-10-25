@@ -17,35 +17,33 @@ package set
 // set Set data structure
 type set map[interface{}]struct{}
 
-func (set set) Add(element interface{}) bool {
-	if _, ok := set[element]; ok {
+func (s *set) Add(element interface{}) bool {
+	if _, ok := (*s)[element]; ok {
 		return false
 	}
-	set[element] = struct{}{}
+	(*s)[element] = struct{}{}
 	return true
 }
 
-func (set set) Remove(element interface{}) {
-	delete(set, element)
+func (s *set) Remove(element interface{}) {
+	delete(*s, element)
 }
 
-func (set set) Contains(elements ...interface{}) bool {
+func (s *set) Contains(elements ...interface{}) bool {
 	for _, e := range elements {
-		if _, ok := (set)[e]; !ok {
+		if _, ok := (*s)[e]; !ok {
 			return false
 		}
 	}
 	return true
 }
 
-func (set set) Clear() {
-	for k := range set {
-		delete(set, k)
-	}
+func (s *set) Clear() {
+	*s = newSet()
 }
 
-func (set set) Len() int {
-	return len(set)
+func (s *set) Len() int {
+	return len(*s)
 }
 
 func newSet() set {
