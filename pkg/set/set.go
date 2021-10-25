@@ -38,6 +38,7 @@ func NewSet(e ...interface{}) Set {
 	return &set
 }
 
+// NewSyncSet Initialize a sync set
 func NewSyncSet(e ...interface{}) Set {
 	set := newSyncSet()
 	for _, item := range e {

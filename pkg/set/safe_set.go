@@ -2,6 +2,7 @@ package set
 
 import "sync"
 
+// syncSet syncSet data structure, contains sync.RWMutex
 type syncSet struct {
 	set set
 	sync.RWMutex
@@ -9,34 +10,34 @@ type syncSet struct {
 
 func (ss *syncSet) Add(element interface{}) bool {
 	ss.Lock()
+	defer ss.Unlock()
 	result := ss.set.Add(element)
-	ss.Unlock()
 	return result
 }
 
 func (ss *syncSet) Remove(element interface{}) {
 	ss.Lock()
+	defer ss.Unlock()
 	ss.set.Remove(element)
-	ss.Unlock()
 }
 
 func (ss *syncSet) Contains(elements ...interface{}) bool {
 	ss.RLock()
+	defer ss.RUnlock()
 	result := ss.set.Contains(elements...)
-	ss.RUnlock()
 	return result
 }
 
 func (ss *syncSet) Clear() {
 	ss.Lock()
+	defer ss.Unlock()
 	ss.set = newSet()
-	ss.Unlock()
 }
 
 func (ss *syncSet) Len() int {
 	ss.RLock()
+	defer ss.RUnlock()
 	result := ss.set.Len()
-	ss.RUnlock()
 	return result
 }
 
