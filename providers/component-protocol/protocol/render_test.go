@@ -75,6 +75,7 @@ hierarchy:
       - filter
       - overview_group
       - blocks
+      - mt_plan_chart_group
     overview_group:
       - quality_chart
       - blocks
@@ -87,6 +88,11 @@ hierarchy:
     mt_block_header:
       right: mt_block_header_filter
       left: mt_block_header_title
+    mt_plan_chart_group:
+      children:
+        - mt_plan_chart2
+        - mt_plan_chart
+      extraContent: mt_plan_chart_filter
 `
 	var p cptype.ComponentProtocol
 	assert.NoError(t, yaml.Unmarshal([]byte(py), &p))
@@ -94,7 +100,8 @@ hierarchy:
 	assert.NoError(t, err)
 	expected := []string{"page", "filter", "overview_group", "quality_chart", "blocks", "mt_block",
 		"mt_block_header", "mt_block_header_title", "mt_block_header_filter",
-		"mt_block_detail", "at_block"}
+		"mt_block_detail", "at_block",
+		"mt_plan_chart_group", "mt_plan_chart_filter", "mt_plan_chart2", "mt_plan_chart"}
 	for i := range expected {
 		assert.True(t,true, expected[i] == orders[i])
 	}

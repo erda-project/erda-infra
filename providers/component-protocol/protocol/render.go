@@ -189,11 +189,24 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 			if r := subs["right"]; r != "" {
 				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(r))
 			}
-			for _, compName := range subs {
-				if compName == "left" || compName == "right" {
+			var childrenComps []string
+			if children := subs["children"]; children != nil {
+				switch v := children.(type) {
+				case []interface{}:
+					for _, comp := range v {
+						childrenComps = append(childrenComps, strutil.String(comp))
+					}
+				}
+			}
+			// recognized structKey: left, right, children
+			for structKey, compName := range subs {
+				if structKey == "left" || structKey == "right" || structKey == "children" {
 					continue
 				}
 				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(compName))
+			}
+			for _, comp := range childrenComps {
+				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(comp))
 			}
 		}
 		allCompSubMap[k] = strutil.DedupSlice(allCompSubMap[k], true)
