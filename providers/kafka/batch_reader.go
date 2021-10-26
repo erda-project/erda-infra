@@ -134,7 +134,7 @@ func (r *kafkaBatchReader) Confirm() error {
 		_, err := r.consumer.Commit()
 		if kerr, ok := err.(kafka.Error); ok {
 			if kerr.Code() == kafka.ErrNoOffset {
-				return err
+				return nil
 			}
 		}
 		return err
