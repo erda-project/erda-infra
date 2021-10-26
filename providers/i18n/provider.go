@@ -58,6 +58,9 @@ var (
 // NopTranslator .
 type NopTranslator struct{}
 
+// Get .
+func (t *NopTranslator) Get(lang LanguageCodes, key, def string) string { return def }
+
 // Text .
 func (t *NopTranslator) Text(lang LanguageCodes, key string) string { return key }
 
