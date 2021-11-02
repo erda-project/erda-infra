@@ -15,6 +15,9 @@
 package cptype
 
 import (
+	"strconv"
+
+	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
@@ -23,7 +26,7 @@ import (
 type SDK struct {
 	Tran     i18n.Translator
 	Identity *pb.IdentityInfo
-	InParams map[string]interface{}
+	InParams InParams
 	Lang     i18n.LanguageCodes
 }
 
@@ -36,4 +39,36 @@ func (sdk *SDK) I18n(key string, args ...interface{}) string {
 		}
 	}
 	return sdk.Tran.Sprintf(sdk.Lang, key, args...)
+}
+
+// String .
+func (p InParams) String(key string) string {
+	if p == nil {
+		return ""
+	}
+	return strutil.String(p[key])
+}
+
+// Int64 .
+func (p InParams) Int64(key string) int64 {
+	if p == nil {
+		return 0
+	}
+	i, ok := p[key]
+	if !ok {
+		return 0
+	}
+	switch v := i.(type) {
+	case string:
+		res, _ := strconv.ParseInt(v, 10, 64)
+		return res
+	default:
+		res, _ := i.(int64)
+		return res
+	}
+}
+
+// Uint64 .
+func (p InParams) Uint64(key string) uint64 {
+	return uint64(p.Int64(key))
 }

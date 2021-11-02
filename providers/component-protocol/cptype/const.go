@@ -33,6 +33,9 @@ const (
 
 	// GlobalInnerKeyError .
 	GlobalInnerKeyError GlobalInnerCtxKey = "_error_"
+
+	// GlobalInnerKeyStateTemp .
+	GlobalInnerKeyStateTemp GlobalInnerCtxKey = "_state_temp_"
 )
 
 // DefaultRenderingKey .

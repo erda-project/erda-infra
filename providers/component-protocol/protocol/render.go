@@ -78,6 +78,10 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		}
 
 	} else {
+		// root is always rendered
+		if req.Event.Component != req.Protocol.Hierarchy.Root {
+			compRending = append(compRending, cptype.RendingItem{Name: req.Protocol.Hierarchy.Root})
+		}
 		// 如果是前端触发一个组件操作，则先渲染该组件;
 		// 再根据定义的渲染顺序，依次完成其他组件的state注入和渲染;
 		compName := req.Event.Component
