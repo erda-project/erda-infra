@@ -102,9 +102,7 @@ hierarchy:
 		"mt_block_header", "mt_block_header_title", "mt_block_header_filter",
 		"mt_block_detail", "at_block",
 		"mt_plan_chart_group", "mt_plan_chart_filter", "mt_plan_chart2", "mt_plan_chart"}
-	for i := range expected {
-		assert.True(t,true, expected[i] == orders[i])
-	}
+	assert.Equal(t, expected, orders)
 }
 
 func Test_recursiveWalkCompOrder(t *testing.T) {
@@ -116,9 +114,7 @@ func Test_recursiveWalkCompOrder(t *testing.T) {
 	err := recursiveWalkCompOrder("page", &result, allCompSubMap)
 	assert.NoError(t, err)
 	expected := []string{"page", "title", "overview", "quality_chart", "blocks", "filter"}
-	for i := range expected {
-		assert.True(t,true, expected[i] == result[i])
-	}
+	assert.Equal(t, expected, result)
 }
 
 func Test_getDefaultHierarchyRenderOrderFromCompExclude(t *testing.T) {

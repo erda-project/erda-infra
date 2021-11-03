@@ -202,14 +202,26 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 					}
 				}
 			}
-			// recognized structKey: left, right, children
+			var footerComps []string
+			if footer := subs["footer"]; footer != nil {
+				switch v := footer.(type) {
+				case []interface{}:
+					for _, comp := range v {
+						footerComps = append(footerComps, strutil.String(comp))
+					}
+				}
+			}
+			// recognized structKey: left, right, children, footer
 			for structKey, compName := range subs {
-				if structKey == "left" || structKey == "right" || structKey == "children" {
+				if structKey == "left" || structKey == "right" || structKey == "children" || structKey == "footer" {
 					continue
 				}
 				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(compName))
 			}
 			for _, comp := range childrenComps {
+				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(comp))
+			}
+			for _, comp := range footerComps {
 				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(comp))
 			}
 		}
