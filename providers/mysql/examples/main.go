@@ -19,9 +19,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jinzhu/gorm"
+
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/mysql"
-	"github.com/jinzhu/gorm"
 )
 
 type provider struct {
@@ -37,6 +38,9 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func (p *provider) Run(ctx context.Context) error {
+	if err := p.DB.Exec("SELECT 1").Error; err != nil {
+		return err
+	}
 	for {
 		select {
 		case <-ctx.Done():

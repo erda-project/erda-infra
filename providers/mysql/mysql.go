@@ -19,10 +19,11 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/base/servicehub"
 	_ "github.com/go-sql-driver/mysql" // mysql client driver package
 	"github.com/jinzhu/gorm"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
 // Interface .
@@ -45,6 +46,7 @@ type config struct {
 	MySQLMaxIdleConns uint64        `file:"max_idle_conns" env:"MYSQL_MAXIDLECONNS" default:"1"`
 	MySQLMaxOpenConns uint64        `file:"max_open_conns" env:"MYSQL_MAXOPENCONNS" default:"2"`
 	MySQLMaxLifeTime  time.Duration `file:"max_lifetime" env:"MYSQL_MAXLIFETIME" default:"30m"`
+	MySQLDebug        bool          `file:"debug" env:"MYYSQL_DEBUG" default:"false"`
 }
 
 func (c *config) url() string {
@@ -74,6 +76,9 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	db.DB().SetMaxOpenConns(int(p.Cfg.MySQLMaxOpenConns))
 	db.DB().SetConnMaxLifetime(p.Cfg.MySQLMaxLifeTime)
 	p.db = db
+	if p.Cfg.MySQLDebug {
+		p.db = p.db.Debug()
+	}
 	return nil
 }
 
