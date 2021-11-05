@@ -15,6 +15,8 @@
 package prometheus
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -24,19 +26,42 @@ import (
 )
 
 type config struct {
-	MetricsPath string `file:"metrics_path" default:"/metrics"`
+	MetricsPath       string `file:"metrics_path" default:"/metrics"`
+	RouterLabelEnable bool   `file:"router_label_enable" default:"true"`
+	RouterLabel       string `file:"router_label" default:"admin"`
 }
 
 // provider .
 type provider struct {
 	server *http.Server
 	Cfg    *config
-	Router httpserver.Router `autowired:"http-server@admin"`
+}
+
+func findRouter(ctx servicehub.Context, service string) (httpserver.Router, error) {
+	svc := ctx.Service(service)
+	if svc == nil {
+		return nil, errors.New("unable to find http router: " + service)
+	}
+	router, ok := svc.(httpserver.Router)
+	if !ok {
+		return nil, fmt.Errorf("invalid type %T, which must be httpserver.Router", svc)
+	}
+	return router, nil
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.Router.GET(p.Cfg.MetricsPath, promhttp.Handler())
+	svcName := "http-router"
+	if p.Cfg.RouterLabelEnable {
+		svcName += "@" + p.Cfg.RouterLabel
+	}
+
+	router, err := findRouter(ctx, svcName)
+	if err != nil {
+		return fmt.Errorf("find router: %w", err)
+	}
+
+	router.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
 }
 
