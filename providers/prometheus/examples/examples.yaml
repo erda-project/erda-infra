@@ -3,4 +3,3 @@ http-server:
 http-server@admin:
     addr: ":8081"
 prometheus:
-    http_router: prometheus

@@ -26,8 +26,9 @@ import (
 )
 
 type config struct {
-	MetricsPath string `file:"metrics_path" default:"/metrics"`
-	HTTPRouter  string `file:"http_router" default:"http-server@admin"`
+	MetricsPath       string `file:"metrics_path" default:"/metrics"`
+	RouterLabelEnable bool   `file:"router_label_enable" default:"true"`
+	RouterLabel       string `file:"router_label" default:"admin"`
 }
 
 // provider .
@@ -36,16 +37,30 @@ type provider struct {
 	Cfg    *config
 }
 
-// Init .
-func (p *provider) Init(ctx servicehub.Context) error {
-	svc := ctx.Service(p.Cfg.HTTPRouter)
+func findRouter(ctx servicehub.Context, service string) (httpserver.Router, error) {
+	svc := ctx.Service(service)
 	if svc == nil {
-		return errors.New("unable to find http router: "+ p.Cfg.HTTPRouter)
+		return nil, errors.New("unable to find http router: " + service)
 	}
 	router, ok := svc.(httpserver.Router)
 	if !ok {
-		return fmt.Errorf("invalid type %T, which must be httpserver.Router", svc)
+		return nil, fmt.Errorf("invalid type %T, which must be httpserver.Router", svc)
 	}
+	return router, nil
+}
+
+// Init .
+func (p *provider) Init(ctx servicehub.Context) error {
+	svcName := "http-router"
+	if p.Cfg.RouterLabelEnable {
+		svcName += "@" + p.Cfg.RouterLabel
+	}
+
+	router, err := findRouter(ctx, svcName)
+	if err != nil {
+		return fmt.Errorf("find router: %w", err)
+	}
+
 	router.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
 }
