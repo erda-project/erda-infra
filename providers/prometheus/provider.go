@@ -25,18 +25,19 @@ import (
 
 type config struct {
 	MetricsPath string `file:"metrics_path" default:"/metrics"`
+	HTTPRouter  string `file:"http_router" default:"http-server@admin"`
 }
 
 // provider .
 type provider struct {
 	server *http.Server
 	Cfg    *config
-	Router httpserver.Router `autowired:"http-server@admin"`
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.Router.GET(p.Cfg.MetricsPath, promhttp.Handler())
+	router := ctx.Service(p.Cfg.HTTPRouter).(httpserver.Router)
+	router.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
 }
 
