@@ -15,6 +15,8 @@
 package prometheus
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -36,7 +38,14 @@ type provider struct {
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	router := ctx.Service(p.Cfg.HTTPRouter).(httpserver.Router)
+	svc := ctx.Service(p.Cfg.HTTPRouter)
+	if svc == nil {
+		return errors.New("unable to find http router: "+ p.Cfg.HTTPRouter)
+	}
+	router, ok := svc.(httpserver.Router)
+	if !ok {
+		return fmt.Errorf("invalid type %T, which must be httpserver.Router", svc)
+	}
 	router.GET(p.Cfg.MetricsPath, promhttp.Handler())
 	return nil
 }
