@@ -46,7 +46,7 @@ type config struct {
 	MySQLMaxIdleConns uint64        `file:"max_idle_conns" env:"MYSQL_MAXIDLECONNS" default:"1"`
 	MySQLMaxOpenConns uint64        `file:"max_open_conns" env:"MYSQL_MAXOPENCONNS" default:"2"`
 	MySQLMaxLifeTime  time.Duration `file:"max_lifetime" env:"MYSQL_MAXLIFETIME" default:"30m"`
-	MySQLDebug        bool          `file:"debug" env:"MYYSQL_DEBUG" default:"false"`
+	MySQLDebug        bool          `file:"debug" env:"MYSQL_DEBUG" default:"false"`
 }
 
 func (c *config) url() string {
