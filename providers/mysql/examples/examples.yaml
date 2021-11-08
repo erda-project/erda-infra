@@ -4,6 +4,6 @@ mysql:
     username: "${MYSQL_USERNAME:root}"
     password: "${MYSQL_PASSWORD:123456}"
     database: "${MYSQL_DATABASE:test}"
-    debug: true
+    debug: "${MYSQL_DEBUG:true}"
 
 example:
