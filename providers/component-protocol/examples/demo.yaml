@@ -1,19 +1,26 @@
 demo:
 
-# component-protocol framework
-component-protocol:
-
-# components
-component-protocol.components.demo.table:
-  scenario: demo
-component-protocol.components.demo.table@demoTable2: # multi-instances
-
 service-register:
 http-server:
   addr: ":8080"
+  allow_cors: true
 grpc-server:
   addr: ":8081"
 
 i18n:
+  common:
+    - i18n/common.yaml
   files:
-    - dic.yaml
+    - i18n/scenarios
+
+# component-protocol framework
+component-protocol:
+
+# scenario components
+## demo
+component-protocol.components.demo.table:
+  scenario: demo
+component-protocol.components.demo.table@demoTable2: # multi-instances
+
+## yetAnotherDemo
+component-protocol.components.yet-another-demo.table:

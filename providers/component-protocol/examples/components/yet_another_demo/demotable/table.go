@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package components
+package demotable
 
-import (
-	// easy to import all common components
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demo/demotable"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/yet_another_demo/demotable"
-)
+type column struct {
+	DataIndex string `json:"dataIndex,omitempty"`
+	Title     string `json:"title,omitempty"`
+}
+type tableLine struct {
+	SN       string `json:"sn,omitempty"`
+	Name     string `json:"name,omitempty"`
+	HelloMsg string `json:"helloMsg,omitempty"`
+}

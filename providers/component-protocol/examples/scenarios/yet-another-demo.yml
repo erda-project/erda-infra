@@ -1,4 +1,4 @@
-scenario: yetAnotherDemo
+scenario: yet-another-demo
 
 hierarchy:
   root: demoTable
@@ -8,7 +8,3 @@ hierarchy:
 components:
   demoTable:
     type: Table
-
-rendering:
-  __DefaultRendering__:
-    - name: demoTable
