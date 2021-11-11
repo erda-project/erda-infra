@@ -14,9 +14,3 @@ components:
     type: Table
   demoTable2:
     type: Table
-
-rendering:
-  __DefaultRendering__:
-    - name: Container
-    - name: demoTable
-    - name: demoTable2

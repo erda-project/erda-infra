@@ -38,7 +38,7 @@ type provider struct {
 	Log      logs.Logger
 	Register transport.Register
 
-	tran             i18n.Translator
+	tran             i18n.I18n
 	customContextKVs map[interface{}]interface{}
 
 	protocolService *protocolService

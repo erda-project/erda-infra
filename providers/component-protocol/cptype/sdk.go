@@ -24,6 +24,7 @@ import (
 
 // SDK .
 type SDK struct {
+	Scenario string
 	Tran     i18n.Translator
 	Identity *pb.IdentityInfo
 	InParams InParams

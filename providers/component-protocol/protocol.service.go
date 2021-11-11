@@ -39,7 +39,8 @@ func (s *protocolService) Render(ctx context.Context, req *pb.RenderRequest) (*p
 
 	// make sdk
 	sdk := cptype.SDK{
-		Tran:     s.p.tran,
+		Scenario: req.Scenario.ScenarioKey,
+		Tran:     s.p.tran.Translator(req.Scenario.ScenarioKey),
 		Identity: cputil.GetIdentity(ctx),
 		InParams: renderReq.InParams,
 		Lang:     cputil.Language(ctx),

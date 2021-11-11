@@ -41,7 +41,7 @@ type provider struct {
 	Log logs.Logger
 
 	Protocol componentprotocol.Interface
-	Tran     i18n.Translator `translator:"dic"` // match dic.yaml
+	Tran     i18n.I18n
 }
 
 // Init .

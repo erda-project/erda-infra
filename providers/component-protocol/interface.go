@@ -24,7 +24,7 @@ import (
 // Interface wrap CPService and other logic.
 type Interface interface {
 	Render(ctx context.Context, req *pb.RenderRequest) (*pb.RenderResponse, error)
-	SetI18nTran(tran i18n.Translator)
+	SetI18nTran(tran i18n.I18n)
 	WithContextValue(key, value interface{})
 }
 
@@ -34,7 +34,7 @@ func (p *provider) Render(ctx context.Context, req *pb.RenderRequest) (*pb.Rende
 }
 
 // SetI18nTran .
-func (p *provider) SetI18nTran(tran i18n.Translator) { p.tran = tran }
+func (p *provider) SetI18nTran(tran i18n.I18n) { p.tran = tran }
 
 // WithContextValue .
 func (p *provider) WithContextValue(key, value interface{}) { p.customContextKVs[key] = value }
