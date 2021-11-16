@@ -16,6 +16,8 @@ package protocol
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -119,19 +121,19 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		// 组件状态渲染
 		err := protoCompStateRending(ctx, req.Protocol, v)
 		if err != nil {
-			logrus.Errorf("protocol component state rending failed, request:%+v, err: %v", v, err)
+			logrus.Errorf("protocol component state rending failed, request: %+v, err: %v", v, err)
 			return err
 		}
 		// 获取协议中相关组件
 		c, err := getProtoComp(ctx, req.Protocol, v.Name)
 		if err != nil {
-			logrus.Errorf("get component from protocol failed, scenario:%s, component:%s", sk, req.Event.Component)
+			logrus.Errorf("get component from protocol failed, scenario: %s, component: %s", sk, req.Event.Component)
 			return nil
 		}
 		// 获取组件渲染函数
 		cr, err := getCompRender(ctx, *sr, v.Name, c.Type)
 		if err != nil {
-			logrus.Errorf("get component render failed, scenario:%s, component:%s", sk, req.Event.Component)
+			logrus.Errorf("get component render failed, scenario: %s, component: %s", sk, req.Event.Component)
 			return err
 		}
 		// 生成组件对应事件，如果不是组件自身事件则为默认事件
@@ -142,7 +144,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		c.Name = instanceName
 		err = wrapCompRender(cr.RenderC(), req.Protocol.Version).Render(ctx, c, req.Scenario, event, req.Protocol.GlobalState)
 		if err != nil {
-			logrus.Errorf("render component failed,err: %s, scenario:%+v, component:%s", err.Error(), req.Scenario, cr.CompName)
+			logrus.Errorf("render component failed, err: %s, scenario: %+v, component: %s", err.Error(), req.Scenario, cr.CompName)
 			return err
 		}
 		elapsed := time.Since(start)
@@ -184,21 +186,21 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 		switch subs := v.(type) {
 		case []interface{}:
 			for i := range subs {
-				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(subs[i]))
+				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs[i])...)
 			}
 		case map[string]interface{}:
 			if l := subs["left"]; l != "" {
-				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(l))
+				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, l)...)
 			}
 			if r := subs["right"]; r != "" {
-				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(r))
+				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, r)...)
 			}
 			var childrenComps []string
 			if children := subs["children"]; children != nil {
 				switch v := children.(type) {
 				case []interface{}:
 					for _, comp := range v {
-						childrenComps = append(childrenComps, strutil.String(comp))
+						childrenComps = append(childrenComps, *recursiveGetSubComps(nil, comp)...)
 					}
 				}
 			}
@@ -207,7 +209,7 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 				switch v := footer.(type) {
 				case []interface{}:
 					for _, comp := range v {
-						footerComps = append(footerComps, strutil.String(comp))
+						footerComps = append(footerComps, *recursiveGetSubComps(nil, comp)...)
 					}
 				}
 			}
@@ -216,13 +218,13 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 				if structKey == "left" || structKey == "right" || structKey == "children" || structKey == "footer" {
 					continue
 				}
-				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(compName))
+				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, compName)...)
 			}
 			for _, comp := range childrenComps {
-				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(comp))
+				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, comp)...)
 			}
 			for _, comp := range footerComps {
-				allCompSubMap[k] = append(allCompSubMap[k], strutil.String(comp))
+				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, comp)...)
 			}
 		}
 		allCompSubMap[k] = strutil.DedupSlice(allCompSubMap[k], true)
@@ -235,6 +237,32 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 	}
 	results = strutil.DedupSlice(results, true)
 	return results, nil
+}
+
+func recursiveGetSubComps(result *[]string, subs interface{}) *[]string {
+	if result == nil {
+		result = &[]string{}
+	}
+	if subs == nil {
+		return result
+	}
+	switch v := subs.(type) {
+	case []interface{}:
+		for _, vv := range v {
+			recursiveGetSubComps(result, vv)
+		}
+	case map[string]interface{}:
+		for _, vv := range v {
+			recursiveGetSubComps(result, vv)
+		}
+	case string:
+		*result = append(*result, v)
+	case float64:
+		*result = append(*result, strutil.String(v))
+	default:
+		panic(fmt.Errorf("not supported type: %v, subs: %v", reflect.TypeOf(subs), subs))
+	}
+	return result
 }
 
 // recursiveWalkCompOrder

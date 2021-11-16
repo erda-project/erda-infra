@@ -76,6 +76,7 @@ hierarchy:
       - overview_group
       - blocks
       - mt_plan_chart_group
+      - leftHead
     overview_group:
       - quality_chart
       - blocks
@@ -93,6 +94,13 @@ hierarchy:
         - mt_plan_chart2
         - mt_plan_chart
       extraContent: mt_plan_chart_filter
+    leftHead:
+      right:
+        - leftHeadAddSceneSet
+        - moreOperation
+      left: leftHeadTitle
+      tabBarExtraContent:
+        - tabSceneSetExecuteButton
 `
 	var p cptype.ComponentProtocol
 	assert.NoError(t, yaml.Unmarshal([]byte(py), &p))
@@ -101,7 +109,9 @@ hierarchy:
 	expected := []string{"page", "filter", "overview_group", "quality_chart", "blocks", "mt_block",
 		"mt_block_header", "mt_block_header_title", "mt_block_header_filter",
 		"mt_block_detail", "at_block",
-		"mt_plan_chart_group", "mt_plan_chart_filter", "mt_plan_chart2", "mt_plan_chart"}
+		"mt_plan_chart_group", "mt_plan_chart_filter", "mt_plan_chart2", "mt_plan_chart",
+		"leftHead", "leftHeadTitle", "leftHeadAddSceneSet", "moreOperation", "tabSceneSetExecuteButton",
+	}
 	assert.Equal(t, expected, orders)
 }
 

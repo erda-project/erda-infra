@@ -133,7 +133,7 @@ func protoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r c
 			// get bound key value
 			stateFromValue, err = getProtoCompStateValue(ctx, p, stateFrom, stateFromKey)
 			if err != nil {
-				logrus.Errorf("failed to get component state value, component: %s, key: %s", stateFrom, stateFromKey)
+				logrus.Errorf("failed to get component state value, toComponent: %s, fromComponent: %s, key: %s", r.Name, stateFrom, stateFromKey)
 				return err
 			}
 		}
