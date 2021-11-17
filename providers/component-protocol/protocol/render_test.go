@@ -77,6 +77,7 @@ hierarchy:
       - blocks
       - mt_plan_chart_group
       - leftHead
+      - executeHistory
     overview_group:
       - quality_chart
       - blocks
@@ -101,6 +102,9 @@ hierarchy:
       left: leftHeadTitle
       tabBarExtraContent:
         - tabSceneSetExecuteButton
+    executeHistory:
+      children: executeHistoryButton
+      content: executeHistoryPop
 `
 	var p cptype.ComponentProtocol
 	assert.NoError(t, yaml.Unmarshal([]byte(py), &p))
@@ -111,6 +115,7 @@ hierarchy:
 		"mt_block_detail", "at_block",
 		"mt_plan_chart_group", "mt_plan_chart_filter", "mt_plan_chart2", "mt_plan_chart",
 		"leftHead", "leftHeadTitle", "leftHeadAddSceneSet", "moreOperation", "tabSceneSetExecuteButton",
+		"executeHistory", "executeHistoryPop", "executeHistoryButton",
 	}
 	assert.Equal(t, expected, orders)
 }

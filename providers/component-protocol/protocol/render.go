@@ -189,30 +189,10 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs[i])...)
 			}
 		case map[string]interface{}:
-			if l := subs["left"]; l != "" {
-				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, l)...)
-			}
-			if r := subs["right"]; r != "" {
-				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, r)...)
-			}
-			var childrenComps []string
-			if children := subs["children"]; children != nil {
-				switch v := children.(type) {
-				case []interface{}:
-					for _, comp := range v {
-						childrenComps = append(childrenComps, *recursiveGetSubComps(nil, comp)...)
-					}
-				}
-			}
-			var footerComps []string
-			if footer := subs["footer"]; footer != nil {
-				switch v := footer.(type) {
-				case []interface{}:
-					for _, comp := range v {
-						footerComps = append(footerComps, *recursiveGetSubComps(nil, comp)...)
-					}
-				}
-			}
+			allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs["left"])...)
+			allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs["right"])...)
+			childrenComps := *recursiveGetSubComps(nil, subs["children"])
+			footerComps := *recursiveGetSubComps(nil, subs["footer"])
 			// recognized structKey: left, right, children, footer
 			for structKey, compName := range subs {
 				if structKey == "left" || structKey == "right" || structKey == "children" || structKey == "footer" {
