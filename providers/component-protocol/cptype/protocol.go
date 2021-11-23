@@ -137,5 +137,5 @@ type ComponentProtocolDebugOptions struct {
 // ProtocolOptions .
 type ProtocolOptions struct {
 	// SyncIntervalSecond can be float64, such as 10, 1, 0.5 .
-	SyncIntervalSecond float64 `json:"syncIntervalSecond,omitempty"`
+	SyncIntervalSecond float64 `json:"syncIntervalSecond" yaml:"syncIntervalSecond"`
 }
