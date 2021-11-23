@@ -6,6 +6,7 @@ package pb
 import (
 	json "encoding/json"
 	url "net/url"
+	strconv "strconv"
 	strings "strings"
 
 	urlenc "github.com/erda-project/erda-infra/pkg/urlenc"
@@ -20,6 +21,7 @@ var _ urlenc.URLValuesUnmarshaler = (*Component)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*Scenario)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*ComponentEvent)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*DebugOptions)(nil)
+var _ urlenc.URLValuesUnmarshaler = (*ProtocolOptions)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*RenderRequest)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*RenderResponse)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*IdentityInfo)(nil)
@@ -42,6 +44,19 @@ func (m *ComponentProtocol) UnmarshalURLValues(prefix string, values url.Values)
 					m.Hierarchy = &Hierarchy{}
 				}
 				m.Hierarchy.Root = vals[0]
+			case "options":
+				if m.Options == nil {
+					m.Options = &ProtocolOptions{}
+				}
+			case "options.syncIntervalSecond":
+				if m.Options == nil {
+					m.Options = &ProtocolOptions{}
+				}
+				val, err := strconv.ParseFloat(vals[0], 64)
+				if err != nil {
+					return err
+				}
+				m.Options.SyncIntervalSecond = val
 			}
 		}
 	}
@@ -143,6 +158,23 @@ func (m *DebugOptions) UnmarshalURLValues(prefix string, values url.Values) erro
 	return nil
 }
 
+// ProtocolOptions implement urlenc.URLValuesUnmarshaler.
+func (m *ProtocolOptions) UnmarshalURLValues(prefix string, values url.Values) error {
+	for key, vals := range values {
+		if len(vals) > 0 {
+			switch prefix + key {
+			case "syncIntervalSecond":
+				val, err := strconv.ParseFloat(vals[0], 64)
+				if err != nil {
+					return err
+				}
+				m.SyncIntervalSecond = val
+			}
+		}
+	}
+	return nil
+}
+
 // RenderRequest implement urlenc.URLValuesUnmarshaler.
 func (m *RenderRequest) UnmarshalURLValues(prefix string, values url.Values) error {
 	for key, vals := range values {
@@ -205,6 +237,25 @@ func (m *RenderRequest) UnmarshalURLValues(prefix string, values url.Values) err
 					m.Protocol.Hierarchy = &Hierarchy{}
 				}
 				m.Protocol.Hierarchy.Root = vals[0]
+			case "protocol.options":
+				if m.Protocol == nil {
+					m.Protocol = &ComponentProtocol{}
+				}
+				if m.Protocol.Options == nil {
+					m.Protocol.Options = &ProtocolOptions{}
+				}
+			case "protocol.options.syncIntervalSecond":
+				if m.Protocol == nil {
+					m.Protocol = &ComponentProtocol{}
+				}
+				if m.Protocol.Options == nil {
+					m.Protocol.Options = &ProtocolOptions{}
+				}
+				val, err := strconv.ParseFloat(vals[0], 64)
+				if err != nil {
+					return err
+				}
+				m.Protocol.Options.SyncIntervalSecond = val
 			case "debugOptions":
 				if m.DebugOptions == nil {
 					m.DebugOptions = &DebugOptions{}
@@ -268,6 +319,25 @@ func (m *RenderResponse) UnmarshalURLValues(prefix string, values url.Values) er
 					m.Protocol.Hierarchy = &Hierarchy{}
 				}
 				m.Protocol.Hierarchy.Root = vals[0]
+			case "protocol.options":
+				if m.Protocol == nil {
+					m.Protocol = &ComponentProtocol{}
+				}
+				if m.Protocol.Options == nil {
+					m.Protocol.Options = &ProtocolOptions{}
+				}
+			case "protocol.options.syncIntervalSecond":
+				if m.Protocol == nil {
+					m.Protocol = &ComponentProtocol{}
+				}
+				if m.Protocol.Options == nil {
+					m.Protocol.Options = &ProtocolOptions{}
+				}
+				val, err := strconv.ParseFloat(vals[0], 64)
+				if err != nil {
+					return err
+				}
+				m.Protocol.Options.SyncIntervalSecond = val
 			}
 		}
 	}

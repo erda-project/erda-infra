@@ -31,6 +31,7 @@ type ComponentProtocol struct {
 	Hierarchy   Hierarchy                `json:"hierarchy" yaml:"hierarchy"`
 	Components  map[string]*Component    `json:"components" yaml:"components"`
 	Rendering   map[string][]RendingItem `json:"rendering" yaml:"rendering"`
+	Options     ProtocolOptions          `json:"options" yaml:"options"`
 }
 
 // GlobalStateData .
@@ -131,4 +132,10 @@ type ComponentProtocolParams interface{}
 // ComponentProtocolDebugOptions .
 type ComponentProtocolDebugOptions struct {
 	ComponentKey string `json:"componentKey"`
+}
+
+// ProtocolOptions .
+type ProtocolOptions struct {
+	// SyncIntervalSecond can be float64, such as 10, 1, 0.5 .
+	SyncIntervalSecond float64 `json:"syncIntervalSecond,omitempty"`
 }
