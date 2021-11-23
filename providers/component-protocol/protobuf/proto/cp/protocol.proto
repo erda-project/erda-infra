@@ -34,6 +34,9 @@ message ComponentProtocol {
 
   // rendering represents components rendering definitions.
   map<string, google.protobuf.ListValue> rendering = 6;
+
+  // options
+  ProtocolOptions options = 7;
 }
 
 // Hierarchy represents components' hierarchy.
@@ -94,6 +97,12 @@ message ComponentEvent {
 message DebugOptions {
   // componentKey .
   string componentKey = 1;
+}
+
+// ProtocolOptions .
+message ProtocolOptions {
+  // sync interval second.
+  double syncIntervalSecond = 1;
 }
 
 // RenderRequest is protocol render request.
