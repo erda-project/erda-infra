@@ -27,6 +27,11 @@ func (this *ComponentProtocol) Validate() error {
 	}
 	// Validation of proto3 map<> fields is unsupported.
 	// Validation of proto3 map<> fields is unsupported.
+	if this.Options != nil {
+		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.Options); err != nil {
+			return github_com_mwitkow_go_proto_validators.FieldError("Options", err)
+		}
+	}
 	return nil
 }
 func (this *Hierarchy) Validate() error {
@@ -52,6 +57,9 @@ func (this *ComponentEvent) Validate() error {
 	return nil
 }
 func (this *DebugOptions) Validate() error {
+	return nil
+}
+func (this *ProtocolOptions) Validate() error {
 	return nil
 }
 func (this *RenderRequest) Validate() error {
