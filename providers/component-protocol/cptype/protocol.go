@@ -21,6 +21,9 @@ const (
 	InitializeOperation OperationKey = "__Initialize__"
 	// 用于替换掉DefaultOperation，前端触发某组件，在协议Rending中定义了关联渲染组件，传递的事件是RendingOperation
 	RenderingOperation OperationKey = "__Rendering__"
+
+	SyncOperation        OperationKey = "__Sync__"
+	AsyncAtInitOperation OperationKey = "__AsyncAtInit__"
 )
 
 // ComponentProtocol is protocol definition.
@@ -31,7 +34,7 @@ type ComponentProtocol struct {
 	Hierarchy   Hierarchy                `json:"hierarchy" yaml:"hierarchy"`
 	Components  map[string]*Component    `json:"components" yaml:"components"`
 	Rendering   map[string][]RendingItem `json:"rendering" yaml:"rendering"`
-	Options     ProtocolOptions          `json:"options" yaml:"options"`
+	Options     *ProtocolOptions         `json:"options" yaml:"options"`
 }
 
 // GlobalStateData .
@@ -53,27 +56,37 @@ type Component struct {
 	// 组件名字
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 	// table 动态字段
-	Props interface{} `json:"props,omitempty" yaml:"props,omitempty"`
+	Props ComponentProps `json:"props,omitempty" yaml:"props,omitempty"`
 	// 组件业务数据
 	Data ComponentData `json:"data,omitempty" yaml:"data,omitempty"`
 	// 前端组件状态
-	State map[string]interface{} `json:"state,omitempty" yaml:"state,omitempty"`
+	State ComponentState `json:"state,omitempty" yaml:"state,omitempty"`
 	// 组件相关操作（前端定义）
-	Operations ComponentOps `json:"operations,omitempty" yaml:"operations,omitempty"`
+	Operations ComponentOperations `json:"operations,omitempty" yaml:"operations,omitempty"`
+	// Component Options
+	Options *ComponentOptions `json:"options,omitempty" yaml:"options,omitempty"`
 }
+
+// ComponentState .
+type ComponentState map[string]interface{}
 
 // ComponentData .
 type ComponentData map[string]interface{}
 
-// ComponentOps .
-type ComponentOps map[string]interface{}
+// ComponentProps .
+type ComponentProps map[string]interface{}
 
-// Operation .
-type Operation struct {
-	Key      string `json:"key"`
-	Value    string `json:"value"`
-	Reload   bool   `json:"reload"`
-	FillMeta string `json:"fillMeta"`
+// ComponentOperations .
+type ComponentOperations map[string]interface{}
+
+// ComponentOptions .
+type ComponentOptions struct {
+	Visible     bool `json:"visible,omitempty" yaml:"visible,omitempty"`
+	AsyncAtInit bool `json:"asyncAtInit,omitempty" yaml:"asyncAtInit,omitempty"`
+
+	// extra related
+	FlatExtra            bool `json:"flatExtra,omitempty" yaml:"flatExtra,omitempty"`
+	RemoveExtraAfterFlat bool `json:"removeExtraAfterFlat,omitempty" yaml:"removeExtraAfterFlat,omitempty"`
 }
 
 // RendingItem .

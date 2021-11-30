@@ -19,6 +19,8 @@ var _ json.Marshaler = (*Hierarchy)(nil)
 var _ json.Unmarshaler = (*Hierarchy)(nil)
 var _ json.Marshaler = (*Component)(nil)
 var _ json.Unmarshaler = (*Component)(nil)
+var _ json.Marshaler = (*ComponentOptions)(nil)
+var _ json.Unmarshaler = (*ComponentOptions)(nil)
 var _ json.Marshaler = (*Scenario)(nil)
 var _ json.Unmarshaler = (*Scenario)(nil)
 var _ json.Marshaler = (*ComponentEvent)(nil)
@@ -83,6 +85,24 @@ func (m *Component) MarshalJSON() ([]byte, error) {
 
 // Component implement json.Marshaler.
 func (m *Component) UnmarshalJSON(b []byte) error {
+	return (&protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+	}).Unmarshal(b, m)
+}
+
+// ComponentOptions implement json.Marshaler.
+func (m *ComponentOptions) MarshalJSON() ([]byte, error) {
+	buf := &bytes.Buffer{}
+	err := (&jsonpb.Marshaler{
+		OrigName:     false,
+		EnumsAsInts:  false,
+		EmitDefaults: true,
+	}).Marshal(buf, m)
+	return buf.Bytes(), err
+}
+
+// ComponentOptions implement json.Marshaler.
+func (m *ComponentOptions) UnmarshalJSON(b []byte) error {
 	return (&protojson.UnmarshalOptions{
 		DiscardUnknown: true,
 	}).Unmarshal(b, m)

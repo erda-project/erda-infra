@@ -15,6 +15,7 @@
 package cputil
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,4 +35,63 @@ func TestObjJSONTransfer(t *testing.T) {
 	err := ObjJSONTransfer(&src, &dest)
 	assert.NoError(t, err)
 	assert.Equal(t, src.Options.SyncIntervalSecond, dest.Options.SyncIntervalSecond)
+}
+
+func TestMustFlatMapMeta(t *testing.T) {
+	input := map[string]interface{}{
+		"a": "b",
+	}
+	MustFlatMapMeta(input, false)
+	assert.True(t, len(input) == 1)
+
+	input = map[string]interface{}{
+		"c": "d",
+		"meta": map[string]interface{}{
+			"a": "b",
+		},
+	}
+	MustFlatMapMeta(input, false)
+	assert.True(t, len(input) == 3)
+
+	// map
+	input = map[string]interface{}{
+		"c": "d",
+		"meta": map[string]interface{}{
+			"a": "b",
+		},
+		"flatMeta": true,
+	}
+	MustFlatMapMeta(input, false)
+	assert.True(t, len(input) == 4)
+	assert.Equal(t, "b", input["a"])
+
+	// ref map
+	input = map[string]interface{}{
+		"c": "d",
+		"meta": map[string]interface{}{
+			"a": "b",
+			"e": "f",
+		},
+		"flatMeta": true,
+	}
+	MustFlatMapMeta(&input, false)
+	assert.True(t, len(input) == 5)
+	assert.Equal(t, "b", input["a"])
+	assert.Equal(t, "f", input["e"])
+
+	// nested flat meta
+	input = map[string]interface{}{
+		"a": "b",
+		"meta": map[string]interface{}{
+			"sub": map[string]interface{}{
+				"meta": map[string]interface{}{
+					"e": "f",
+					"g": "h",
+				},
+			},
+		},
+	}
+	MustFlatMapMeta(&input, true)
+	b, _ := json.MarshalIndent(input, "", "  ")
+	fmt.Println(string(b))
 }

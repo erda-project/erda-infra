@@ -15,6 +15,7 @@
 package cptype
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/erda-project/erda-infra/pkg/strutil"
@@ -24,11 +25,25 @@ import (
 
 // SDK .
 type SDK struct {
+	Ctx      context.Context
 	Scenario string
 	Tran     i18n.Translator
 	Identity *pb.IdentityInfo
 	InParams InParams
 	Lang     i18n.LanguageCodes
+
+	GlobalState *GlobalStateData
+	Event       ComponentEvent
+	CompOpFuncs map[OperationKey]OperationFunc
+	Comp        *Component
+}
+
+// UniversalStructuredCompPtr .
+type UniversalStructuredCompPtr struct {
+	StdInParamsPtr   interface{}
+	StdStatePtr      interface{}
+	StdDataPtr       interface{}
+	StdOperationsPtr interface{}
 }
 
 // I18n .
@@ -72,4 +87,14 @@ func (p InParams) Int64(key string) int64 {
 // Uint64 .
 func (p InParams) Uint64(key string) uint64 {
 	return uint64(p.Int64(key))
+}
+
+// RegisterOperation .
+func (sdk *SDK) RegisterOperation(opKey OperationKey, opFunc OperationFunc) {
+	sdk.CompOpFuncs[opKey] = opFunc
+}
+
+// SetUserIDs .
+func (sdk *SDK) SetUserIDs(userIDs []string) {
+	(*sdk.GlobalState)[GlobalInnerKeyUserIDs.String()] = strutil.DedupSlice(userIDs, true)
 }
