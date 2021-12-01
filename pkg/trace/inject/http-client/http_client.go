@@ -17,7 +17,7 @@ package traceinject
 import (
 	"net/http"
 	"time"
-	_ "unsafe"
+	_ "unsafe" //nolint
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"

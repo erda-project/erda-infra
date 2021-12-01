@@ -15,7 +15,7 @@
 package etcdclientv3
 
 import (
-	_ "unsafe"
+	_ "unsafe" //nolint
 
 	"github.com/coreos/etcd/clientv3"
 	"google.golang.org/grpc"
