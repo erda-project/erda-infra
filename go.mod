@@ -79,7 +79,6 @@ require (
 
 replace (
 	github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.5
-	go.opentelemetry.io/otel/exporters/stdout => go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.2.0
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => github.com/kubernetes/api v0.18.3
 	k8s.io/apiextensions-apiserver => github.com/kubernetes/apiextensions-apiserver v0.18.3
