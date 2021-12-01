@@ -30,6 +30,7 @@ var _ Option = OptionFunc(nil)
 // OptionFunc implements the Option interface.
 type OptionFunc func(*config)
 
+// Apply .
 func (f OptionFunc) Apply(c *config) {
 	f(c)
 }

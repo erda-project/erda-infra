@@ -17,11 +17,11 @@ package traceinject
 import (
 	"context"
 	"net/http"
-	_ "unsafe"
+	_ "unsafe" //nolint
 
-	injectcontext "github.com/erda-project/erda-infra/pkg/trace/inject/context"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
+	injectcontext "github.com/erda-project/erda-infra/pkg/trace/inject/context"
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
 

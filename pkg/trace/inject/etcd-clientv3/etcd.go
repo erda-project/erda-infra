@@ -18,9 +18,10 @@ import (
 	_ "unsafe"
 
 	"github.com/coreos/etcd/clientv3"
+	"google.golang.org/grpc"
+
 	grpccontext "github.com/erda-project/erda-infra/pkg/trace/inject/context/grpc"
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
-	"google.golang.org/grpc"
 )
 
 //go:linkname newClient github.com/coreos/etcd/clientv3.newClient

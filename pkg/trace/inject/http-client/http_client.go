@@ -19,11 +19,11 @@ import (
 	"time"
 	_ "unsafe"
 
-	injectcontext "github.com/erda-project/erda-infra/pkg/trace/inject/context"
-	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
-
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
+
+	injectcontext "github.com/erda-project/erda-infra/pkg/trace/inject/context"
+	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
 
 //go:linkname send net/http.send

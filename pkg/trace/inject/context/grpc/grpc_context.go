@@ -17,10 +17,10 @@ package grpccontext
 import (
 	"context"
 
-	injectcontext "github.com/erda-project/erda-infra/pkg/trace/inject/context"
-
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
+
+	injectcontext "github.com/erda-project/erda-infra/pkg/trace/inject/context"
 )
 
 // UnaryServerInterceptor .

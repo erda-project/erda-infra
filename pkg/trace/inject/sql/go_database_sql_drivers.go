@@ -18,10 +18,10 @@ import (
 	"database/sql/driver"
 	"log"
 	"sync"
-	_ "unsafe"
+	_ "unsafe" //nolint
 
 	"github.com/XSAM/otelsql"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" //nolint
 )
 
 var (

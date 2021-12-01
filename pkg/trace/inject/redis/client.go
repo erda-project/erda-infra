@@ -15,8 +15,9 @@
 package redis
 
 import (
-	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 	"github.com/go-redis/redis"
+
+	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
 
 // Client .
