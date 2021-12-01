@@ -31,7 +31,7 @@ import (
 func Init(opt ...sdktrace.TracerProviderOption) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("[ERROR] failed to initialize TracerProvider %v\n", err)
+			log.Printf("[ERROR] failed to initialize TracerProvider %s\n", err)
 		}
 	}()
 	tp := sdktrace.NewTracerProvider(opt...)
