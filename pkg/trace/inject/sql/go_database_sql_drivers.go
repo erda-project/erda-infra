@@ -16,26 +16,50 @@ package sql
 
 import (
 	"database/sql"
-	"database/sql/driver"
+	"sync"
+
+	"github.com/XSAM/otelsql"
+	_ "github.com/go-sql-driver/mysql" //nolint
 
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
-	_ "github.com/go-sql-driver/mysql" //nolint
 )
 
 //go:noinline
-func originalOpenDB(c driver.Connector) *sql.DB {
-	return sql.OpenDB(c)
+func originalOpen(driverName, dataSourceName string) (*sql.DB, error) {
+	return sql.Open(driverName, dataSourceName)
 }
 
+var (
+	driversMu sync.Mutex
+	drivers   = map[string]string{}
+)
+
 //go:noinline
-func tracedOpenDB(c driver.Connector) *sql.DB {
-	d := c.Driver()
-	return originalOpenDB(&wrappedConnector{
-		driver:    wrapDriver(d),
-		connector: c,
-	})
+func tracedOpen(driverName, dataSourceName string) (*sql.DB, error) {
+	driversMu.Lock()
+	if dname, ok := drivers[driverName]; !ok {
+		// retrieve the driver implementation we need to wrap with instrumentation
+		db, err := originalOpen(driverName, "")
+		if err != nil {
+			driversMu.Unlock()
+			return nil, err
+		}
+		d := db.Driver()
+		if err = db.Close(); err != nil {
+			driversMu.Unlock()
+			return nil, err
+		}
+		dname = "otelsql-" + driverName
+		sql.Register(dname, wrapDriver(otelsql.WrapDriver(d, driverName)))
+		drivers[driverName] = dname
+		driverName = dname
+	} else {
+		driverName = dname
+	}
+	driversMu.Unlock()
+	return originalOpen(driverName, dataSourceName)
 }
 
 func init() {
-	hook.Hook(sql.OpenDB, tracedOpenDB, originalOpenDB)
+	hook.Hook(sql.Open, tracedOpen, originalOpen)
 }
