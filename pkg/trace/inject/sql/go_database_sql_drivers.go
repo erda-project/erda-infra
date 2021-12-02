@@ -30,6 +30,8 @@ var (
 
 	//go:linkname drivers database/sql.drivers
 	drivers map[string]driver.Driver
+
+	x int = 1
 )
 
 // WrapDrivers .
