@@ -21,6 +21,7 @@ import (
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	grpccontext "github.com/erda-project/erda-infra/pkg/trace/inject/context/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -37,6 +38,7 @@ type config struct {
 		CertFile string `file:"cert_file" desc:"the TLS cert file"`
 		KeyFile  string `file:"key_file" desc:"the TLS key file"`
 	} `file:"tls"`
+	TraceEnable bool `file:"trace_enable" default:"true"`
 }
 
 type provider struct {
@@ -60,6 +62,12 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			return fmt.Errorf("fail to generate credentials %v", err)
 		}
 		opts = append(opts, grpc.Creds(creds))
+	}
+	if p.Cfg.TraceEnable {
+		opts = append(opts,
+			grpc.UnaryInterceptor(grpccontext.UnaryServerInterceptor()),
+			grpc.StreamInterceptor(grpccontext.StreamServerInterceptor()),
+		)
 	}
 	p.server = grpc.NewServer(opts...)
 	return nil
