@@ -15,46 +15,27 @@
 package sql
 
 import (
+	"database/sql"
 	"database/sql/driver"
-	"log"
-	"sync"
-	_ "unsafe" //nolint
 
-	"github.com/XSAM/otelsql"
+	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 	_ "github.com/go-sql-driver/mysql" //nolint
 )
 
-var (
-	//go:linkname drivers database/sql.driversMu
-	driversMu sync.RWMutex
-
-	//go:linkname drivers database/sql.drivers
-	drivers map[string]driver.Driver
-
-	x int = 1
-)
-
-// WrapDrivers .
-func WrapDrivers() {
-	driversMu.Lock()
-	defer driversMu.Unlock()
-	for name, driver := range drivers {
-		if _, ok := driver.(*wrappedDriver); ok {
-			continue
-		}
-		if _, ok := driver.(*wrappedDriverContext); ok {
-			continue
-		}
-		drivers[name] = WrapDriver(name, driver)
-	}
+//go:noinline
+func originalOpenDB(c driver.Connector) *sql.DB {
+	return sql.OpenDB(c)
 }
 
-// WrapDriver .
-func WrapDriver(name string, d driver.Driver) driver.Driver {
-	log.Printf("hook %q database driver", name)
-	return wrapDriver(otelsql.WrapDriver(d, name))
+//go:noinline
+func tracedOpenDB(c driver.Connector) *sql.DB {
+	d := c.Driver()
+	return originalOpenDB(&wrappedConnector{
+		driver:    wrapDriver(d),
+		connector: c,
+	})
 }
 
 func init() {
-	WrapDrivers()
+	hook.Hook(sql.OpenDB, tracedOpenDB, originalOpenDB)
 }

@@ -57,18 +57,18 @@ func (d *wrappedDriverContext) OpenConnector(name string) (driver.Connector, err
 		return nil, err
 	}
 	return &wrappedConnector{
-		wrappedDriver: d.wrappedDriver,
-		Connector:     rawConnector,
+		driver:    d,
+		connector: rawConnector,
 	}, err
 }
 
 type wrappedConnector struct {
-	*wrappedDriver
-	driver.Connector
+	driver    driver.Driver
+	connector driver.Connector
 }
 
 func (c *wrappedConnector) Connect(ctx context.Context) (driver.Conn, error) {
-	conn, err := c.Connector.Connect(ctx)
+	conn, err := c.connector.Connect(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -78,5 +78,5 @@ func (c *wrappedConnector) Connect(ctx context.Context) (driver.Conn, error) {
 }
 
 func (c *wrappedConnector) Driver() driver.Driver {
-	return c.wrappedDriver
+	return c.driver
 }
