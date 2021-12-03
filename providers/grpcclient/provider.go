@@ -21,6 +21,7 @@ import (
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	grpccontext "github.com/erda-project/erda-infra/pkg/trace/inject/context/grpc"
 	transgrpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -44,8 +45,9 @@ type config struct {
 		ServerNameOverride string `file:"cert_file" desc:"the server name used to verify the hostname returned by the TLS handshake"`
 		CAFile             string `file:"ca_file" desc:"the file containing the CA root cert file"`
 	} `file:"tls"`
-	Singleton bool `file:"singleton" default:"true" desc:"one client instance"`
-	Block     bool `file:"block" default:"true" desc:"block until the connection is up"`
+	Singleton   bool `file:"singleton" default:"true" desc:"one client instance"`
+	Block       bool `file:"block" default:"true" desc:"block until the connection is up"`
+	TraceEnable bool `file:"trace_enable" default:"true"`
 }
 
 type provider struct {
@@ -65,6 +67,12 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		opts = append(opts, grpc.WithTransportCredentials(creds))
 	} else {
 		opts = append(opts, grpc.WithInsecure())
+	}
+	if p.Cfg.TraceEnable {
+		opts = append(opts,
+			grpc.WithUnaryInterceptor(grpccontext.UnaryClientInterceptor()),
+			grpc.WithStreamInterceptor(grpccontext.StreamClientInterceptor()),
+		)
 	}
 	p.opts = opts
 	if p.Cfg.Singleton {
