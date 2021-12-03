@@ -15,7 +15,12 @@
 package redis
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/go-redis/redis"
+	"go.opentelemetry.io/otel/attribute"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
@@ -54,21 +59,33 @@ func originalNewClusterClient(opts *redis.ClusterOptions) *redis.ClusterClient {
 //go:noinline
 func wrappedNewClient(opts *redis.Options) *redis.Client {
 	client := originalNewClient(opts)
-	Wrap(client)
+	Wrap(client, WithAttributes(
+		attribute.Key("db.host").String(opts.Addr),
+		attribute.Key("redis.client.type").String("client"),
+		semconv.DBNameKey.String(strconv.FormatInt(int64(opts.DB), 10)),
+	))
 	return client
 }
 
 //go:noinline
 func wrappedNewFailoverClient(opts *redis.FailoverOptions) *redis.Client {
 	client := originalNewFailoverClient(opts)
-	Wrap(client)
+	Wrap(client, WithAttributes(
+		attribute.Key("db.host").String(strings.Join(opts.SentinelAddrs, ",")),
+		attribute.Key("redis.master.name").String(opts.MasterName),
+		attribute.Key("redis.client.type").String("sentinel"),
+		semconv.DBNameKey.String(strconv.FormatInt(int64(opts.DB), 10)),
+	))
 	return client
 }
 
 //go:noinline
 func wrappedNewClusterClient(opts *redis.ClusterOptions) *redis.ClusterClient {
 	client := originalNewClusterClient(opts)
-	Wrap(client)
+	Wrap(client, WithAttributes(
+		attribute.Key("db.host").String(strings.Join(opts.Addrs, ",")),
+		attribute.Key("redis.client.type").String("cluster"),
+	))
 	return client
 }
 

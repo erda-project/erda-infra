@@ -16,10 +16,13 @@ package sql
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"sync"
 
 	"github.com/XSAM/otelsql"
-	_ "github.com/go-sql-driver/mysql" //nolint
+	"github.com/go-sql-driver/mysql"
+	"go.opentelemetry.io/otel/attribute"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
@@ -50,7 +53,7 @@ func tracedOpen(driverName, dataSourceName string) (*sql.DB, error) {
 			return nil, err
 		}
 		dname = "otelsql-" + driverName
-		sql.Register(dname, wrapDriver(otelsql.WrapDriver(d, driverName)))
+		sql.Register(dname, wrapDriver(otelsql.WrapDriver(d, driverName, otelsql.WithAttributes(getDriverAttributes(driverName, dataSourceName, d)...))))
 		drivers[driverName] = dname
 		driverName = dname
 	} else {
@@ -58,6 +61,21 @@ func tracedOpen(driverName, dataSourceName string) (*sql.DB, error) {
 	}
 	driversMu.Unlock()
 	return originalOpen(driverName, dataSourceName)
+}
+
+func getDriverAttributes(driverName, dataSourceName string, d driver.Driver) (attrs []attribute.KeyValue) {
+	switch driverName {
+	case "mysql":
+		cfg, err := mysql.ParseDSN(dataSourceName)
+		if err == nil {
+			attrs = append(attrs,
+				semconv.DBUserKey.String(cfg.User),
+				semconv.DBNameKey.String(cfg.DBName),
+				attribute.Key("db.host").String(cfg.Addr),
+			)
+		}
+	}
+	return attrs
 }
 
 func init() {
