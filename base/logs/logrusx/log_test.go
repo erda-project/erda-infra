@@ -1,8 +1,9 @@
 package logrusx
 
 import (
-	"github.com/sirupsen/logrus"
 	"testing"
+
+	"github.com/sirupsen/logrus"
 )
 
 func TestNew(t *testing.T) {
