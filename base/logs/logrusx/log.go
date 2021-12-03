@@ -15,8 +15,12 @@
 package logrusx
 
 import (
+	"io/ioutil"
+	"os"
+
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/writer"
 )
 
 // Logger .
@@ -28,6 +32,24 @@ type Logger struct {
 // New .
 func New(options ...Option) logs.Logger {
 	log := logrus.New()
+	log.SetOutput(ioutil.Discard)
+	log.AddHook(&writer.Hook{
+		Writer: os.Stderr,
+		LogLevels: []logrus.Level{
+			logrus.PanicLevel,
+			logrus.FatalLevel,
+			logrus.ErrorLevel,
+			logrus.WarnLevel,
+		},
+	})
+	log.AddHook(&writer.Hook{
+		Writer: os.Stdout,
+		LogLevels: []logrus.Level{
+			logrus.InfoLevel,
+			logrus.DebugLevel,
+		},
+	})
+
 	log.SetFormatter(&logrus.TextFormatter{
 		ForceColors:     false,
 		FullTimestamp:   true,
