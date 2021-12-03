@@ -18,9 +18,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/writer"
+
+	"github.com/erda-project/erda-infra/base/logs"
 )
 
 // Logger .
