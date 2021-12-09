@@ -134,6 +134,7 @@ func genProvider(gen *protogen.Plugin, files []*protogen.File, root *protogen.Fi
 	g.P("		Services: []string{")
 	for _, name := range services {
 		g.P("		", strconv.Quote(name), ",")
+		g.P("		", strconv.Quote(name+".client"), ",")
 	}
 	g.P("		", strconv.Quote(string(root.Desc.Package())+"-client"), ",")
 	g.P("		},")

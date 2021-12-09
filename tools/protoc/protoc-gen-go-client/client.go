@@ -120,10 +120,18 @@ func genClient(gen *protogen.Plugin, files []*protogen.File, root *protogen.File
 			g.P("}")
 			g.P()
 			for _, m := range ser.Methods {
-				g.P("func (s *", typeName, ") ", m.GoName, "(ctx ", contextPackage.Ident("Context"), ",req *", m.Input.GoIdent, ") (*", m.Output.GoIdent, ", error) {")
-				g.P("	return s.client.", m.GoName, "(ctx, req, append(", transgrpcPackage.Ident("CallOptionFromContext"), "(ctx), s.opts...)...)")
-				g.P("}")
-				g.P()
+				if m.Desc.IsStreamingServer() || m.Desc.IsStreamingClient() {
+					g.P("// ", m.GoName, " This method has no implements, do not use it directly")
+					g.P("func (s *", typeName, ") ", m.GoName, "(req *", m.Input.GoIdent, ", stream ", file.GoImportPath.Ident(fmt.Sprintf("%v_%vServer", ser.GoName, m.GoName)), ") error {")
+					g.P("	panic(\"not implemented\")")
+					g.P("}")
+					g.P()
+				} else {
+					g.P("func (s *", typeName, ") ", m.GoName, "(ctx ", contextPackage.Ident("Context"), ",req *", m.Input.GoIdent, ") (*", m.Output.GoIdent, ", error) {")
+					g.P("	return s.client.", m.GoName, "(ctx, req, append(", transgrpcPackage.Ident("CallOptionFromContext"), "(ctx), s.opts...)...)")
+					g.P("}")
+					g.P()
+				}
 			}
 		}
 	}
