@@ -27,6 +27,7 @@ import (
 
 //go:linkname RoundTrip net/http.(*Transport).RoundTrip
 //go:noinline
+// RoundTrip .
 func RoundTrip(t *http.Transport, req *http.Request) (*http.Response, error)
 
 //go:noinline
