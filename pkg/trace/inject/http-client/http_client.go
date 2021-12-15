@@ -16,7 +16,6 @@ package traceinject
 
 import (
 	"net/http"
-	"time"
 	_ "unsafe" //nolint
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -26,31 +25,28 @@ import (
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
 
-//go:linkname send net/http.send
+//go:linkname RoundTrip net/http.(*Transport).RoundTrip
 //go:noinline
-func send(ireq *http.Request, rt http.RoundTripper, deadline time.Time) (resp *http.Response, didTimeout func() bool, err error)
+func RoundTrip(t *http.Transport, req *http.Request) (*http.Response, error)
 
 //go:noinline
-func originalSend(ireq *http.Request, rt http.RoundTripper, deadline time.Time) (resp *http.Response, didTimeout func() bool, err error) {
-	return send(ireq, rt, deadline)
+func originalRoundTrip(t *http.Transport, req *http.Request) (*http.Response, error) {
+	return RoundTrip(t, req)
+}
+
+type wrappedTransport struct {
+	t *http.Transport
 }
 
 //go:noinline
-func tracedSend(ireq *http.Request, rt http.RoundTripper, deadline time.Time) (resp *http.Response, didTimeout func() bool, err error) {
-	rt = &wrappedRoundTripper{
-		RoundTripper: otelhttp.NewTransport(rt),
-	}
-	return originalSend(ireq, rt, deadline)
-}
-
-type wrappedRoundTripper struct {
-	http.RoundTripper
+func (t *wrappedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return originalRoundTrip(t.t, req)
 }
 
 //go:noinline
-func (t *wrappedRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+func tracedRoundTrip(t *http.Transport, req *http.Request) (*http.Response, error) {
 	req = contextWithSpan(req)
-	return t.RoundTripper.RoundTrip(req)
+	return otelhttp.NewTransport(&wrappedTransport{t: t}).RoundTrip(req)
 }
 
 //go:noinline
@@ -69,5 +65,6 @@ func contextWithSpan(req *http.Request) *http.Request {
 }
 
 func init() {
-	hook.Hook(send, tracedSend, originalSend)
+	// hook.Hook(send, tracedSend, originalSend)
+	hook.Hook(RoundTrip, tracedRoundTrip, originalRoundTrip)
 }
