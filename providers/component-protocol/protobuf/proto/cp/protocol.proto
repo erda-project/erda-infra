@@ -68,6 +68,16 @@ message Component {
 
   // operations of the component.
   map<string, google.protobuf.Value> operations = 6;
+
+  // options of the component.
+  ComponentOptions options = 7;
+}
+
+message ComponentOptions {
+  bool visible = 1;
+  bool asyncAtInit = 2;
+  bool flatMeta = 3;
+  bool removeMetaAfterFlat = 4;
 }
 
 // Scenario represents protocol scenario.

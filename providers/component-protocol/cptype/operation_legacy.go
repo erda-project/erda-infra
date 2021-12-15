@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package components
+package cptype
 
-import (
-	// easy to import all common components
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demo/demotable"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/kanban_demo/kanban"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/yet_another_demo/demotable"
-)
+// LegacyOperation .
+type LegacyOperation struct {
+	Key         string `json:"key,omitempty"`
+	Text        string `json:"text,omitempty"`
+	Confirm     string `json:"confirm,omitempty"`
+	Disabled    bool   `json:"disabled,omitempty"`
+	DisabledTip string `json:"disabledTip,omitempty"`
+	Reload      bool   `json:"reload,omitempty"`
+}

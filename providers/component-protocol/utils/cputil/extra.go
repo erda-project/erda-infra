@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package components
+package cputil
 
 import (
-	// easy to import all common components
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demo/demotable"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/kanban_demo/kanban"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/yet_another_demo/demotable"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
+
+// NewExtra .
+func NewExtra(inputPtr interface{}) cptype.Extra {
+	output := make(map[string]interface{})
+	MustObjJSONTransfer(inputPtr, &output)
+	return cptype.Extra{Extra: output}
+}

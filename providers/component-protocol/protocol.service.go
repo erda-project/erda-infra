@@ -55,6 +55,8 @@ func (s *protocolService) Render(ctx context.Context, req *pb.RenderRequest) (*p
 	// temp state
 	ctx = context.WithValue(ctx, cptype.GlobalInnerKeyStateTemp, make(map[string]interface{}))
 
+	sdk.Ctx = ctx
+
 	// render concrete scenario
 	if err := protocol.RunScenarioRender(ctx, renderReq); err != nil {
 		return nil, err

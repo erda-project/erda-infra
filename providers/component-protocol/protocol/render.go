@@ -106,6 +106,8 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		}
 	}
 	compRending = polishComponentRendering(req.DebugOptions, compRending)
+	compRending = polishComponentRenderingByInitOp(req.Protocol, req.Event, compRending)
+	compRending = polishComponentRenderingByAsyncAtInitOp(req.Protocol, req.Event, compRending)
 
 	if req.Protocol.GlobalState == nil {
 		gs := make(cptype.GlobalStateData)
@@ -162,6 +164,61 @@ func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions
 		if item.Name == debugOptions.ComponentKey {
 			result = append(result, item)
 			break
+		}
+	}
+	return result
+}
+
+func polishComponentRenderingByInitOp(protocol *cptype.ComponentProtocol, event cptype.ComponentEvent, compRendering []cptype.RendingItem) []cptype.RendingItem {
+	// judge event
+	if event.Component != cptype.InitializeOperation.String() {
+		return compRendering
+	}
+	// judge async comps
+	asyncCompsByName := make(map[string]struct{})
+	for _, comp := range protocol.Components {
+		if comp.Options != nil && comp.Options.AsyncAtInit {
+			asyncCompsByName[comp.Name] = struct{}{}
+		}
+	}
+	// skip comp with option: asyncAtInit
+	var result []cptype.RendingItem
+	for _, item := range compRendering {
+		if _, needAsyncAtInit := asyncCompsByName[item.Name]; needAsyncAtInit {
+			continue
+		}
+		result = append(result, item)
+	}
+	return result
+}
+
+func polishComponentRenderingByAsyncAtInitOp(protocol *cptype.ComponentProtocol, event cptype.ComponentEvent, compRendering []cptype.RendingItem) []cptype.RendingItem {
+	// judge event
+	if event.Component != cptype.AsyncAtInitOperation.String() {
+		return compRendering
+	}
+	asyncCompsByName := make(map[string]struct{})
+	if len(event.OperationData) > 0 {
+		v, ok := event.OperationData["components"]
+		if ok {
+			for _, vv := range v.([]interface{}) {
+				asyncCompsByName[strutil.String(vv)] = struct{}{}
+			}
+		}
+	}
+	if len(asyncCompsByName) == 0 {
+		// analyze from protocol
+		for _, comp := range protocol.Components {
+			if comp.Options != nil && comp.Options.AsyncAtInit {
+				asyncCompsByName[comp.Name] = struct{}{}
+			}
+		}
+	}
+	// only render async comps
+	var result []cptype.RendingItem
+	for _, item := range compRendering {
+		if _, needAsyncAtInit := asyncCompsByName[item.Name]; needAsyncAtInit {
+			result = append(result, item)
 		}
 	}
 	return result

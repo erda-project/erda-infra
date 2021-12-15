@@ -1,0 +1,18 @@
+scenario: kanban-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - kanban
+
+components:
+  page:
+    type: Container
+  kanban:
+    type: IssueKanban
+#    options:
+#      asyncAtInit: true
+
+#options:
+#  syncIntervalSecond: 10

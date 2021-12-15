@@ -65,7 +65,7 @@ func getScenarioRenders(scenario string) (*ScenarioRender, error) {
 			continue
 		}
 		return nil, fmt.Errorf("failed to found component render neither in scenario renders nor default renders, "+
-			"sceneario: %s, component: %s", scenario, compName)
+			"scenario: %s, component: %s", scenario, compName)
 	}
 
 	return renders, nil

@@ -24,3 +24,6 @@ component-protocol.components.demo.table@demoTable2: # multi-instances
 
 ## yetAnotherDemo
 component-protocol.components.yet-another-demo.table:
+
+## kanban
+component-protocol.components.kanban-demo.kanban:

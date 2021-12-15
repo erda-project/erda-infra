@@ -31,6 +31,25 @@ type CompRenderSpec struct {
 	CompName string `json:"name"`
 	// RenderC used to created component
 	RenderC RenderCreator
+	// Creator used to create component instance
+	Creator ComponentCreator
+}
+
+func ensureRender(spec *CompRenderSpec) {
+	if spec.RenderC != nil {
+		return
+	}
+	if spec.Creator == nil {
+		panic("no RenderCreator or ComponentCreator specified when register")
+	}
+	spec.RenderC = convertToRenderC(spec.Creator)
+}
+
+// ComponentCreator .
+type ComponentCreator func() cptype.IComponent
+
+func convertToRenderC(creator ComponentCreator) RenderCreator {
+	return func() CompRender { return FRAMEWORK{IC: creator()} }
 }
 
 // RenderCreator .
@@ -50,6 +69,7 @@ func MustRegisterComponent(r *CompRenderSpec) {
 
 // RegisterComponent register a component under scenario
 func RegisterComponent(r *CompRenderSpec) error {
+	ensureRender(r)
 	if r == nil {
 		return fmt.Errorf("register request is empty")
 	}

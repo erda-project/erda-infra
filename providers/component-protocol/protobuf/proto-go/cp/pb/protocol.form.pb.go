@@ -18,6 +18,7 @@ import (
 var _ urlenc.URLValuesUnmarshaler = (*ComponentProtocol)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*Hierarchy)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*Component)(nil)
+var _ urlenc.URLValuesUnmarshaler = (*ComponentOptions)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*Scenario)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*ComponentEvent)(nil)
 var _ urlenc.URLValuesUnmarshaler = (*DebugOptions)(nil)
@@ -109,6 +110,81 @@ func (m *Component) UnmarshalURLValues(prefix string, values url.Values) error {
 						m.Props = structpb.NewStringValue(vals[0])
 					}
 				}
+			case "options":
+				if m.Options == nil {
+					m.Options = &ComponentOptions{}
+				}
+			case "options.visible":
+				if m.Options == nil {
+					m.Options = &ComponentOptions{}
+				}
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.Options.Visible = val
+			case "options.asyncAtInit":
+				if m.Options == nil {
+					m.Options = &ComponentOptions{}
+				}
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.Options.AsyncAtInit = val
+			case "options.flatMeta":
+				if m.Options == nil {
+					m.Options = &ComponentOptions{}
+				}
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.Options.FlatMeta = val
+			case "options.removeMetaAfterFlat":
+				if m.Options == nil {
+					m.Options = &ComponentOptions{}
+				}
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.Options.RemoveMetaAfterFlat = val
+			}
+		}
+	}
+	return nil
+}
+
+// ComponentOptions implement urlenc.URLValuesUnmarshaler.
+func (m *ComponentOptions) UnmarshalURLValues(prefix string, values url.Values) error {
+	for key, vals := range values {
+		if len(vals) > 0 {
+			switch prefix + key {
+			case "visible":
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.Visible = val
+			case "asyncAtInit":
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.AsyncAtInit = val
+			case "flatMeta":
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.FlatMeta = val
+			case "removeMetaAfterFlat":
+				val, err := strconv.ParseBool(vals[0])
+				if err != nil {
+					return err
+				}
+				m.RemoveMetaAfterFlat = val
 			}
 		}
 	}
