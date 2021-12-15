@@ -65,6 +65,5 @@ func contextWithSpan(req *http.Request) *http.Request {
 }
 
 func init() {
-	// hook.Hook(send, tracedSend, originalSend)
 	hook.Hook(RoundTrip, tracedRoundTrip, originalRoundTrip)
 }
