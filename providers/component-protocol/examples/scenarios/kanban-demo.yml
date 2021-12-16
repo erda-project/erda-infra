@@ -10,7 +10,7 @@ components:
   page:
     type: Container
   kanban:
-    type: IssueKanban
+    type: Kanban
 #    options:
 #      asyncAtInit: true
 

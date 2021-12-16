@@ -38,14 +38,6 @@ type SDK struct {
 	Comp        *Component
 }
 
-// UniversalStructuredCompPtr .
-type UniversalStructuredCompPtr struct {
-	StdInParamsPtr   interface{}
-	StdStatePtr      interface{}
-	StdDataPtr       interface{}
-	StdOperationsPtr interface{}
-}
-
 // I18n .
 func (sdk *SDK) I18n(key string, args ...interface{}) string {
 	if len(args) == 0 {
