@@ -86,10 +86,11 @@ func (d *DefaultKanban) AfterHandleOp(sdk *cptype.SDK) {}
 
 // StdStructuredPtrCreator .
 func (d *DefaultKanban) StdStructuredPtrCreator() func() cptype.IStdStructuredPtr {
-	ptr := StdStructuredPtr{
-		StdInParamsPtr: &cptype.ExtraMap{},
-		StdStatePtr:    &cptype.ExtraMap{},
-		StdDataPtr:     &kanban.Data{},
+	return func() cptype.IStdStructuredPtr {
+		return &StdStructuredPtr{
+			StdInParamsPtr: &cptype.ExtraMap{},
+			StdStatePtr:    &cptype.ExtraMap{},
+			StdDataPtr:     &kanban.Data{},
+		}
 	}
-	return func() cptype.IStdStructuredPtr { return &ptr }
 }

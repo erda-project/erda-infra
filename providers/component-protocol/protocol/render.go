@@ -149,6 +149,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 			logrus.Errorf("render component failed, err: %s, scenario: %+v, component: %s", err.Error(), req.Scenario, cr.CompName)
 			return err
 		}
+		simplifyComp(c)
 		elapsed := time.Since(start)
 		logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, v.Name, elapsed)
 	}
@@ -329,4 +330,27 @@ func getDefaultHierarchyRenderOrderFromCompExclude(fullOrders []string, startFro
 		return []string{}
 	}
 	return fullOrders[fromIdx+1:]
+}
+
+func simplifyComp(comp *cptype.Component) {
+	if len(comp.Data) == 0 {
+		comp.Data = nil
+	}
+	if len(comp.State) == 0 {
+		comp.State = nil
+	}
+	if len(comp.Operations) == 0 {
+		comp.Operations = nil
+	}
+	if comp.Options != nil {
+		if !comp.Options.Visible &&
+			!comp.Options.AsyncAtInit &&
+			!comp.Options.FlatExtra &&
+			!comp.Options.RemoveExtraAfterFlat {
+			comp.Options = nil
+		}
+	}
+	if len(comp.Props) == 0 {
+		comp.Props = nil
+	}
 }

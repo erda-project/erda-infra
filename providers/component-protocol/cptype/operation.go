@@ -20,10 +20,6 @@ type OperationFunc func(sdk *SDK)
 // IOperation .
 type IOperation interface {
 	OpKey() OperationKey
-	GetOp() Operation
-	GetServerData() interface{}
-	SetServerData(data interface{})
-	GetClientData() interface{}
 }
 
 // Operation .

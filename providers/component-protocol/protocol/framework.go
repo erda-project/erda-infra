@@ -51,28 +51,27 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 	sdk.Event = event
 	// structured comp ptr
 	stdStructuredCompPtr := F.IC.StdStructuredPtrCreator()()
-	universalStdPtr := F.makeUniversalPtr(stdStructuredCompPtr)
+	F.injectStdStructurePtr(stdStructuredCompPtr)
 	// register operations
 	F.registerOperations(sdk)
 	// init
 	F.IC.Initialize(sdk)
 	// decoder
-	F.IC.DecodeInParams(sdk.InParams, universalStdPtr.StdInParamsPtr)
-	F.IC.DecodeState(c.State, universalStdPtr.StdStatePtr)
-	F.IC.DecodeData(c.Data, universalStdPtr.StdDataPtr)
-	//F.IC.DecodeOperations(c.Operations, universalStdPtr.StdOperationsPtr)
+	F.IC.DecodeInParams(sdk.InParams, stdStructuredCompPtr.InParamsPtr())
+	F.IC.DecodeState(c.State, stdStructuredCompPtr.StatePtr())
+	F.IC.DecodeData(c.Data, stdStructuredCompPtr.DataPtr())
 	// visible
 	visible := F.IC.Visible(sdk)
 	defer F.setVisible(sdk, visible)
 	// handle op
 	if !F.IC.SkipOp(sdk) {
 		F.IC.BeforeHandleOp(sdk)
-		F.handleOp(sdk, stdStructuredCompPtr, universalStdPtr)
+		F.handleOp(sdk, stdStructuredCompPtr)
 		F.IC.AfterHandleOp(sdk)
 		// encoder
-		F.IC.EncodeData(universalStdPtr.StdDataPtr, &sdk.Comp.Data)
-		F.IC.EncodeState(universalStdPtr.StdStatePtr, &sdk.Comp.State)
-		F.IC.EncodeInParams(universalStdPtr.StdInParamsPtr, &sdk.InParams)
+		F.IC.EncodeData(stdStructuredCompPtr.DataPtr(), &sdk.Comp.Data)
+		F.IC.EncodeState(stdStructuredCompPtr.StatePtr(), &sdk.Comp.State)
+		F.IC.EncodeInParams(stdStructuredCompPtr.InParamsPtr(), &sdk.InParams)
 		// flat extra
 		F.flatExtra(sdk.Comp)
 		// finalize
@@ -83,8 +82,6 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 
 func (F FRAMEWORK) setVisible(sdk *cptype.SDK, visible bool) {
 	sdk.Comp.Options.Visible = visible
-	// compatible with old version
-	sdk.Comp.Props["visible"] = visible
 }
 
 func ensureCompFields(sdk *cptype.SDK, comp *cptype.Component) *cptype.Component {
@@ -134,7 +131,7 @@ func (F FRAMEWORK) registerOperations(sdk *cptype.SDK) {
 	}
 }
 
-func (F FRAMEWORK) handleOp(sdk *cptype.SDK, stdPtr cptype.IStdStructuredPtr, universalPtr *cptype.UniversalStructuredCompPtr) {
+func (F FRAMEWORK) handleOp(sdk *cptype.SDK, stdPtr cptype.IStdStructuredPtr) {
 	op := sdk.Event.Operation
 	opFunc, ok := sdk.CompOpFuncs[op]
 	if !ok {
@@ -142,23 +139,9 @@ func (F FRAMEWORK) handleOp(sdk *cptype.SDK, stdPtr cptype.IStdStructuredPtr, un
 	}
 	// do op
 	opFunc(sdk)
-
-	// ensure structured ptr
-	setUniversalPtr(stdPtr, universalPtr)
 }
 
-func (F FRAMEWORK) makeUniversalPtr(stdPtr cptype.IStdStructuredPtr) *cptype.UniversalStructuredCompPtr {
-	// set std ptr
+func (F FRAMEWORK) injectStdStructurePtr(stdPtr cptype.IStdStructuredPtr) {
+	// inject std ptr
 	reflect.ValueOf(F.IC).Elem().FieldByName(fieldStdStructuredPtr).Set(reflect.ValueOf(stdPtr))
-
-	// universal
-	universalPtr := &cptype.UniversalStructuredCompPtr{}
-	setUniversalPtr(stdPtr, universalPtr)
-	return universalPtr
-}
-
-func setUniversalPtr(stdPtr cptype.IStdStructuredPtr, universalPtr *cptype.UniversalStructuredCompPtr) {
-	universalPtr.StdDataPtr = stdPtr.DataPtr()
-	universalPtr.StdStatePtr = stdPtr.StatePtr()
-	universalPtr.StdInParamsPtr = stdPtr.InParamsPtr()
 }
