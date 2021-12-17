@@ -14,47 +14,20 @@
 
 package cptype
 
-// IComponent .
+// IComponent combines IDefaultComponent and BaseOperationRegister.
 type IComponent interface {
-	Initialize(sdk *SDK)
-	Finalize(sdk *SDK)
-	SkipOp(sdk *SDK) bool
-	Visible(sdk *SDK) bool
-	BeforeHandleOp(sdk *SDK)
-	AfterHandleOp(sdk *SDK)
-	StdStructuredPtrCreator() func() IStdStructuredPtr
-
-	OperationsRegister
-	Encoder
-	Decoder
+	IDefaultComponent
+	BaseOperationRegister
 }
 
-// IStdStructuredPtr .
-type IStdStructuredPtr interface {
-	DataPtr() interface{}
-	StatePtr() interface{}
-	InParamsPtr() interface{}
-}
-
-// OperationsRegister .
-type OperationsRegister interface {
+// BaseOperationRegister includes Initialize & Rendering Op.
+type BaseOperationRegister interface {
 	RegisterInitializeOp() (opFunc OperationFunc)
 	RegisterRenderingOp() (opFunc OperationFunc)
-	RegisterCompStdOps() (opFuncs map[OperationKey]OperationFunc)
 }
 
-// Encoder is a protocol-level interface, convert structured-struct to raw-cp-result.
-// encode std-struct-ptr to raw-ptr.
-type Encoder interface {
-	EncodeData(srcStdStructPtr interface{}, dstRawPtr *ComponentData)
-	EncodeState(srcStdStructPtr interface{}, dstRawPtr *ComponentState)
-	EncodeInParams(srcStdStructPtr interface{}, dstRawPtr *InParams)
-}
-
-// Decoder is a protocol-level interface, convert raw-cp-result to structured-struct.
-// decode raw-ptr to std-struct-ptr.
-type Decoder interface {
-	DecodeData(srcRawPtr ComponentData, dstStdStructPtr interface{})
-	DecodeState(srcRawPtr ComponentState, dstStdStructPtr interface{})
-	DecodeInParams(srcRawPtr InParams, dstStdStructPtr interface{})
+// OperationRegister includes a component's all operations.
+type OperationRegister interface {
+	BaseOperationRegister
+	CompStdOperationRegister
 }
