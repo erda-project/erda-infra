@@ -1,0 +1,13 @@
+scenario: filter-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - filter
+
+components:
+  page:
+    type: Container
+  filter:
+    type: ConfigurableFilter
