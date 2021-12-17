@@ -36,6 +36,6 @@ type (
 		Items          []Item `json:"items,omitempty"`          // records
 		TitleIcon      string `json:"titleIcon,omitempty"`      // title icon
 		BackgroundIcon string `json:"backgroundIcon,omitempty"` // record icon
-		Span           string `json:"span,omitempty"`           // scale of echo record
+		Span           string `json:"span,omitempty"`           // scale of each record
 	}
 )
