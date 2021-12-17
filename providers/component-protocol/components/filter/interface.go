@@ -12,12 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package components
+package filter
 
 import (
-	// easy to import all common components
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demo/demotable"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/filter_demo/filter"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/kanban_demo/kanban"
-	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/yet_another_demo/demotable"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
+
+// IFilter .
+type IFilter interface {
+	cptype.IComponent
+	IFilterStdOps
+}
+
+// IFilterStdOps .
+type IFilterStdOps interface {
+	RegisterFilterOp(opData OpFilter) (opFunc cptype.OperationFunc)
+	RegisterFilterItemSaveOp(opData OpFilterItemSave) (opFunc cptype.OperationFunc)
+	RegisterFilterItemDeleteOp(opData OpFilterItemDelete) (opFunc cptype.OperationFunc)
+}

@@ -27,3 +27,6 @@ component-protocol.components.yet-another-demo.table:
 
 ## kanban
 component-protocol.components.kanban-demo.kanban:
+
+## filter
+component-protocol.components.filter-demo.filter:
