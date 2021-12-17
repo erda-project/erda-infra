@@ -1,0 +1,13 @@
+scenario: top-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - top
+
+components:
+  page:
+    type: Container
+  top:
+    type: Top

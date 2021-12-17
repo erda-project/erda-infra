@@ -28,5 +28,9 @@ component-protocol.components.yet-another-demo.table:
 ## kanban
 component-protocol.components.kanban-demo.kanban:
 
+## top
+component-protocol.components.top-demo.top:
+
+
 ## filter
 component-protocol.components.filter-demo.filter:
