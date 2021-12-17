@@ -20,12 +20,14 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
+// DefaultFilter .
 type DefaultFilter struct {
 	Impl filter.IFilter
 
 	*StdStructuredPtr
 }
 
+// StdStructuredPtr .
 type StdStructuredPtr struct {
 	StdInParamsPtr *cptype.ExtraMap
 	StdDataPtr     *filter.Data
@@ -82,4 +84,5 @@ func (d *DefaultFilter) StdStructuredPtrCreator() func() cptype.IStdStructuredPt
 	}
 }
 
+// Visible .
 func (d *DefaultFilter) Visible(sdk *cptype.SDK) bool { return true }

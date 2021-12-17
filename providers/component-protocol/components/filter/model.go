@@ -19,12 +19,17 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
+// Data .
 type (
+	// Data filter std data
 	Data struct {
+		// models/condition.go define constructors of condition type
+		// SelectCondition, DateRangeCondition, etc
 		Conditions []interface{} `json:"conditions,omitempty"`
 		FilterSet  []FilterItem  `json:"filterSet,omitempty"`
 	}
 
+	// FilterItem custom filter conditions
 	FilterItem struct {
 		ID       string          `json:"id,omitempty"`
 		Values   cptype.ExtraMap `json:"values,omitempty"`
@@ -32,10 +37,12 @@ type (
 		IsPreset bool            `json:"isPreset,omitempty"`
 	}
 
+	// ICondition get type ICondition
 	ICondition interface {
 		Type() model.ConditionType
 	}
 
+	// State filter std state
 	State struct {
 		Values            cptype.ExtraMap `json:"values,omitempty"`
 		SelectedFilterSet string          `json:"selectedFilterSet,omitempty"`

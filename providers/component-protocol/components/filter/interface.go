@@ -18,11 +18,13 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
+// IFilter .
 type IFilter interface {
 	cptype.IComponent
 	IFilterStdOps
 }
 
+// IFilterStdOps .
 type IFilterStdOps interface {
 	RegisterFilterOp(opData OpFilter) (opFunc cptype.OperationFunc)
 	RegisterFilterItemSaveOp(opData OpFilterItemSave) (opFunc cptype.OperationFunc)

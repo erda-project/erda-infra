@@ -14,8 +14,10 @@
 
 package model
 
+// ConditionType .
 type ConditionType string
 
+// ConditionTypeSelect .
 const (
 	ConditionTypeSelect      ConditionType = "select"
 	ConditionTypeInput       ConditionType = "input"
@@ -23,6 +25,7 @@ const (
 	ConditionTypeRangePicker ConditionType = "rangePicker"
 )
 
+// ConditionBase .
 type ConditionBase struct {
 	Key         string        `json:"key,omitempty"`
 	Label       string        `json:"label,omitempty"`
@@ -30,32 +33,39 @@ type ConditionBase struct {
 	Placeholder string        `json:"placeholder,omitempty"`
 }
 
+// SelectCondition .
 type SelectCondition struct {
 	ConditionBase
 	Mode    string         `json:"mode,omitempty"`
 	Options []SelectOption `json:"options,omitempty"`
 }
 
+// SelectConditionWithChildren .
 type SelectConditionWithChildren struct {
 	ConditionBase
 	Mode    string                     `json:"mode,omitempty"`
 	Options []SelectOptionWithChildren `json:"options,omitempty"`
 }
 
+// DateRangeCondition .
 type DateRangeCondition SelectCondition
 
+// Type .
 func (o SelectCondition) Type() ConditionType {
 	return ConditionTypeSelect
 }
 
+// Type .
 func (o SelectConditionWithChildren) Type() ConditionType {
 	return ConditionTypeSelect
 }
 
+// Type .
 func (o DateRangeCondition) Type() ConditionType {
 	return ConditionTypeDateRange
 }
 
+// NewCondition .
 func NewCondition(key string, label string) *ConditionBase {
 	return &ConditionBase{
 		Key:   key,
@@ -63,7 +73,7 @@ func NewCondition(key string, label string) *ConditionBase {
 	}
 }
 
-// initial condition with select option
+// NewSelectCondition initial condition with select option
 func NewSelectCondition(key string, label string, options []SelectOption) *SelectCondition {
 	var r = SelectCondition{
 		ConditionBase: *NewCondition(key, label),
@@ -73,7 +83,7 @@ func NewSelectCondition(key string, label string, options []SelectOption) *Selec
 	return &r
 }
 
-// initial condition with select option with children
+// NewSelectConditionWithChildren initial condition with select option with children
 func NewSelectConditionWithChildren(key string, label string, options []SelectOptionWithChildren) *SelectConditionWithChildren {
 	var r = SelectConditionWithChildren{
 		ConditionBase: *NewCondition(key, label),
@@ -83,6 +93,7 @@ func NewSelectConditionWithChildren(key string, label string, options []SelectOp
 	return &r
 }
 
+// NewDateRangeCondition .
 func NewDateRangeCondition(key string, label string) *DateRangeCondition {
 	var r = DateRangeCondition{
 		ConditionBase: *NewCondition(key, label),
@@ -91,11 +102,13 @@ func NewDateRangeCondition(key string, label string) *DateRangeCondition {
 	return &r
 }
 
+// WithPlaceHolder .
 func (s *SelectCondition) WithPlaceHolder(placeholder string) *SelectCondition {
 	s.Placeholder = placeholder
 	return s
 }
 
+// WithMode .
 func (s *SelectCondition) WithMode(mode string) *SelectCondition {
 	s.Mode = mode
 	return s

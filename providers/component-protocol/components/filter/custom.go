@@ -18,21 +18,21 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-// CustomData is kanban's custom data handler.
+// CustomData is filter's custom data handler.
 type CustomData interface {
 	CustomDataPtr() interface{}
 	EncodeFromCustomData(customDataPtr interface{}, stdDataPtr *Data)
 	DecodeToCustomData(stdDataPtr *Data, customDataPtr interface{})
 }
 
-// CustomState is kanban's custom state handler.
+// CustomState is filter's custom state handler.
 type CustomState interface {
 	CustomStatePtr() interface{}
 	EncodeFromCustomState(customStatePtr interface{}, stdStatePtr *State)
 	DecodeToCustomState(stdStatePtr *State, customStatePtr interface{})
 }
 
-// CustomInParams is kanban's custom inParams handler.
+// CustomInParams is filter's custom inParams handler.
 type CustomInParams interface {
 	CustomInParamsPtr() interface{}
 	EncodeFromCustomInParams(customInParamsPtr interface{}, stdInParamsPtr *cptype.ExtraMap)

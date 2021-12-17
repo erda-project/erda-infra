@@ -19,38 +19,50 @@ import (
 )
 
 type (
+	// OpFilter .
 	OpFilter struct {
 		cptype.Operation
 		ClientData OpFilterClientData `json:"clientData,omitempty"`
 	}
+
+	// OpFilterClientData .
 	OpFilterClientData struct {
 		Values cptype.ExtraMap `json:"values,omitempty"`
 	}
 )
 
+// OpKey .
 func (o OpFilter) OpKey() cptype.OperationKey { return "filter" }
 
 type (
+	// OpFilterItemSave .
 	OpFilterItemSave struct {
 		cptype.Operation
 		ClientData OpFilterItemSaveClientData `json:"clientData,omitempty"`
 	}
+
+	// OpFilterItemSaveClientData .
 	OpFilterItemSaveClientData struct {
 		Values cptype.ExtraMap `json:"values,omitempty"`
 		Label  string          `json:"label,omitempty"`
 	}
 )
 
+// OpKey .
 func (o OpFilterItemSave) OpKey() cptype.OperationKey { return "saveFilterSet" }
 
 type (
+	// OpFilterItemDelete .
 	OpFilterItemDelete struct {
 		cptype.Operation
 		ClientData OpFilterItemDeleteClientData `json:"clientData,omitempty"`
 	}
+
+	// OpFilterItemDeleteClientData .
 	OpFilterItemDeleteClientData struct {
 		DataRef *FilterItem `json:"dataRef,omitempty"`
 	}
 )
 
+// OpKey .
 func (o OpFilterItemDelete) OpKey() cptype.OperationKey { return "deleteFilterSet" }
