@@ -35,5 +35,6 @@ type (
 		Items          []Item `json:"items,omitempty"`
 		TitleIcon      string `json:"titleIcon,omitempty"`
 		BackgroundIcon string `json:"backgroundIcon,omitempty"`
+		Span           string `json:"span,omitempty"`
 	}
 )
