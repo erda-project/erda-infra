@@ -50,6 +50,12 @@ func (b *OperationBuilder) WithDisable(disable bool, disableTip string) *Operati
 	return b
 }
 
+// WithSkipRender .
+func (b *OperationBuilder) WithSkipRender(skipRender bool) *OperationBuilder {
+	b.Operation.SkipRender = skipRender
+	return b
+}
+
 // WithAsync .
 func (b *OperationBuilder) WithAsync(async bool) *OperationBuilder {
 	b.Operation.Async = async
