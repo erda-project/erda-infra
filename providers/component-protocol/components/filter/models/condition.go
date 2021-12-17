@@ -103,13 +103,13 @@ func NewDateRangeCondition(key string, label string) *DateRangeCondition {
 }
 
 // WithPlaceHolder .
-func (s *SelectCondition) WithPlaceHolder(placeholder string) *SelectCondition {
-	s.Placeholder = placeholder
-	return s
+func (o *SelectCondition) WithPlaceHolder(placeholder string) *SelectCondition {
+	o.Placeholder = placeholder
+	return o
 }
 
 // WithMode .
-func (s *SelectCondition) WithMode(mode string) *SelectCondition {
-	s.Mode = mode
-	return s
+func (o *SelectCondition) WithMode(mode string) *SelectCondition {
+	o.Mode = mode
+	return o
 }

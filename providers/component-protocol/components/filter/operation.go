@@ -60,7 +60,7 @@ type (
 
 	// OpFilterItemDeleteClientData .
 	OpFilterItemDeleteClientData struct {
-		DataRef *FilterItem `json:"dataRef,omitempty"`
+		DataRef *SetItem `json:"dataRef,omitempty"`
 	}
 )
 

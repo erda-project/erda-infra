@@ -26,11 +26,11 @@ type (
 		// models/condition.go define constructors of condition type
 		// SelectCondition, DateRangeCondition, etc
 		Conditions []interface{} `json:"conditions,omitempty"`
-		FilterSet  []FilterItem  `json:"filterSet,omitempty"`
+		FilterSet  []SetItem     `json:"filterSet,omitempty"`
 	}
 
-	// FilterItem custom filter conditions
-	FilterItem struct {
+	// SetItem custom filter conditions
+	SetItem struct {
 		ID       string          `json:"id,omitempty"`
 		Values   cptype.ExtraMap `json:"values,omitempty"`
 		Label    string          `json:"label,omitempty"`

@@ -40,8 +40,8 @@ func mockCondition() []interface{} {
 	return []interface{}{c1, c2, c3}
 }
 
-func mockFilterSet() []filter.FilterItem {
-	var i1 = filter.FilterItem{
+func mockFilterSet() []filter.SetItem {
+	var i1 = filter.SetItem{
 		ID:       "f0",
 		Label:    "f0",
 		IsPreset: true,
@@ -50,7 +50,7 @@ func mockFilterSet() []filter.FilterItem {
 			"b": "456",
 		},
 	}
-	var i2 = filter.FilterItem{
+	var i2 = filter.SetItem{
 		ID:       "f1",
 		Label:    "f1",
 		IsPreset: false,
@@ -58,7 +58,7 @@ func mockFilterSet() []filter.FilterItem {
 			"a": "234",
 		},
 	}
-	return []filter.FilterItem{i1, i2}
+	return []filter.SetItem{i1, i2}
 }
 
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
