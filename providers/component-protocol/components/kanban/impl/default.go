@@ -78,6 +78,9 @@ func (d *DefaultKanban) Finalize(sdk *cptype.SDK) {}
 // SkipOp providers default impl for user.
 func (d *DefaultKanban) SkipOp(sdk *cptype.SDK) bool { return !d.Impl.Visible(sdk) }
 
+// Visible .
+func (d *DefaultKanban) Visible(sdk *cptype.SDK) bool { return true }
+
 // BeforeHandleOp providers default impl for user.
 func (d *DefaultKanban) BeforeHandleOp(sdk *cptype.SDK) {}
 
