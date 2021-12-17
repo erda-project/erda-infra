@@ -25,9 +25,11 @@ type DefaultTop struct {
 	*StdStructuredPtr
 }
 
+// Initialize .
 func (d *DefaultTop) Initialize(sdk *cptype.SDK) {
 }
 
+// Visible .
 func (d *DefaultTop) Visible(sdk *cptype.SDK) bool {
 	return true
 }
