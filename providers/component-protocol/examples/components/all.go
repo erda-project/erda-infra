@@ -18,5 +18,6 @@ import (
 	// easy to import all common components
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demo/demotable"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/kanban_demo/kanban"
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/top_demo/top"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/yet_another_demo/demotable"
 )
