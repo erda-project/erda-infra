@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package top
+package topn
 
 // Below is standard struct for top related.
 type (
-	// Data includes list of boards.
+	// Data includes list.
 	Data struct {
-		List []Info `json:"list,omitempty"`
+		List []Record `json:"list,omitempty"`
 	}
 
+	// Item .
 	Item struct {
 		ID    string  `json:"id,omitempty"`
 		Name  string  `json:"name,omitempty"`
@@ -29,12 +30,12 @@ type (
 		Unit  string  `json:"unit,omitempty"`
 	}
 
-	// Info includes one info of top
-	Info struct {
-		Title          string `json:"title,omitempty"`
-		Items          []Item `json:"items,omitempty"`
-		TitleIcon      string `json:"titleIcon,omitempty"`
-		BackgroundIcon string `json:"backgroundIcon,omitempty"`
-		Span           string `json:"span,omitempty"`
+	// Record includes one record of top
+	Record struct {
+		Title          string `json:"title,omitempty"`          // record title
+		Items          []Item `json:"items,omitempty"`          // records
+		TitleIcon      string `json:"titleIcon,omitempty"`      // title icon
+		BackgroundIcon string `json:"backgroundIcon,omitempty"` // record icon
+		Span           string `json:"span,omitempty"`           // scale of echo record
 	}
 )

@@ -15,14 +15,14 @@
 package impl
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/top"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/topn"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
 // DecodeData .
 func (d *DefaultTop) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
-	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*top.Data))
+	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*topn.Data))
 }
 
 // DecodeState .

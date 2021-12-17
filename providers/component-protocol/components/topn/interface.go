@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package top
+package topn
 
 import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
+// ITop top interface
 type ITop interface {
 	cptype.IComponent
 	ITopStdOps
 }
 
+// ITopStdOps .
 type ITopStdOps interface{}

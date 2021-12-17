@@ -18,7 +18,7 @@ import (
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/top/impl"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/topn/impl"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 )

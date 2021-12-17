@@ -15,19 +15,27 @@
 package impl
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/top"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/topn"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
+// DefaultTop default top component
 type DefaultTop struct {
-	Impl top.ITop
+	Impl topn.ITop
 	*StdStructuredPtr
+}
+
+func (d *DefaultTop) Initialize(sdk *cptype.SDK) {
+}
+
+func (d *DefaultTop) Visible(sdk *cptype.SDK) bool {
+	return true
 }
 
 // StdStructuredPtr .
 type StdStructuredPtr struct {
 	StdInParamsPtr *cptype.ExtraMap
-	StdDataPtr     *top.Data
+	StdDataPtr     *topn.Data
 	StdStatePtr    *cptype.ExtraMap
 }
 
@@ -63,7 +71,7 @@ func (d *DefaultTop) StdStructuredPtrCreator() func() cptype.IStdStructuredPtr {
 		return &StdStructuredPtr{
 			StdInParamsPtr: &cptype.ExtraMap{},
 			StdStatePtr:    &cptype.ExtraMap{},
-			StdDataPtr:     &top.Data{},
+			StdDataPtr:     &topn.Data{},
 		}
 	}
 }

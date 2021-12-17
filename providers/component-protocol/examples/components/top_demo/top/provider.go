@@ -15,8 +15,8 @@
 package top
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/top"
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/top/impl"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/topn"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/topn/impl"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
@@ -27,11 +27,11 @@ type provider struct {
 // RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
-		data := top.Data{
-			List: []top.Info{
+		data := topn.Data{
+			List: []topn.Record{
 				{
 					Title: "rps-max-top5",
-					Items: []top.Item{
+					Items: []topn.Item{
 						{
 							ID:    "id2",
 							Name:  "name2",
@@ -42,7 +42,7 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 				},
 				{
 					Title: "rps-max-top5",
-					Items: []top.Item{
+					Items: []topn.Item{
 						{
 							ID:    "id2",
 							Name:  "name2",
@@ -56,12 +56,6 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 		p.StdDataPtr = &data
 	}
 }
-
-// Initialize .
-func (p *provider) Initialize(sdk *cptype.SDK) { return }
-
-// Visible .
-func (p *provider) Visible(sdk *cptype.SDK) bool { return true }
 
 // RegisterRenderingOp .
 func (p *provider) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
