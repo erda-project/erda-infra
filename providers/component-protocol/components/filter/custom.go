@@ -28,8 +28,8 @@ type CustomData interface {
 // CustomState is filter's custom state handler.
 type CustomState interface {
 	CustomStatePtr() interface{}
-	EncodeFromCustomState(customStatePtr interface{}, stdStatePtr *State)
-	DecodeToCustomState(stdStatePtr *State, customStatePtr interface{})
+	EncodeFromCustomState(customStatePtr interface{}, stdStatePtr *cptype.ExtraMap)
+	DecodeToCustomState(stdStatePtr *cptype.ExtraMap, customStatePtr interface{})
 }
 
 // CustomInParams is filter's custom inParams handler.

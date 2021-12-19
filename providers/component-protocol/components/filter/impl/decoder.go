@@ -30,7 +30,7 @@ func (d *DefaultFilter) DecodeData(compData cptype.ComponentData, modelDataPtr i
 
 // DecodeState .
 func (d *DefaultFilter) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
-	cputil.MustObjJSONTransfer(compState, modelStatePtr.(*filter.State))
+	cputil.MustObjJSONTransfer(compState, modelStatePtr.(*cptype.ExtraMap))
 	if custom, ok := d.Impl.(filter.CustomState); ok {
 		custom.DecodeToCustomState(d.StdStatePtr, custom.CustomStatePtr())
 	}

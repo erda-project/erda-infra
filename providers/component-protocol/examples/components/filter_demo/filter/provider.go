@@ -76,7 +76,7 @@ func (p *provider) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
 
 func (p *provider) RegisterFilterOp(opData filter.OpFilter) (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
-		fmt.Println("state values", p.StdStatePtr.Values)
+		fmt.Println("state values", p.StdStatePtr)
 		fmt.Println("op come", opData.ClientData)
 	}
 }

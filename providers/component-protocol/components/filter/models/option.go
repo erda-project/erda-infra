@@ -16,8 +16,8 @@ package model
 
 // OptionBase .
 type OptionBase struct {
-	Label string `json:"label,omitempty"`
-	Value string `json:"value,omitempty"`
+	Label string      `json:"label,omitempty"`
+	Value interface{} `json:"value,omitempty"`
 }
 
 // SelectOption .
@@ -29,8 +29,14 @@ type SelectOptionWithChildren struct {
 	Children []SelectOption `json:"children,omitempty"`
 }
 
+// TagsSelectOption .
+type TagsSelectOption struct {
+	SelectOption
+	Color string `json:"color,omitempty"`
+}
+
 // NewSelectOption .
-func NewSelectOption(label string, value string) *SelectOption {
+func NewSelectOption(label string, value interface{}) *SelectOption {
 	return &SelectOption{
 		Label: label,
 		Value: value,
@@ -38,9 +44,17 @@ func NewSelectOption(label string, value string) *SelectOption {
 }
 
 // NewSelectChildrenOption .
-func NewSelectChildrenOption(label string, value string, children []SelectOption) *SelectOptionWithChildren {
+func NewSelectChildrenOption(label string, value interface{}, children []SelectOption) *SelectOptionWithChildren {
 	return &SelectOptionWithChildren{
 		SelectOption: *NewSelectOption(label, value),
 		Children:     children,
+	}
+}
+
+// NewTagsSelectOption .
+func NewTagsSelectOption(label string, value interface{}, color string) *TagsSelectOption {
+	return &TagsSelectOption{
+		SelectOption: *NewSelectOption(label, value),
+		Color:        color,
 	}
 }
