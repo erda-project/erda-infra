@@ -33,7 +33,7 @@ func (d *DefaultFilter) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype.C
 // EncodeState .
 func (d *DefaultFilter) EncodeState(srcStructPtr interface{}, dstRawPtr *cptype.ComponentState) {
 	if custom, ok := d.Impl.(filter.CustomState); ok {
-		custom.EncodeFromCustomState(custom.CustomStatePtr(), srcStructPtr.(*filter.State))
+		custom.EncodeFromCustomState(custom.CustomStatePtr(), srcStructPtr.(*cptype.ExtraMap))
 	}
 	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }

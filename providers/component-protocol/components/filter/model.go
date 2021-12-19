@@ -42,10 +42,10 @@ type (
 		Type() model.ConditionType
 	}
 
-	// State filter std state
-	State struct {
-		Values            cptype.ExtraMap `json:"values,omitempty"`
-		SelectedFilterSet string          `json:"selectedFilterSet,omitempty"`
-		cptype.ExtraMap
-	}
+	// // State filter std state
+	// State struct {
+	// 	Values            cptype.ExtraMap `json:"values,omitempty"`
+	// 	SelectedFilterSet string          `json:"selectedFilterSet,omitempty"`
+	// 	cptype.ExtraMap
+	// }
 )

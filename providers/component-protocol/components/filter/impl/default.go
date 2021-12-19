@@ -31,7 +31,7 @@ type DefaultFilter struct {
 type StdStructuredPtr struct {
 	StdInParamsPtr *cptype.ExtraMap
 	StdDataPtr     *filter.Data
-	StdStatePtr    *filter.State
+	StdStatePtr    *cptype.ExtraMap
 }
 
 // DataPtr .
@@ -78,7 +78,7 @@ func (d *DefaultFilter) StdStructuredPtrCreator() func() cptype.IStdStructuredPt
 	return func() cptype.IStdStructuredPtr {
 		return &StdStructuredPtr{
 			StdInParamsPtr: &cptype.ExtraMap{},
-			StdStatePtr:    &filter.State{},
+			StdStatePtr:    &cptype.ExtraMap{},
 			StdDataPtr:     &filter.Data{},
 		}
 	}

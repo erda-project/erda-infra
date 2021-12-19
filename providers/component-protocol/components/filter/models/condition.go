@@ -19,10 +19,10 @@ type ConditionType string
 
 // ConditionTypeSelect .
 const (
-	ConditionTypeSelect      ConditionType = "select"
-	ConditionTypeInput       ConditionType = "input"
-	ConditionTypeDateRange   ConditionType = "dateRange"
-	ConditionTypeRangePicker ConditionType = "rangePicker"
+	ConditionTypeSelect     ConditionType = "select"
+	ConditionTypeInput      ConditionType = "input"
+	ConditionTypeDateRange  ConditionType = "dateRange"
+	ConditionTypeTagsSelect ConditionType = "tagsSelect"
 )
 
 // ConditionBase .
@@ -50,6 +50,13 @@ type SelectConditionWithChildren struct {
 // DateRangeCondition .
 type DateRangeCondition SelectCondition
 
+// TagsSelectCondition .
+type TagsSelectCondition struct {
+	ConditionBase
+	Mode    string             `json:"mode,omitempty"`
+	Options []TagsSelectOption `json:"options,omitempty"`
+}
+
 // Type .
 func (o SelectCondition) Type() ConditionType {
 	return ConditionTypeSelect
@@ -63,6 +70,11 @@ func (o SelectConditionWithChildren) Type() ConditionType {
 // Type .
 func (o DateRangeCondition) Type() ConditionType {
 	return ConditionTypeDateRange
+}
+
+// Type .
+func (o TagsSelectCondition) Type() ConditionType {
+	return ConditionTypeTagsSelect
 }
 
 // NewCondition .
@@ -97,6 +109,16 @@ func NewSelectConditionWithChildren(key string, label string, options []SelectOp
 func NewDateRangeCondition(key string, label string) *DateRangeCondition {
 	var r = DateRangeCondition{
 		ConditionBase: *NewCondition(key, label),
+	}
+	r.ConditionBase.Type = r.Type()
+	return &r
+}
+
+// NewTagsSelectCondition .
+func NewTagsSelectCondition(key string, label string, options []TagsSelectOption) *TagsSelectCondition {
+	var r = TagsSelectCondition{
+		ConditionBase: *NewCondition(key, label),
+		Options:       options,
 	}
 	r.ConditionBase.Type = r.Type()
 	return &r
