@@ -26,7 +26,7 @@ type (
 		ID      string  `json:"id,omitempty"`
 		Name    string  `json:"name,omitempty"`
 		Value   float64 `json:"value,omitempty"`
-		Percent float64 `json:"percent,omitempty"`
+		Percent float64 `json:"percent,omitempty"` // percent
 		Unit    string  `json:"unit,omitempty"`
 	}
 
