@@ -23,11 +23,11 @@ type (
 
 	// Item .
 	Item struct {
-		ID    string  `json:"id,omitempty"`
-		Name  string  `json:"name,omitempty"`
-		Value float64 `json:"value,omitempty"`
-		Total float64 `json:"total,omitempty"`
-		Unit  string  `json:"unit,omitempty"`
+		ID      string  `json:"id,omitempty"`
+		Name    string  `json:"name,omitempty"`
+		Value   float64 `json:"value,omitempty"`
+		Percent float64 `json:"percent,omitempty"`
+		Unit    string  `json:"unit,omitempty"`
 	}
 
 	// Record includes one record of top
