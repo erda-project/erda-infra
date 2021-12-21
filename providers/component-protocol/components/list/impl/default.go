@@ -61,6 +61,11 @@ func (d *DefaultList) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cpty
 	}
 }
 
+// RegisterCompNonStdOps .
+func (d *DefaultList) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+	return nil
+}
+
 // Initialize .
 func (d *DefaultList) Initialize(sdk *cptype.SDK) {}
 
