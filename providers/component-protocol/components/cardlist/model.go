@@ -17,18 +17,23 @@ package cardlist
 import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
 type (
-	// Data cardList std data
+	// Data card std data
 	Data struct {
 		Total int
 		Title string
-		List  []List `json:"list,omitempty"`
+		List  []Card `json:"list,omitempty"`
 	}
-	// List .
-	List struct {
-		Logo  string
-		Title string
+	// Card .
+	Card struct {
+		ID      string
+		LogoURL string `json:"logo"`
+		Title   string
+		Labels  []Label
+		Star    bool
+		cptype.Extra
+	}
+	// Label .
+	Label struct {
 		Label string
-		Star  bool
-		Extra cptype.Extra
 	}
 )

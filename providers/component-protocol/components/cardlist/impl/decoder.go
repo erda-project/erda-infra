@@ -21,7 +21,7 @@ import (
 )
 
 // DecodeData .
-func (d *DefaultCardList) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
+func (d *DefaultCard) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
 	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*cardlist.Data))
 	if custom, ok := d.Impl.(cardlist.CustomData); ok {
 		custom.DecodeToCustomData(d.StdDataPtr, custom.CustomDataPtr())
@@ -29,7 +29,7 @@ func (d *DefaultCardList) DecodeData(compData cptype.ComponentData, modelDataPtr
 }
 
 // DecodeState .
-func (d *DefaultCardList) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
+func (d *DefaultCard) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
 	cputil.MustObjJSONTransfer(compState, modelStatePtr.(*cptype.ExtraMap))
 	if custom, ok := d.Impl.(cardlist.CustomState); ok {
 		custom.DecodeToCustomState(d.StdStatePtr, custom.CustomStatePtr())
@@ -37,7 +37,7 @@ func (d *DefaultCardList) DecodeState(compState cptype.ComponentState, modelStat
 }
 
 // DecodeInParams .
-func (d *DefaultCardList) DecodeInParams(compInParams cptype.InParams, modelInParamsPtr interface{}) {
+func (d *DefaultCard) DecodeInParams(compInParams cptype.InParams, modelInParamsPtr interface{}) {
 	cputil.MustObjJSONTransfer(compInParams, modelInParamsPtr.(*cptype.ExtraMap))
 	if custom, ok := d.Impl.(cardlist.CustomInParams); ok {
 		custom.DecodeToCustomInParams(d.StdInParamsPtr, custom.CustomInParamsPtr())

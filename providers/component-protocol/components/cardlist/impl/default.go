@@ -20,9 +20,9 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
-// DefaultCardList .
-type DefaultCardList struct {
-	Impl cardlist.ICardList
+// DefaultCard .
+type DefaultCard struct {
+	Impl cardlist.ICard
 
 	*StdStructuredPtr
 }
@@ -44,39 +44,39 @@ func (s *StdStructuredPtr) StatePtr() interface{} { return s.StdStatePtr }
 func (s *StdStructuredPtr) InParamsPtr() interface{} { return s.StdInParamsPtr }
 
 // RegisterCompStdOps .
-func (d *DefaultCardList) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+func (d *DefaultCard) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return map[cptype.OperationKey]cptype.OperationFunc{
 		cardlist.OpCardListGoto{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterCardListOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListGoto{}).(*cardlist.OpCardListGoto))(sdk)
+			d.Impl.RegisterCardGotoOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListGoto{}).(*cardlist.OpCardListGoto))(sdk)
 		},
 		cardlist.OpCardListIconGoto{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterCardListIconOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListIconGoto{}).(*cardlist.OpCardListIconGoto))(sdk)
+			d.Impl.RegisterCardIconGotoOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListIconGoto{}).(*cardlist.OpCardListIconGoto))(sdk)
 		},
 	}
 }
 
 // RegisterCompNonStdOps .
-func (d *DefaultCardList) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+func (d *DefaultCard) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return nil
 }
 
 // Initialize .
-func (d *DefaultCardList) Initialize(sdk *cptype.SDK) {}
+func (d *DefaultCard) Initialize(sdk *cptype.SDK) {}
 
 // Finalize .
-func (d *DefaultCardList) Finalize(sdk *cptype.SDK) {}
+func (d *DefaultCard) Finalize(sdk *cptype.SDK) {}
 
 // SkipOp providers default impl for user.
-func (d *DefaultCardList) SkipOp(sdk *cptype.SDK) bool { return !d.Impl.Visible(sdk) }
+func (d *DefaultCard) SkipOp(sdk *cptype.SDK) bool { return !d.Impl.Visible(sdk) }
 
 // BeforeHandleOp providers default impl for user.
-func (d *DefaultCardList) BeforeHandleOp(sdk *cptype.SDK) {}
+func (d *DefaultCard) BeforeHandleOp(sdk *cptype.SDK) {}
 
 // AfterHandleOp providers default impl for user.
-func (d *DefaultCardList) AfterHandleOp(sdk *cptype.SDK) {}
+func (d *DefaultCard) AfterHandleOp(sdk *cptype.SDK) {}
 
 // StdStructuredPtrCreator .
-func (d *DefaultCardList) StdStructuredPtrCreator() func() cptype.IStdStructuredPtr {
+func (d *DefaultCard) StdStructuredPtrCreator() func() cptype.IStdStructuredPtr {
 	return func() cptype.IStdStructuredPtr {
 		return &StdStructuredPtr{
 			StdInParamsPtr: &cptype.ExtraMap{},
@@ -87,4 +87,4 @@ func (d *DefaultCardList) StdStructuredPtrCreator() func() cptype.IStdStructured
 }
 
 // Visible .
-func (d *DefaultCardList) Visible(sdk *cptype.SDK) bool { return true }
+func (d *DefaultCard) Visible(sdk *cptype.SDK) bool { return true }

@@ -21,7 +21,7 @@ import (
 )
 
 // EncodeData .
-func (d *DefaultCardList) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype.ComponentData) {
+func (d *DefaultCard) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype.ComponentData) {
 	// custom -> struct
 	if custom, ok := d.Impl.(cardlist.CustomData); ok {
 		custom.EncodeFromCustomData(custom.CustomDataPtr(), srcStructPtr.(*cardlist.Data))
@@ -31,7 +31,7 @@ func (d *DefaultCardList) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype
 }
 
 // EncodeState .
-func (d *DefaultCardList) EncodeState(srcStructPtr interface{}, dstRawPtr *cptype.ComponentState) {
+func (d *DefaultCard) EncodeState(srcStructPtr interface{}, dstRawPtr *cptype.ComponentState) {
 	if custom, ok := d.Impl.(cardlist.CustomState); ok {
 		custom.EncodeFromCustomState(custom.CustomStatePtr(), srcStructPtr.(*cptype.ExtraMap))
 	}
@@ -39,7 +39,7 @@ func (d *DefaultCardList) EncodeState(srcStructPtr interface{}, dstRawPtr *cptyp
 }
 
 // EncodeInParams .
-func (d *DefaultCardList) EncodeInParams(srcStructPtr interface{}, dstRawPtr *cptype.InParams) {
+func (d *DefaultCard) EncodeInParams(srcStructPtr interface{}, dstRawPtr *cptype.InParams) {
 	if custom, ok := d.Impl.(cardlist.CustomInParams); ok {
 		custom.EncodeFromCustomInParams(custom.CustomInParamsPtr(), srcStructPtr.(*cptype.ExtraMap))
 	}

@@ -18,14 +18,16 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-// ICardList .
-type ICardList interface {
+// ICard .
+type ICard interface {
 	cptype.IComponent
 	ICardListStdOps
 }
 
 // ICardListStdOps .
 type ICardListStdOps interface {
-	RegisterCardListOp(opData OpCardListGoto) (opFunc cptype.OperationFunc)
-	RegisterCardListIconOp(opData OpCardListIconGoto) (opFunc cptype.OperationFunc)
+	// RegisterCardGotoOp click card to another page
+	RegisterCardGotoOp(opData OpCardListGoto) (opFunc cptype.OperationFunc)
+	// RegisterCardIconGotoOp click icon in card to another page
+	RegisterCardIconGotoOp(opData OpCardListIconGoto) (opFunc cptype.OperationFunc)
 }
