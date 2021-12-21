@@ -17,17 +17,17 @@ package cptype
 // IComponent combines IDefaultComponent and BaseOperationRegister.
 type IComponent interface {
 	IDefaultComponent
-	BaseOperationRegister
+	CompBaseOperationRegister
 }
 
-// BaseOperationRegister includes Initialize & Rendering Op.
-type BaseOperationRegister interface {
+// CompBaseOperationRegister includes Initialize & Rendering Op.
+type CompBaseOperationRegister interface {
 	RegisterInitializeOp() (opFunc OperationFunc)
 	RegisterRenderingOp() (opFunc OperationFunc)
 }
 
-// OperationRegister includes a component's all operations.
-type OperationRegister interface {
-	BaseOperationRegister
-	CompStdOperationRegister
+// CompOperationRegister includes a component's all operations.
+type CompOperationRegister interface {
+	CompBaseOperationRegister
+	CompNonBaseOperationRegister
 }

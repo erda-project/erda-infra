@@ -28,6 +28,10 @@ type provider struct {
 }
 
 const (
+	nonStdOp1Key = "NonStdOp1"
+)
+
+const (
 	boardLabelUrgent = "URGENT"
 	boardLabelNormal = "NORMAL"
 )
@@ -63,9 +67,23 @@ var (
 				WithAsync(true).
 				WithServerDataPtr(&kanban.OpCardMoveToServerData{AllowedTargetBoardIDs: []string{boardLabelUrgent, boardLabelNormal}}).
 				Build(),
+			// Test Non-Std op
+			nonStdOp1Key: cputil.NewOpBuilder().Build(),
 		},
 	}
 )
+
+func (p *provider) registerNonStdOp1() cptype.OperationFunc {
+	return func(sdk *cptype.SDK) {
+		fmt.Println("This is NonStdOp1")
+	}
+}
+
+func (p *provider) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+	return map[cptype.OperationKey]cptype.OperationFunc{
+		nonStdOp1Key: p.registerNonStdOp1(),
+	}
+}
 
 // RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {

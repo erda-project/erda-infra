@@ -17,7 +17,7 @@ package cptype
 // IDefaultComponent std component's default impl should implement this interface.
 type IDefaultComponent interface {
 	CompStdStructuredPtrCreator
-	CompStdOperationRegister
+	CompNonBaseOperationRegister
 	CompFrameworkSteper
 	CompEncoder
 	CompDecoder
@@ -35,10 +35,22 @@ type IStdStructuredPtr interface {
 	InParamsPtr() interface{}
 }
 
-// CompStdOperationRegister register a component's all custom operations to standard cptype.OperationFunc,
+// CompNonBaseOperationRegister includes a component's all non-base operations.
+type CompNonBaseOperationRegister interface {
+	CompStdOperationRegister
+	CompNonStdOperationRegister
+}
+
+// CompStdOperationRegister register a component's all standard operations to standard cptype.OperationFunc,
 // and then used by framework.
 type CompStdOperationRegister interface {
 	RegisterCompStdOps() (opFuncs map[OperationKey]OperationFunc)
+}
+
+// CompNonStdOperationRegister register a component's all non-standard operations to standard cptype.OperationFunc,
+// and then used by framework.
+type CompNonStdOperationRegister interface {
+	RegisterCompNonStdOps() (opFuncs map[OperationKey]OperationFunc)
 }
 
 // CompFrameworkSteper represents all component steps played in framework.

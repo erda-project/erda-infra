@@ -129,6 +129,10 @@ func (F FRAMEWORK) registerOperations(sdk *cptype.SDK) {
 	for opKey, opFunc := range F.IC.RegisterCompStdOps() {
 		sdk.RegisterOperation(opKey, opFunc)
 	}
+	// comp non-standard ops
+	for opKey, opFunc := range F.IC.RegisterCompNonStdOps() {
+		sdk.RegisterOperation(opKey, opFunc)
+	}
 }
 
 func (F FRAMEWORK) handleOp(sdk *cptype.SDK, stdPtr cptype.IStdStructuredPtr) {

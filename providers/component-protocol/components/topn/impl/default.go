@@ -55,6 +55,11 @@ func (d *DefaultTop) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptyp
 	return map[cptype.OperationKey]cptype.OperationFunc{}
 }
 
+// RegisterCompNonStdOps .
+func (d *DefaultTop) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+	return nil
+}
+
 // Finalize .
 func (d *DefaultTop) Finalize(sdk *cptype.SDK) {}
 
