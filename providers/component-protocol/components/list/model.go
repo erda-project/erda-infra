@@ -16,6 +16,16 @@ package list
 
 import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
+type ItemLabelStatus string
+
+const (
+	ItemLabelStatusDefault ItemLabelStatus = ""
+	ItemLabelStatusSuccess ItemLabelStatus = "success"
+	ItemLabelStatusInfo    ItemLabelStatus = "info"
+	ItemLabelStatusWarning ItemLabelStatus = "warning"
+	ItemLabelStatusError   ItemLabelStatus = "error"
+)
+
 type (
 	// Data includes list of items.
 	Data struct {
@@ -52,7 +62,7 @@ type (
 		// optional: label color
 		Color string `json:"color,omitempty"`
 		// optional: default[gray], success[green], info[blue], warning[yellow], error[red]
-		Status string `json:"status,omitempty"`
+		Status ItemLabelStatus `json:"status,omitempty"`
 	}
 
 	// MetaInfo .
