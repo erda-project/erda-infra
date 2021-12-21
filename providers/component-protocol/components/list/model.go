@@ -16,14 +16,20 @@ package list
 
 import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
+// ItemLabelStatus .
 type ItemLabelStatus string
 
 const (
+	// ItemLabelStatusDefault default status
 	ItemLabelStatusDefault ItemLabelStatus = ""
+	// ItemLabelStatusSuccess success status
 	ItemLabelStatusSuccess ItemLabelStatus = "success"
-	ItemLabelStatusInfo    ItemLabelStatus = "info"
+	// ItemLabelStatusInfo info status
+	ItemLabelStatusInfo ItemLabelStatus = "info"
+	// ItemLabelStatusWarning warning status
 	ItemLabelStatusWarning ItemLabelStatus = "warning"
-	ItemLabelStatusError   ItemLabelStatus = "error"
+	// ItemLabelStatusError error status
+	ItemLabelStatusError ItemLabelStatus = "error"
 )
 
 type (
@@ -48,7 +54,7 @@ type (
 		Labels           []ItemLabel `json:"labels,omitempty"`
 		Description      string      `json:"description,omitempty"`
 		BackgroundImgURL string      `json:"backgroundImgURL,omitempty"`
-		MetaInfos        []MetaInfo  `json:"metaInfos,omitempty"`
+		KvInfos          []KvInfo    `json:"kvInfos,omitempty"`
 		// operations on the frond
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
 		// operations folded
@@ -65,9 +71,10 @@ type (
 		Status ItemLabelStatus `json:"status,omitempty"`
 	}
 
-	// MetaInfo .
-	MetaInfo struct {
-		Label string `json:"label,omitempty"`
+	// KvInfo .
+	KvInfo struct {
+		ID    string `json:"id,omitempty"`
+		Key   string `json:"key,omitempty"`
 		Value string `json:"value,omitempty"`
 		Icon  string `json:"icon,omitempty"`
 		Tip   string `json:"tip,omitempty"`
