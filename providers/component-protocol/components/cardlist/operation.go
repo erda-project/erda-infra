@@ -28,8 +28,8 @@ type (
 	// OpCardListGotoData define click operation data of cardList .
 	OpCardListGotoData struct {
 		// if JumpOut is true ,open new window, else open slide window
-		JumpOut bool
-		Target  string
+		JumpOut bool            `json:"jumpOut"`
+		Target  string          `json:"target"`
 		Query   cptype.ExtraMap `json:"query,omitempty"`
 		Params  cptype.ExtraMap `json:"params,omitempty"`
 	}
@@ -39,8 +39,8 @@ type (
 	// OpCardListIconGoto define click operation of icon in cardList.
 	OpCardListIconGoto struct {
 		cptype.Operation
-		Icon       string
-		Tip        string
+		Icon       string             `json:"icon"`
+		Tip        string             `json:"tip"`
 		ServerData OpCardListGotoData `json:"serverData,omitempty"`
 	}
 )
