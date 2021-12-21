@@ -58,6 +58,11 @@ func (d *DefaultFilter) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cp
 	}
 }
 
+// RegisterCompNonStdOps .
+func (d *DefaultFilter) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+	return nil
+}
+
 // Initialize .
 func (d *DefaultFilter) Initialize(sdk *cptype.SDK) {}
 

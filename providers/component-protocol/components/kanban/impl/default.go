@@ -69,6 +69,11 @@ func (d *DefaultKanban) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cp
 	}
 }
 
+// RegisterCompNonStdOps .
+func (d *DefaultKanban) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+	return nil
+}
+
 // Initialize .
 func (d *DefaultKanban) Initialize(sdk *cptype.SDK) {}
 
