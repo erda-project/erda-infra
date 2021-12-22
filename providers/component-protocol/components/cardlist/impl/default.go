@@ -52,6 +52,9 @@ func (d *DefaultCard) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cpty
 		cardlist.OpCardListIconGoto{}.OpKey(): func(sdk *cptype.SDK) {
 			d.Impl.RegisterCardIconGotoOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListIconGoto{}).(*cardlist.OpCardListIconGoto))(sdk)
 		},
+		cardlist.OpCardListStar{}.OpKey(): func(sdk *cptype.SDK) {
+			d.Impl.RegisterCardListStarOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListStar{}).(*cardlist.OpCardListStar))(sdk)
+		},
 	}
 }
 

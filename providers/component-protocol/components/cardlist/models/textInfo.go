@@ -19,6 +19,6 @@ type TextInfos []TextInfo
 
 // TextInfo .
 type TextInfo struct {
-	Main float64 `json:"main"`
-	Sub  string  `json:"sub"`
+	MainText float64 `json:"mainText"`
+	SubText  string  `json:"subText"`
 }
