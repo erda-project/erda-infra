@@ -19,17 +19,19 @@ import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 type (
 	// Data card std data
 	Data struct {
-		Total int    `json:"total"`
-		Title string `json:"title"`
-		List  []Card `json:"list,omitempty"`
+		Total        int    `json:"total"`
+		Title        string `json:"title"`
+		TitleSummary string `json:"titleSummary"`
+		Cards        []Card `json:"cards,omitempty"`
 	}
 	// Card .
 	Card struct {
-		ID      string  `json:"id"`
-		LogoURL string  `json:"logoURL"`
-		Title   string  `json:"title"`
-		Labels  []Label `json:"labels"`
-		Star    bool    `json:"star"`
+		ID     string  `json:"id"`
+		ImgURL string  `json:"imgURL"`
+		Icon   string  `json:"icon"`
+		Title  string  `json:"title"`
+		Labels []Label `json:"labels"`
+		Star   bool    `json:"star"`
 		cptype.Extra
 	}
 	// Label .

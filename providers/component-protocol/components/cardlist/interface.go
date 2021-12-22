@@ -26,8 +26,10 @@ type ICard interface {
 
 // ICardListStdOps .
 type ICardListStdOps interface {
-	// RegisterCardGotoOp click card to another page
-	RegisterCardGotoOp(opData OpCardListGoto) (opFunc cptype.OperationFunc)
+	// RegisterCardListGotoOp click card to another page
+	RegisterCardListGotoOp(opData OpCardListGoto) (opFunc cptype.OperationFunc)
 	// RegisterCardIconGotoOp click icon in card to another page
 	RegisterCardIconGotoOp(opData OpCardListIconGoto) (opFunc cptype.OperationFunc)
+	// RegisterCardListStarOp give card star
+	RegisterCardListStarOp(opData OpCardListStar) (opFunc cptype.OperationFunc)
 }
