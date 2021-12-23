@@ -48,7 +48,7 @@ func (d *DefaultList) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cpty
 	return map[cptype.OperationKey]cptype.OperationFunc{
 		// list level
 		list.OpChangePage{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterListPagingOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpChangePage{}).(*list.OpChangePage))
+			d.Impl.RegisterChangePage(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpChangePage{}).(*list.OpChangePage))
 		},
 
 		// item level

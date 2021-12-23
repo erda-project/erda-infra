@@ -24,7 +24,7 @@ type IList interface {
 
 // IListStdOps standard options
 type IListStdOps interface {
-	RegisterListPagingOp(opData OpChangePage) (opFunc cptype.OperationFunc)
+	RegisterChangePage(opData OpChangePage) (opFunc cptype.OperationFunc)
 	RegisterItemStarOp(opData OpItemStar) (opFunc cptype.OperationFunc)
 	RegisterItemClickGotoOp(opData OpItemClickGoto) (opFunc cptype.OperationFunc)
 }
