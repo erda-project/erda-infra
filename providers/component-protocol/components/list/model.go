@@ -20,16 +20,16 @@ import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 type ItemCommStatus string
 
 const (
-	// ItemLabelStatusDefault default status
-	ItemLabelStatusDefault ItemCommStatus = ""
-	// ItemLabelStatusSuccess success status
-	ItemLabelStatusSuccess ItemCommStatus = "success"
-	// ItemLabelStatusInfo info status
-	ItemLabelStatusInfo ItemCommStatus = "info"
-	// ItemLabelStatusWarning warning status
-	ItemLabelStatusWarning ItemCommStatus = "warning"
-	// ItemLabelStatusError error status
-	ItemLabelStatusError ItemCommStatus = "error"
+	// ItemCommStatusDefault default status
+	ItemCommStatusDefault ItemCommStatus = ""
+	// ItemCommStatusSuccess success status
+	ItemCommStatusSuccess ItemCommStatus = "success"
+	// ItemCommStatusInfo info status
+	ItemCommStatusInfo ItemCommStatus = "info"
+	// ItemCommStatusWarning warning status
+	ItemCommStatusWarning ItemCommStatus = "warning"
+	// ItemCommStatusError error status
+	ItemCommStatusError ItemCommStatus = "error"
 )
 
 type (
@@ -55,7 +55,7 @@ type (
 		LogoURL          string      `json:"logoURL,omitempty"`
 		Star             bool        `json:"star,omitempty"`
 		MainState        StateInfo   `json:"mainState,omitempty"`
-		Labels           []ItemLabel `json:"labels,omitempty"`
+		TitleState       []StateInfo `json:"titleState,omitempty"`
 		Description      string      `json:"description,omitempty"`
 		BackgroundImgURL string      `json:"backgroundImgURL,omitempty"`
 		KvInfos          []KvInfo    `json:"kvInfos,omitempty"`
@@ -71,15 +71,6 @@ type (
 	// StateInfo .
 	StateInfo struct {
 		Text   string         `json:"text,omitempty"`
-		Status ItemCommStatus `json:"status,omitempty"`
-	}
-
-	// ItemLabel .
-	ItemLabel struct {
-		Label string `json:"label,omitempty"`
-		// optional: label color
-		Color string `json:"color,omitempty"`
-		// optional: default[gray], success[green], info[blue], warning[yellow], error[red]
 		Status ItemCommStatus `json:"status,omitempty"`
 	}
 

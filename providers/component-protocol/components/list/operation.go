@@ -24,6 +24,8 @@ const (
 	OpItemStarKey = "star"
 	// OpItemClickGotoKey item level
 	OpItemClickGotoKey = "clickGoto"
+	// OpItemClickKey .
+	OpItemClickKey = "click"
 )
 
 // list-level
@@ -99,3 +101,23 @@ type OpItemBasicServerData struct {
 
 // OpKey .
 func (o OpItemClickGoto) OpKey() cptype.OperationKey { return OpItemClickGotoKey }
+
+type (
+	// OpItemClick .
+	OpItemClick struct {
+		cptype.Operation
+		ServerData OpItemClickServerData `json:"serverData,omitempty"`
+		ClientData OpItemClickClientData `json:"clientData,omitempty"`
+	}
+
+	// OpItemClickServerData server data
+	OpItemClickServerData struct {
+		OpItemBasicServerData
+	}
+
+	// OpItemClickClientData data
+	OpItemClickClientData struct{}
+)
+
+// OpKey .
+func (o OpItemClick) OpKey() cptype.OperationKey { return OpItemClickKey }
