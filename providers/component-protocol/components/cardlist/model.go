@@ -14,7 +14,10 @@
 
 package cardlist
 
-import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+import (
+	model "github.com/erda-project/erda-infra/providers/component-protocol/components/cardlist/models"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+)
 
 type (
 	// Data card std data
@@ -26,12 +29,13 @@ type (
 	}
 	// Card .
 	Card struct {
-		ID     string  `json:"id"`
-		ImgURL string  `json:"imgURL"`
-		Icon   string  `json:"icon"`
-		Title  string  `json:"title"`
-		Labels []Label `json:"labels"`
-		Star   bool    `json:"star"`
+		ID       string           `json:"id"`
+		ImgURL   string           `json:"imgURL"`
+		Icon     string           `json:"icon"`
+		Title    string           `json:"title"`
+		Labels   []Label          `json:"labels"`
+		Star     bool             `json:"star"`
+		TextMeta []model.TextMeta `json:"textMeta"`
 		cptype.Extra
 	}
 	// Label .
