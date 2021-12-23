@@ -16,50 +16,62 @@ package list
 
 import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
-// ItemLabelStatus .
-type ItemLabelStatus string
+// ItemCommStatus .
+type ItemCommStatus string
 
 const (
 	// ItemLabelStatusDefault default status
-	ItemLabelStatusDefault ItemLabelStatus = ""
+	ItemLabelStatusDefault ItemCommStatus = ""
 	// ItemLabelStatusSuccess success status
-	ItemLabelStatusSuccess ItemLabelStatus = "success"
+	ItemLabelStatusSuccess ItemCommStatus = "success"
 	// ItemLabelStatusInfo info status
-	ItemLabelStatusInfo ItemLabelStatus = "info"
+	ItemLabelStatusInfo ItemCommStatus = "info"
 	// ItemLabelStatusWarning warning status
-	ItemLabelStatusWarning ItemLabelStatus = "warning"
+	ItemLabelStatusWarning ItemCommStatus = "warning"
 	// ItemLabelStatusError error status
-	ItemLabelStatusError ItemLabelStatus = "error"
+	ItemLabelStatusError ItemCommStatus = "error"
 )
 
 type (
 	// Data includes list of items.
 	Data struct {
-		List       []Item                                   `json:"list,omitempty"`
-		PageNo     uint64                                   `json:"pageNo,omitempty"`
-		PageSize   uint64                                   `json:"pageSize,omitempty"`
-		Total      uint64                                   `json:"total,omitempty"`
-		Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
-		UserIDs    []string                                 `json:"userIDs,omitempty"`
+		Title        string                                   `json:"title,omitempty"`
+		TitleSummary string                                   `json:"titleSummary,omitempty"`
+		List         []Item                                   `json:"list,omitempty"`
+		PageNo       uint64                                   `json:"pageNo,omitempty"`
+		PageSize     uint64                                   `json:"pageSize,omitempty"`
+		Total        uint64                                   `json:"total,omitempty"`
+		Operations   map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
+		UserIDs      []string                                 `json:"userIDs,omitempty"`
 	}
 
 	// Item minimum unit of list
 	Item struct {
 		// uniq id of the item, e.g: appID, projID, ...
-		ID    string `json:"id,omitempty"`
-		Title string `json:"title,omitempty"`
+		ID           string `json:"id,omitempty"`
+		Title        string `json:"title,omitempty"`
+		TitleSummary string `json:"titleSummary,omitempty"`
 		// logo link url of title
-		LogoURL          string      `json:"LogoURL,omitempty"`
+		LogoURL          string      `json:"logoURL,omitempty"`
 		Star             bool        `json:"star,omitempty"`
+		MainState        StateInfo   `json:"mainState,omitempty"`
 		Labels           []ItemLabel `json:"labels,omitempty"`
 		Description      string      `json:"description,omitempty"`
 		BackgroundImgURL string      `json:"backgroundImgURL,omitempty"`
 		KvInfos          []KvInfo    `json:"kvInfos,omitempty"`
+		// columns show in the item, e.g user, time
+		ColumnsInfo map[string]interface{} `json:"columnsInfo,omitempty"`
 		// operations on the frond
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
 		// operations folded
-		MoreOperations MoreOperations `json:"moreOperations,omitempty"`
+		MoreOperations []MoreOpItem `json:"moreOperations,omitempty"`
 		cptype.Extra
+	}
+
+	// StateInfo .
+	StateInfo struct {
+		Text   string         `json:"text,omitempty"`
+		Status ItemCommStatus `json:"status,omitempty"`
 	}
 
 	// ItemLabel .
@@ -68,7 +80,7 @@ type (
 		// optional: label color
 		Color string `json:"color,omitempty"`
 		// optional: default[gray], success[green], info[blue], warning[yellow], error[red]
-		Status ItemLabelStatus `json:"status,omitempty"`
+		Status ItemCommStatus `json:"status,omitempty"`
 	}
 
 	// KvInfo .
@@ -82,9 +94,12 @@ type (
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}
 
-	// MoreOperations .
-	MoreOperations struct {
-		Operations      map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
-		OperationsOrder []cptype.OperationKey                    `json:"operationsOrder,omitempty"`
+	// MoreOpItem more operation item info
+	MoreOpItem struct {
+		ID   string `json:"id,omitempty"`
+		Text string `json:"key,omitempty"`
+		Icon string `json:"icon,omitempty"`
+		// more operation related operations
+		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}
 )

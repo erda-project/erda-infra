@@ -31,15 +31,15 @@ type (
 	// OpChangePage paging operation data
 	OpChangePage struct {
 		cptype.Operation
-		ServerData OpListPagingServerData `json:"serverData,omitempty"`
-		ClientData OpListPagingClientData `json:"clientData,omitempty"`
+		ServerData OpChangePageServerData `json:"serverData,omitempty"`
+		ClientData OpChangePageClientData `json:"clientData,omitempty"`
 	}
 
-	// OpListPagingServerData server data
-	OpListPagingServerData struct{}
+	// OpChangePageServerData server data
+	OpChangePageServerData struct{}
 
-	// OpListPagingClientData data
-	OpListPagingClientData struct {
+	// OpChangePageClientData data
+	OpChangePageClientData struct {
 		PageNo   uint64 `json:"pageNo,omitempty"`
 		PageSize uint64 `json:"pageSize,omitempty"`
 	}
