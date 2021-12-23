@@ -54,6 +54,7 @@ type (
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}
 
+	// IconOperations .
 	IconOperations struct {
 		Icon       string                                   `json:"icon"`
 		Tip        string                                   `json:"tip"`
