@@ -58,6 +58,9 @@ func (d *DefaultList) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cpty
 		list.OpItemClickGoto{}.OpKey(): func(sdk *cptype.SDK) {
 			d.Impl.RegisterItemClickGotoOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemClickGoto{}).(*list.OpItemClickGoto))
 		},
+		list.OpItemClick{}.OpKey(): func(sdk *cptype.SDK) {
+			d.Impl.RegisterItemClickOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemClick{}).(*list.OpItemClick))
+		},
 	}
 }
 
