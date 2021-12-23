@@ -14,11 +14,11 @@
 
 package model
 
-// TextInfos .
-type TextInfos []TextInfo
+import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
-// TextInfo .
-type TextInfo struct {
-	MainText float64 `json:"mainText"`
-	SubText  string  `json:"subText"`
+// TextMeta .
+type TextMeta struct {
+	MainText   float64                                  `json:"mainText"`
+	SubText    string                                   `json:"subText"`
+	Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 }
