@@ -24,12 +24,12 @@ type IOperation interface {
 
 // Operation .
 type Operation struct {
-	Text        string `json:"text,omitempty"`
-	Confirm     string `json:"confirm,omitempty"`
-	Disabled    bool   `json:"disabled,omitempty"`
-	DisabledTip string `json:"disabledTip,omitempty"`
-	SkipRender  bool   `json:"skipRender,omitempty"` // skipRender means this op is just a frontend op, won't invoke backend to render.
-	Async       bool   `json:"async,omitempty"`
+	Text       string `json:"text,omitempty"`
+	Tip        string `json:"tip,omitempty"`
+	Confirm    string `json:"confirm,omitempty"`
+	Disabled   bool   `json:"disabled,omitempty"`
+	SkipRender bool   `json:"skipRender,omitempty"` // skipRender means this op is just a frontend op, won't invoke backend to render.
+	Async      bool   `json:"async,omitempty"`
 
 	// ServerData generated at server-side.
 	ServerData *OpServerData `json:"serverData,omitempty"`

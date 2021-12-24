@@ -22,7 +22,7 @@ type (
 	// OpCardListGoto define click operation of cardList .
 	OpCardListGoto struct {
 		cptype.Operation
-		ServerData OpCardListGotoData `json:"serverData,omitempty"`
+		ServerData *OpCardListGotoData `json:"serverData,omitempty"`
 	}
 
 	// OpCardListGotoData define click operation data of cardList .
@@ -35,33 +35,15 @@ type (
 	}
 )
 
-type (
-	// OpCardListIconGoto define click operation of icon in cardList.
-	OpCardListIconGoto struct {
-		cptype.Operation
-		Icon       string             `json:"icon"`
-		Tip        string             `json:"tip"`
-		ServerData OpCardListGotoData `json:"serverData,omitempty"`
-	}
-)
-
 // OpKey .
 func (o OpCardListGoto) OpKey() cptype.OperationKey { return "clickGoto" }
-
-// OpKey .
-func (o OpCardListIconGoto) OpKey() cptype.OperationKey { return "clickGoto" }
 
 type (
 	// OpCardListStar give card star.
 	OpCardListStar struct {
 		cptype.Operation
-		Icon       string             `json:"icon"`
-		Tip        string             `json:"tip"`
-		ClientData OpCardListGotoData `json:"clientData,omitempty"`
-	}
-	// OpCardListStarData .
-	OpCardListStarData struct {
-		DataRef cptype.ExtraMap `json:"dataRef"`
+		Icon string `json:"icon"`
+		Tip  string `json:"tip"`
 	}
 )
 
