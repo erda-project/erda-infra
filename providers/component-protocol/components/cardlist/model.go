@@ -15,7 +15,6 @@
 package cardlist
 
 import (
-	model "github.com/erda-project/erda-infra/providers/component-protocol/components/cardlist/models"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
@@ -27,19 +26,30 @@ type (
 		TitleSummary string `json:"titleSummary"`
 		Cards        []Card `json:"cards,omitempty"`
 	}
+
 	// Card .
 	Card struct {
-		ID       string           `json:"id"`
-		ImgURL   string           `json:"imgURL"`
-		Icon     string           `json:"icon"`
-		Title    string           `json:"title"`
-		Labels   []Label          `json:"labels"`
-		Star     bool             `json:"star"`
-		TextMeta []model.TextMeta `json:"textMeta"`
+		ID         string       `json:"id"`
+		ImgURL     string       `json:"imgURL"`
+		Icon       string       `json:"icon"`
+		Title      string       `json:"title"`
+		TitleState []TitleState `json:"titleState"`
+		Star       bool         `json:"star"`
+		TextMeta   []TextMeta   `json:"textMeta"`
 		cptype.Extra
 	}
-	// Label .
-	Label struct {
-		Label string `json:"label"`
+
+	// TitleState .
+	TitleState struct {
+		Text   string `json:"text"`
+		Color  string `json:"color"`
+		Status string `json:"status"`
+	}
+
+	// TextMeta .
+	TextMeta struct {
+		MainText   float64                                  `json:"mainText"`
+		SubText    string                                   `json:"subText"`
+		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}
 )
