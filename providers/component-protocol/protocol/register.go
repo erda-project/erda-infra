@@ -45,7 +45,7 @@ func MustRegisterProtocolsFromFS(rootFS embed.FS) {
 	walkEmbedFS(rootFS, ".", &files)
 	// log
 	for _, file := range files {
-		logrus.Infof("register ptorocols from fs: fullPath: %s, isDir: %t", file.fullPath, file.isDir)
+		logrus.Infof("register protocols from fs: fullPath: %s, isDir: %t", file.fullPath, file.isDir)
 	}
 	// register all protocols
 	registerAllProtocolsFromRootFSFiles(files)

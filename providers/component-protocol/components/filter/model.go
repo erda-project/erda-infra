@@ -25,8 +25,9 @@ type (
 	Data struct {
 		// models/condition.go define constructors of condition type
 		// SelectCondition, DateRangeCondition, etc
-		Conditions []interface{} `json:"conditions,omitempty"`
-		FilterSet  []SetItem     `json:"filterSet,omitempty"`
+		Conditions []interface{}                            `json:"conditions,omitempty"`
+		FilterSet  []SetItem                                `json:"filterSet,omitempty"`
+		Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
 	}
 
 	// SetItem custom filter conditions
