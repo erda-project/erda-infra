@@ -44,9 +44,15 @@ func (b *OperationBuilder) WithConfirmTip(confirmTip string) *OperationBuilder {
 }
 
 // WithDisable .
-func (b *OperationBuilder) WithDisable(disable bool, disableTip string) *OperationBuilder {
+func (b *OperationBuilder) WithDisable(disable bool, tip string) *OperationBuilder {
 	b.Operation.Disabled = disable
-	b.Operation.DisabledTip = disableTip
+	b.Operation.Tip = tip
+	return b
+}
+
+// WithTip .
+func (b *OperationBuilder) WithTip(tip string) *OperationBuilder {
+	b.Operation.Tip = tip
 	return b
 }
 
