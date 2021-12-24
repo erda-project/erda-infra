@@ -29,14 +29,15 @@ type (
 
 	// Card .
 	Card struct {
-		ID             string         `json:"id"`
-		ImgURL         string         `json:"imgURL"`
-		Icon           string         `json:"icon"`
-		Title          string         `json:"title"`
-		TitleState     []TitleState   `json:"titleState"`
-		Star           bool           `json:"star"`
-		TextMeta       []TextMeta     `json:"textMeta"`
-		IconOperations IconOperations `json:"iconOperations"`
+		ID             string                                   `json:"id"`
+		ImgURL         string                                   `json:"imgURL"`
+		Icon           string                                   `json:"icon"`
+		Title          string                                   `json:"title"`
+		TitleState     []TitleState                             `json:"titleState"`
+		Star           bool                                     `json:"star"`
+		TextMeta       []TextMeta                               `json:"textMeta"`
+		IconOperations []IconOperations                         `json:"iconOperations"`
+		Operations     map[cptype.OperationKey]cptype.Operation `json:"operations"`
 		cptype.Extra
 	}
 
