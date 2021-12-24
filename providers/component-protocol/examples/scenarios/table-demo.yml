@@ -1,0 +1,18 @@
+scenario: table-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - table
+
+components:
+  page:
+    type: Container
+  table:
+    type: Table
+#    options:
+#      asyncAtInit: true
+
+#options:
+#  syncIntervalSecond: 10
