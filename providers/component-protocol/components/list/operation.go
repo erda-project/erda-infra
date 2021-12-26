@@ -116,7 +116,9 @@ type (
 	}
 
 	// OpItemClickClientData data
-	OpItemClickClientData struct{}
+	OpItemClickClientData struct {
+		DataRef *Item `json:"dataRef,omitempty"`
+	}
 )
 
 // OpKey .
