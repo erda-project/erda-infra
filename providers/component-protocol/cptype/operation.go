@@ -44,6 +44,4 @@ type OpClientData struct {
 }
 
 // OpServerData .
-type OpServerData struct {
-	Extra ExtraMap `json:"extra,omitempty"`
-}
+type OpServerData ExtraMap
