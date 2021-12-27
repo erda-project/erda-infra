@@ -150,6 +150,8 @@ func (m *Component) UnmarshalURLValues(prefix string, values url.Values) error {
 					return err
 				}
 				m.Options.RemoveMetaAfterFlat = val
+			case "version":
+				m.Version = vals[0]
 			}
 		}
 	}

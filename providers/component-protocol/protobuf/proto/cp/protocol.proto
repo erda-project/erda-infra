@@ -71,6 +71,9 @@ message Component {
 
   // options of the component.
   ComponentOptions options = 7;
+
+  // version of the component.
+  string version = 8;
 }
 
 message ComponentOptions {
