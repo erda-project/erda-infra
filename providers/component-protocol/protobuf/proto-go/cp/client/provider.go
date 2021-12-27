@@ -76,6 +76,7 @@ func init() {
 	servicehub.Register("erda.cp-client", &servicehub.Spec{
 		Services: []string{
 			"erda.cp.CPService",
+			"erda.cp.CPService.client",
 			"erda.cp-client",
 		},
 		Types: []reflect.Type{
