@@ -68,39 +68,10 @@ func (b *OperationBuilder) WithAsync(async bool) *OperationBuilder {
 	return b
 }
 
-// AppendExtraKV .
-func (b *OperationBuilder) AppendExtraKV(k string, v interface{}) *OperationBuilder {
-	if b.Operation.ServerData == nil {
-		b.Operation.ServerData = &cptype.OpServerData{}
-	}
-	if b.Operation.ServerData.Extra == nil {
-		b.Operation.ServerData.Extra = make(cptype.ExtraMap)
-	}
-	b.Operation.ServerData.Extra[k] = v
-	return b
-}
-
-// AppendExtraKVs .
-func (b *OperationBuilder) AppendExtraKVs(kvs map[string]interface{}) *OperationBuilder {
-	for k, v := range kvs {
-		b.AppendExtraKV(k, v)
-	}
-	return b
-}
-
 // WithServerDataPtr .
 func (b *OperationBuilder) WithServerDataPtr(inputPtr interface{}) *OperationBuilder {
-	var serverData cptype.ExtraMap
+	var serverData cptype.OpServerData
 	MustObjJSONTransfer(inputPtr, &serverData)
-	b.Operation.ServerData = &cptype.OpServerData{Extra: serverData}
-	return b
-}
-
-// WithExtraKVs .
-func (b *OperationBuilder) WithExtraKVs(kvs map[string]interface{}) *OperationBuilder {
-	if b.Operation.ServerData == nil {
-		b.Operation.ServerData = &cptype.OpServerData{}
-	}
-	b.Operation.ServerData.Extra = kvs
+	b.Operation.ServerData = &serverData
 	return b
 }
