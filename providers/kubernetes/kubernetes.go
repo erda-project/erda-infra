@@ -16,17 +16,16 @@ package kubernetes
 
 import (
 	"context"
-	"crypto/sha1" // nolint
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/kubernetes/watcher"
 	"github.com/erda-project/erda-infra/providers/kubernetes/watcher/pod"
 
@@ -88,7 +87,7 @@ func (p *provider) WatchPod(ctx context.Context, log logs.Logger, selector watch
 	w := pod.NewWatcher(
 		ctx,
 		p.client,
-		p.Log.Sub(fmt.Sprintf("pod-"+identifySelector(selector))),
+		p.Log.Sub(fmt.Sprintf("pod-"+strutil.RandStr(10))),
 		watcher.Selector{
 			Namespace:     selector.Namespace,
 			LabelSelector: selector.LabelSelector,
@@ -163,12 +162,6 @@ func homeDir() string {
 		return h
 	}
 	return os.Getenv("USERPROFILE") // windows
-}
-
-func identifySelector(selector watcher.Selector) string {
-	h := sha1.New()
-	h.Write([]byte(strings.Join([]string{selector.Namespace, selector.LabelSelector, selector.FieldSelector}, ":")))
-	return string(h.Sum(nil))[:10]
 }
 
 func init() {
