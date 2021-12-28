@@ -19,10 +19,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/erda-project/erda-infra/base/servicehub"
-	pkube "github.com/erda-project/erda-infra/providers/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/erda-project/erda-infra/base/servicehub"
+	pkube "github.com/erda-project/erda-infra/providers/kubernetes"
 )
 
 type provider struct {

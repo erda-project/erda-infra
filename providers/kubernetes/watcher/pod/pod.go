@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/providers/kubernetes/watcher"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,6 +26,9 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/providers/kubernetes/watcher"
 )
 
 type Watcher struct {

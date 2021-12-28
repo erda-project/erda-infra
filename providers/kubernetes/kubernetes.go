@@ -16,7 +16,7 @@ package kubernetes
 
 import (
 	"context"
-	"crypto/sha1"
+	"crypto/sha1" // nolint
 	"fmt"
 	"io/ioutil"
 	"os"
