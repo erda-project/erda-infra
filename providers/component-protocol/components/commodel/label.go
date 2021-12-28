@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package commodel
 
-import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
-
-// TextMeta .
-type TextMeta struct {
-	MainText   float64                                  `json:"mainText"`
-	SubText    string                                   `json:"subText"`
-	Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
+// Label .
+type Label struct {
+	ID    string       `json:"id,omitempty"`
+	Title string       `json:"title,omitempty"`
+	Color UnifiedColor `json:"color,omitempty"`
 }

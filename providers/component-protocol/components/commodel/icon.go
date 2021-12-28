@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cardlist
+package commodel
 
-import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
-)
-
-// ICard .
-type ICard interface {
-	cptype.IComponent
-	ICardListStdOps
+// Icon .
+type Icon struct {
+	URL  string `json:"url,omitempty"`
+	Type string `json:"type,omitempty"`
 }
 
-// ICardListStdOps .
-type ICardListStdOps interface {
-	// RegisterCardListStarOp give card star
-	RegisterCardListStarOp(opData OpCardListStar) (opFunc cptype.OperationFunc)
+// ModelType .
+func (i Icon) ModelType() string { return "icon" }
+
+// NewURLIcon from url, such as: /api/files/{uuid}
+func NewURLIcon(url string) *Icon {
+	return &Icon{URL: url}
+}
+
+// NewTypedIcon from type, such as: ISSUE_ICON.issue.TASK
+func NewTypedIcon(_type string) *Icon {
+	return &Icon{Type: _type}
 }

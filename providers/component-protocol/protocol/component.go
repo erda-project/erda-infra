@@ -82,7 +82,7 @@ func RegisterComponent(r *CompRenderSpec) error {
 	}
 
 	logrus.Infof("begin register component, scenario: %s, component: %s", r.Scenario, r.CompName)
-	// if scenario not exit, crate it
+	// if scenario not exit, create it
 	if _, ok := ScenarioRenders[r.Scenario]; !ok {
 		s := make(ScenarioRender)
 		ScenarioRenders[r.Scenario] = &s

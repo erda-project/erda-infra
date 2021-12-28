@@ -12,20 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cardlist
+package commodel
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"fmt"
 )
 
-// ICard .
-type ICard interface {
-	cptype.IComponent
-	ICardListStdOps
+// UnifiedColor .
+type UnifiedColor int
+
+// IUnifiedColor .
+type IUnifiedColor interface {
+	fmt.Stringer
 }
 
-// ICardListStdOps .
-type ICardListStdOps interface {
-	// RegisterCardListStarOp give card star
-	RegisterCardListStarOp(opData OpCardListStar) (opFunc cptype.OperationFunc)
+// Color .
+const (
+	ColorRed UnifiedColor = iota
+	ColorYellow
+	ColorGreen
+	ColorBlue
+	ColorDefault
+)
+
+// String .
+func (c UnifiedColor) String() string {
+	switch c {
+	case 0:
+		return "red"
+	case 1:
+		return "yellow"
+	case 2:
+		return "green"
+	case 3:
+		return "blue"
+	case 4:
+		return "default"
+	default:
+		return "default"
+	}
 }

@@ -12,20 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cardlist
+package commodel
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"fmt"
 )
 
-// ICard .
-type ICard interface {
-	cptype.IComponent
-	ICardListStdOps
+// UnifiedStatus .
+type UnifiedStatus int
+
+// IUnifiedStatus .
+type IUnifiedStatus interface {
+	fmt.Stringer
 }
 
-// ICardListStdOps .
-type ICardListStdOps interface {
-	// RegisterCardListStarOp give card star
-	RegisterCardListStarOp(opData OpCardListStar) (opFunc cptype.OperationFunc)
+// ErrorStatus .
+const (
+	ErrorStatus UnifiedStatus = iota
+	WarningStatus
+	SuccessStatus
+	ProcessingStatus
+	DefaultStatus
+)
+
+// String .
+func (g UnifiedStatus) String() string {
+	switch g {
+	case 0:
+		return "error"
+	case 1:
+		return "warning"
+	case 2:
+		return "success"
+	case 3:
+		return "processing"
+	case 4:
+		return "default"
+	default:
+		return "default"
+	}
 }

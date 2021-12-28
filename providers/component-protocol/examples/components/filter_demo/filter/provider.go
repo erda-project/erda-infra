@@ -21,6 +21,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/filter/impl"
 	model "github.com/erda-project/erda-infra/providers/component-protocol/components/filter/models"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
 type provider struct {
@@ -66,6 +67,10 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 		p.StdDataPtr = &filter.Data{
 			Conditions: mockCondition(),
 			FilterSet:  mockFilterSet(),
+			Operations: map[cptype.OperationKey]cptype.Operation{
+				filter.OpFilter{}.OpKey():         cputil.NewOpBuilder().Build(),
+				filter.OpFilterItemSave{}.OpKey(): cputil.NewOpBuilder().Build(),
+			},
 		}
 	}
 }
