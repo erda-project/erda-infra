@@ -21,6 +21,7 @@ import (
 // UserSelector .
 type UserSelector struct {
 	Scope           string   `json:"scope,omitempty"` // org/project/app/etc
+	ScopeID         string   `json:"scopeID,omitempty"`
 	SelectedUserIDs []string `json:"selectedUserIDs,omitempty"`
 
 	Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
@@ -29,6 +30,7 @@ type UserSelector struct {
 // ModelType .
 func (us UserSelector) ModelType() string { return "userSelector" }
 
+// OpUserSelectorChange .
 type (
 	// OpUserSelectorChange .
 	OpUserSelectorChange struct {
@@ -40,7 +42,10 @@ type (
 	OpUserSelectorChangeServerData struct{}
 	// OpUserSelectorChangeClientData .
 	OpUserSelectorChangeClientData struct {
-		DataRef         *MenuItem `json:"dataRef,omitempty"`
-		SelectedUserIDs []string  `json:"selectedUserIDs,omitempty"`
+		DataRef         *DropDownMenuItem `json:"dataRef,omitempty"`
+		SelectedUserIDs []string          `json:"selectedUserIDs,omitempty"`
 	}
 )
+
+// OpKey .
+func (o OpUserSelectorChange) OpKey() cptype.OperationKey { return "userSelector" }

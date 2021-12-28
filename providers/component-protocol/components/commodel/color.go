@@ -26,12 +26,13 @@ type IUnifiedColor interface {
 	fmt.Stringer
 }
 
-// Color .
+// UnifiedColor .
 const (
 	ColorRed UnifiedColor = iota
 	ColorYellow
 	ColorGreen
 	ColorBlue
+	ColorPurple
 	ColorDefault
 )
 
@@ -47,7 +48,7 @@ func (c UnifiedColor) String() string {
 	case 3:
 		return "blue"
 	case 4:
-		return "default"
+		return "purple"
 	default:
 		return "default"
 	}
