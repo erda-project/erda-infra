@@ -12,38 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package list
+package protocol
 
 import (
-	"encoding/json"
-	"fmt"
-	"testing"
-
-	"github.com/sirupsen/logrus"
-
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
-	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
-func TestItemExtra(t *testing.T) {
-	item := Item{
-		ID: "ID",
-		Extra: cptype.Extra{
-			Extra: map[string]interface{}{
-				"extKey1": "extVal1",
-				"extKey2": "extVal2",
-			},
-		},
-	}
-	b, _ := json.Marshal(item)
-	// output: {"id":"ID","extra":{"extKey1":"extVal1","extKey2":"extVal2"}}"
-	logrus.Infof("item bytes: %s", string(b))
-}
-
-func TestModel(t *testing.T) {
-	data := Data{Total: 0}
-	compData := cptype.ComponentData{"total": 45}
-	cputil.MustObjJSONTransfer(&data, &compData)
-	fmt.Printf("%#v", compData)
-	_ = data
+func doParallelRendering(p *cptype.ComponentProtocol, compRendering []cptype.RendingItem) error {
+	return nil
 }
