@@ -20,23 +20,23 @@ import (
 
 // DropDownMenu .
 type DropDownMenu struct {
-	Menus []MenuItem `json:"menus,omitempty"`
+	Menus []DropDownMenuItem `json:"menus,omitempty"`
 
 	Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
 }
 
-// MenuItem .
-type MenuItem struct {
-	ID    string `json:"id,omitempty"`
-	Title string `json:"title,omitempty"`
+// DropDownMenuItem .
+type DropDownMenuItem struct {
+	ID   string `json:"id,omitempty"`
+	Text string `json:"text,omitempty"`
 
-	Icon          Icon          `json:"icon,omitempty"`
+	Icon          *Icon         `json:"icon,omitempty"`
 	UnifiedStatus UnifiedStatus `json:"unifiedStatus,omitempty"`
 
-	Selected bool `json:"selected,omitempty"`
-	Disabled bool `json:"disabled,omitempty"`
-	Hidden   bool `json:"hidden,omitempty"`
-	Tip      bool `json:"tip,omitempty"`
+	Selected bool   `json:"selected,omitempty"`
+	Disabled bool   `json:"disabled,omitempty"`
+	Hidden   bool   `json:"hidden,omitempty"`
+	Tip      string `json:"tip,omitempty"`
 }
 
 type (
@@ -50,7 +50,13 @@ type (
 	OpDropDownMenuChangeServerData struct{}
 	// OpDropDownMenuChangeClientData .
 	OpDropDownMenuChangeClientData struct {
-		DataRef        *MenuItem `json:"dataRef,omitempty"`
-		SelectedItemID string    `json:"selectedItemID,omitempty"`
+		DataRef        *DropDownMenuItem `json:"dataRef,omitempty"`
+		SelectedItemID string            `json:"selectedItemID,omitempty"`
 	}
 )
+
+// OpKey .
+func (o OpDropDownMenuChange) OpKey() cptype.OperationKey { return "dropDownMenuChange" }
+
+// ModelType .
+func (m DropDownMenu) ModelType() string { return "dropDownMenu" }

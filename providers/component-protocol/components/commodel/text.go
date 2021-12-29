@@ -19,5 +19,5 @@ type Text struct {
 	Text string `json:"text,omitempty"`
 }
 
-// Type .
-func (t Text) Type() string { return "text" }
+// ModelType .
+func (t Text) ModelType() string { return "text" }

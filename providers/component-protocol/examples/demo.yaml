@@ -36,3 +36,6 @@ component-protocol.components.linegraph-demo.linegraph:
 
 ## filter
 component-protocol.components.filter-demo.filter:
+
+# table
+component-protocol.components.table-demo.table:
