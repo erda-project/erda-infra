@@ -64,6 +64,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 	}
 
 	var compRending []cptype.RendingItem
+	var isOldRenderVersion = true
 	if useDefaultProtocol {
 		crs, ok := req.Protocol.Rendering[cptype.DefaultRenderingKey]
 		if !ok {
@@ -75,6 +76,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 			for _, compName := range orders {
 				compRending = append(compRending, cptype.RendingItem{Name: compName})
 			}
+			isOldRenderVersion = false
 		} else {
 			compRending = append(compRending, crs...)
 		}
@@ -101,6 +103,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 			for _, comp := range subRenderingOrders {
 				compRending = append(compRending, cptype.RendingItem{Name: comp})
 			}
+			isOldRenderVersion = false
 		} else {
 			compRending = append(compRending, crs...)
 		}
@@ -119,7 +122,13 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 	polishProtocol(req.Protocol)
 
-	for _, v := range compRending {
+	var itemMap = map[string]cptype.RendingItem{}
+	for _, item := range compRending {
+		itemMap[item.Name] = item
+	}
+
+	var renderFunc = func(name string) error {
+		v := itemMap[name]
 		// 组件状态渲染
 		err := protoCompStateRending(ctx, req.Protocol, v)
 		if err != nil {
@@ -152,8 +161,52 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		simplifyComp(c)
 		elapsed := time.Since(start)
 		logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, v.Name, elapsed)
+		return nil
+	}
+
+	if isOldRenderVersion {
+		err = dagRenderComponent(compRending, renderFunc)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		for _, v := range compRending {
+			if err := renderFunc(v.Name); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
+}
+
+func dagRenderComponent(rendingItem []cptype.RendingItem, doing func(name string) error) error {
+	render := NewComponentRender()
+	for _, item := range rendingItem {
+		err := render.addNode(item)
+		if err != nil {
+			return err
+		}
+	}
+	for _, item := range rendingItem {
+		err := render.addEdge(item)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(rendingItem) == 0 {
+		return nil
+	}
+
+	err := doing(rendingItem[0].Name)
+	if err != nil {
+		return err
+	}
+	render.doneNode[rendingItem[0].Name] = NodeStatusDone
+
+	//return nil
+	return render.render(rendingItem[0].Name, doing)
 }
 
 func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions, compRendering []cptype.RendingItem) []cptype.RendingItem {
