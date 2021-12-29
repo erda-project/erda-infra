@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/providers/kubernetes/watcher"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
@@ -27,6 +29,7 @@ import (
 )
 
 type provider struct {
+	Log    logs.Logger
 	Kube   pkube.Interface
 	Client *kubernetes.Clientset
 }
@@ -46,7 +49,19 @@ func (p *provider) Run(ctx context.Context) error {
 		ip := node.Name
 		fmt.Println(ip)
 	}
-	return nil
+
+	ch := p.Kube.WatchPod(ctx, p.Log.Sub("pod-watch"), watcher.Selector{
+		Namespace:     "default",
+	})
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case event := <-ch:
+			fmt.Println(event.Pod.Name)
+		}
+	}
 }
 
 func init() {

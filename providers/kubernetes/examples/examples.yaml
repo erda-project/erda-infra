@@ -1,4 +1,4 @@
 kubernetes:
     config_path: "config"
-
+    master_url: "https://localhost:443"
 examples:
