@@ -54,7 +54,7 @@ type (
 		// logo link url of title
 		LogoURL          string      `json:"logoURL,omitempty"`
 		Star             *bool       `json:"star,omitempty"`
-		MainState        StateInfo   `json:"mainState,omitempty"`
+		MainState        *StateInfo  `json:"mainState,omitempty"`
 		TitleState       []StateInfo `json:"titleState,omitempty"`
 		Description      string      `json:"description,omitempty"`
 		BackgroundImgURL string      `json:"backgroundImgURL,omitempty"`

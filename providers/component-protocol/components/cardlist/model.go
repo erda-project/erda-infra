@@ -24,7 +24,7 @@ type (
 		Total        int    `json:"total"`
 		Title        string `json:"title"`
 		TitleSummary string `json:"titleSummary"`
-		Cards        []Card `json:"cards,omitempty"`
+		Cards        []Card `json:"cards"`
 	}
 
 	// Card .
