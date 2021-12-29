@@ -36,6 +36,7 @@ type (
 	}
 )
 
+// New .
 func New(title string) *Data {
 	return &Data{
 		Title:      title,
@@ -46,12 +47,14 @@ func New(title string) *Data {
 	}
 }
 
+// SetXAxis .
 func (d *Data) SetXAxis(values ...interface{}) {
 	d.Lock()
 	defer d.Unlock()
 	d.XAxis.Values = append(d.XAxis.Values, values...)
 }
 
+// SetYAxis .
 func (d *Data) SetYAxis(dimension string, values ...interface{}) {
 	d.Lock()
 	defer d.Unlock()
