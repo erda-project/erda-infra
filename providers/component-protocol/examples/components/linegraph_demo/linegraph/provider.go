@@ -31,35 +31,13 @@ type provider struct {
 // RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
-		data := &linegraph.Data{
-			Title: "line graph demo",
-			Dimensions: []string{
-				"Dimension",
-				"Dimension2",
-			},
-			XAxis: []*linegraph.Axis{
-				{
-					Values: []interface{}{
-						"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
-					},
-				},
-			},
-			YAxis: []*linegraph.Axis{
-				{
-					Values: []interface{}{
-						7, 6, 5, 4, 3, 2, 1,
-					},
-					Dimension: "Dimension2",
-				},
-				{
-					Values: []interface{}{
-						1, 2, 3, 4, 5, 6, 7,
-					},
-					Dimension: "Dimension",
-				},
-			},
-		}
-		p.StdDataPtr = data
+
+		d := linegraph.New("line graph demo")
+		d.SetXAxis("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+		d.SetYAxis("Dimension", 1, 2, 3, 4, 5, 6, 7)
+		d.SetYAxis("Dimension2", 7, 6, 5, 4, 3, 2, 1)
+
+		p.StdDataPtr = d
 	}
 }
 
