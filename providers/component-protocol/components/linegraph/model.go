@@ -25,6 +25,7 @@ type (
 		Inverse    bool     `json:"inverse"` // inverted xAxis and yAxis
 	}
 
+	// Axis defined struct.
 	Axis struct {
 		Dimension string        `json:"dimension,omitempty"`
 		Values    []interface{} `json:"values"`
