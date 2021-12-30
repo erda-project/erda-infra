@@ -46,6 +46,8 @@ type Hierarchy struct {
 	Root    string `json:"root" yaml:"root"`
 	// structure的结构可能是list、map
 	Structure map[string]interface{} `json:"structure" yaml:"structure"`
+	// Parallel
+	Parallel map[string][]string `json:"parallel,omitempty"`
 }
 
 // Component defines a component.
