@@ -32,19 +32,19 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 				{
 					Key:    "key",
 					SubKey: "ms",
-					Value:  1,
+					Value:  "1",
 					Tip:    "tip",
 				},
 				{
 					Key:    "key2",
 					SubKey: "",
-					Value:  2,
+					Value:  "2",
 					Tip:    "tip",
 				},
 				{
 					Key:    "key3",
 					SubKey: "s",
-					Value:  1,
+					Value:  "1",
 					Tip:    "tip",
 				},
 			},

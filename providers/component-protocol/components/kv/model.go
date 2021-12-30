@@ -23,10 +23,10 @@ type (
 
 	// KV defined struct.
 	KV struct {
-		Key      string      `json:"key"`
-		SubKey   string      `json:"subKey"`
-		Value    interface{} `json:"value"`
-		SubValue interface{} `json:"subValue"`
-		Tip      string      `json:"tip"`
+		Key      string `json:"key"`
+		SubKey   string `json:"subKey"`
+		Value    string `json:"value"`
+		SubValue string `json:"subValue"`
+		Tip      string `json:"tip"`
 	}
 )
