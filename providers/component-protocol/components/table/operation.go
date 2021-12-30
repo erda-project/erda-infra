@@ -32,7 +32,8 @@ type (
 	}
 	// OpTableChangePageClientData .
 	OpTableChangePageClientData struct {
-		Title string `json:"title,omitempty"`
+		PageNo   uint64 `json:"pageNo"`
+		PageSize uint64 `json:"pageSize"`
 	}
 )
 
