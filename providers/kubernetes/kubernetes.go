@@ -55,11 +55,7 @@ type provider struct {
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	if len(p.Cfg.ConfigPath) <= 0 {
-		if home := homeDir(); home != "" {
-			p.Cfg.ConfigPath = filepath.Join(home, ".kube", "config")
-		}
-	}
+
 	config, err := p.createRestConfig()
 	if err != nil {
 		return fmt.Errorf("create rest config err: %w", err)
@@ -94,17 +90,6 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 func (p *provider) createRestConfig() (*rest.Config, error) {
 	var config *rest.Config
 	if p.Cfg.MasterURL != "" {
-		if p.Cfg.ConfigPath != "" {
-			if _, err := os.Stat(p.Cfg.ConfigPath); err == nil {
-				// use the current context in kubeconfig
-				cfg, err := clientcmd.BuildConfigFromFlags(p.Cfg.MasterURL, p.Cfg.ConfigPath)
-				if err != nil {
-					return nil, fmt.Errorf("fail to build kube config: %s", err)
-				}
-				config = cfg
-			}
-		}
-
 		if p.Cfg.RootCAFile != "" && p.Cfg.TokenFile != "" {
 			tlscfg := rest.TLSClientConfig{
 				Insecure: p.Cfg.InsecureSkipVerify,
@@ -123,6 +108,20 @@ func (p *provider) createRestConfig() (*rest.Config, error) {
 				Host:            p.Cfg.MasterURL,
 				BearerTokenFile: p.Cfg.TokenFile,
 				BearerToken:     string(token),
+			}
+		} else {
+			if p.Cfg.ConfigPath == "" {
+				if home := homeDir(); home != "" {
+					p.Cfg.ConfigPath = filepath.Join(home, ".kube", "config")
+				}
+			}
+			if _, err := os.Stat(p.Cfg.ConfigPath); err == nil {
+				// use the current context in kubeconfig
+				cfg, err := clientcmd.BuildConfigFromFlags(p.Cfg.MasterURL, p.Cfg.ConfigPath)
+				if err != nil {
+					return nil, fmt.Errorf("fail to build kube config: %s", err)
+				}
+				config = cfg
 			}
 		}
 	} else {
