@@ -15,10 +15,12 @@
 package cputil
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
@@ -29,12 +31,24 @@ func TestObjJSONTransfer(t *testing.T) {
 		Options: &pb.ProtocolOptions{
 			SyncIntervalSecond: 0.01,
 		},
+		Hierarchy: &pb.Hierarchy{
+			Parallel: map[string]*structpb.Value{
+				"page": func() *structpb.Value {
+					result, err := structpb.NewValue([]interface{}{"filter", "grid"})
+					if err != nil {
+						panic(err)
+					}
+					return result
+				}(),
+			},
+		},
 	}
 	var dest cptype.ComponentProtocol
 
 	err := ObjJSONTransfer(&src, &dest)
 	assert.NoError(t, err)
 	assert.Equal(t, src.Options.SyncIntervalSecond, dest.Options.SyncIntervalSecond)
+	fmt.Printf("%#v\n", dest.Hierarchy.Parallel)
 }
 
 func TestMustFlatMapMeta(t *testing.T) {

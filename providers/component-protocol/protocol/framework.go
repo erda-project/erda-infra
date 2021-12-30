@@ -45,7 +45,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 			err = fmt.Errorf(msg)
 		}
 	}()
-	sdk := cputil.SDK(ctx)
+	sdk := cputil.SDK(ctx).Clone()
 	sdk.GlobalState = gs
 	sdk.Comp = ensureCompFields(sdk, c)
 	sdk.Event = event
@@ -70,6 +70,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 		F.IC.AfterHandleOp(sdk)
 		// encoder
 		ensureCompFieldsBeforeEncode(sdk)
+		//spew.Dump("name:", c.Name, "data ptr", stdStructuredCompPtr.DataPtr())
 		F.IC.EncodeData(stdStructuredCompPtr.DataPtr(), &sdk.Comp.Data)
 		F.IC.EncodeState(stdStructuredCompPtr.StatePtr(), &sdk.Comp.State)
 		F.IC.EncodeInParams(stdStructuredCompPtr.InParamsPtr(), &sdk.InParams)

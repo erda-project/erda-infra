@@ -16,10 +16,17 @@ package protocol
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
 type Node struct {
@@ -29,16 +36,16 @@ type Node struct {
 	NextNodes       []*Node
 	nextNodesByName map[string]*Node
 	PreviousNode    *Node
+
+	BindingStates []cptype.RendingState
+
+	doneNextNodesByName map[string]*Node
 }
 
-func printNewLines(w io.Writer, repeat int) {
-	if repeat == 0 {
-		repeat = 1
-	}
-	for i := 0; i < repeat; i++ {
-		fmt.Fprintln(w)
-	}
+func (n *Node) toRendingItem() cptype.RendingItem {
+	return cptype.RendingItem{Name: n.Name, State: n.BindingStates}
 }
+
 func printIndent(w io.Writer, repeat int) {
 	if repeat == 0 {
 		repeat = 1
@@ -57,21 +64,21 @@ func printNode(w io.Writer, n *Node) {
 
 func (n *Node) String() string {
 	w := new(bytes.Buffer)
-	fmt.Fprintf(w, "name: %s\n", n.Name)
+	fmt.Fprintf(w, "root: %s\n", n.Name)
 	depth := 1
 	n.printNexts(w, depth)
 	return w.String()
 }
 func (n *Node) printNexts(w io.Writer, depth int) {
-	for i, next := range n.NextNodes {
-		printIndent(w, depth*i*2)
+	for _, next := range n.NextNodes {
+		printIndent(w, depth*2)
 		printNode(w, next)
 		next.printNexts(w, depth+1)
 	}
 }
 
 func makeSerialNode(item cptype.RendingItem) *Node {
-	return &Node{Name: item.Name, Parallel: false}
+	return &Node{Name: item.Name, Parallel: false, BindingStates: item.State, doneNextNodesByName: map[string]*Node{}}
 }
 func (n *Node) addNext(next *Node) {
 	// set next
@@ -112,6 +119,11 @@ func (n *Node) cutOffPrevious() {
 func (n *Node) linkSubParallelNode(subNode *Node) {
 	// set parallel to true
 	subNode.Parallel = true
+	// link as serial
+	n.linkSubSerialNode(subNode)
+}
+
+func (n *Node) linkSubSerialNode(subNode *Node) {
 	// find index that subNode should be put into
 	subNodeIndex := -1
 	for i, nextNode := range n.NextNodes {
@@ -155,6 +167,20 @@ func parseParallelRendering(p *cptype.ComponentProtocol, compRenderingItems []cp
 		continue
 	}
 
+	// link again according to hierarchy structure
+	for nodeName, v := range p.Hierarchy.Structure {
+		var subCompNames []string
+		if err := cputil.ObjJSONTransfer(&v, &subCompNames); err != nil {
+			continue
+		}
+		node := nodesMap[nodeName]
+		for _, subNodeName := range subCompNames {
+			// set subNode's previous again
+			subNode := nodesMap[subNodeName]
+			node.linkSubSerialNode(subNode)
+		}
+	}
+
 	// link all nodes again according to hierarchy.Parallel definition
 	parallelDef := p.Hierarchy.Parallel
 	if parallelDef == nil {
@@ -178,4 +204,149 @@ func parseParallelRendering(p *cptype.ComponentProtocol, compRenderingItems []cp
 	}
 
 	return rootNode, nil
+}
+
+func renderFromNode(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, node *Node) error {
+	// render itself
+	if err := renderOneNode(ctx, req, sr, node); err != nil {
+		return err
+	}
+
+	// continue render until done
+	i := 0
+	for {
+		if i > 50 {
+			return fmt.Errorf("abnormal render next nodes, over 50 times, force stop")
+		}
+		if len(node.doneNextNodesByName) == len(node.NextNodes) {
+			break
+		}
+		// render next nodes
+		if err := node.renderNextNodes(ctx, req, sr); err != nil {
+			return err
+		}
+		i++
+	}
+
+	return nil
+}
+
+func (n *Node) renderNextNodes(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender) error {
+	// render next nodes
+	renderableNodes := n.calcRenderableNextNodes()
+	if len(renderableNodes) == 0 {
+		return nil
+	}
+	printRenderableNodes(renderableNodes)
+	var wg sync.WaitGroup
+	var errorMsgs []string
+	for _, nextNode := range renderableNodes {
+		wg.Add(1)
+		go func(nextNode *Node) {
+			logrus.Infof("begin render node: %s", nextNode.Name)
+			defer logrus.Infof("end render node: %s", nextNode.Name)
+			defer wg.Done()
+
+			if err := renderFromNode(ctx, req, sr, nextNode); err != nil {
+				errorMsgs = append(errorMsgs, err.Error())
+			}
+		}(nextNode)
+	}
+	wg.Wait()
+	if len(errorMsgs) > 0 {
+		return fmt.Errorf(strings.Join(errorMsgs, ", "))
+	}
+	return nil
+}
+
+func printRenderableNodes(nodes []*Node) {
+	var nodeNames []string
+	for _, node := range nodes {
+		nodeNames = append(nodeNames, node.Name)
+	}
+	switch len(nodeNames) {
+	case 0:
+		return
+	case 1:
+		logrus.Infof("[S] serial renderable node: %s", strings.Join(nodeNames, ", "))
+	default:
+		logrus.Infof("[P] parallel renderable nodes: %s", strings.Join(nodeNames, ", "))
+	}
+}
+
+//func renderNextNodes(node *Node) error {
+//}
+
+func (n *Node) calcRenderableNextNodes() []*Node {
+	//if n.doneNextNodesByName == nil {
+	//	n.doneNextNodesByName = make(map[string]*Node)
+	//}
+	var renderableNodes []*Node
+	defer func() {
+		for _, node := range renderableNodes {
+			n.doneNextNodesByName[node.Name] = node
+		}
+	}()
+	// get from nextNodes by order
+	for _, next := range n.NextNodes {
+		// skip already done
+		if _, done := n.doneNextNodesByName[next.Name]; done {
+			continue
+		}
+		if len(renderableNodes) == 0 {
+			renderableNodes = append(renderableNodes, next)
+			continue
+		}
+		// stop if have serial-node
+		for _, node := range renderableNodes {
+			if !node.Parallel {
+				return renderableNodes
+			}
+			if !next.Parallel {
+				return renderableNodes
+			}
+		}
+		renderableNodes = append(renderableNodes, next)
+	}
+	return renderableNodes
+}
+
+func renderOneNode(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, node *Node) error {
+	return renderOneComp(ctx, req, sr, node.toRendingItem())
+}
+
+func renderOneComp(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, v cptype.RendingItem) error {
+	// 组件状态渲染
+	err := protoCompStateRending(ctx, req.Protocol, v)
+	if err != nil {
+		logrus.Errorf("protocol component state rending failed, request: %+v, err: %v", v, err)
+		return err
+	}
+	// 获取协议中相关组件
+	c, err := getProtoComp(ctx, req.Protocol, v.Name)
+	if err != nil {
+		logrus.Errorf("get component from protocol failed, scenario: %s, component: %s", req.Scenario.ScenarioKey, req.Event.Component)
+		return nil
+	}
+	// 获取组件渲染函数
+	cr, err := getCompRender(ctx, sr, v.Name, c.Type)
+	if err != nil {
+		logrus.Errorf("get component render failed, scenario: %s, component: %s", req.Scenario.ScenarioKey, req.Event.Component)
+		return err
+	}
+	// 生成组件对应事件，如果不是组件自身事件则为默认事件
+	event := eventConvert(v.Name, req.Event)
+	// 运行组件渲染函数
+	start := time.Now() // 获取当前时间
+	_, instanceName := getCompNameAndInstanceName(v.Name)
+	c.Name = instanceName
+	err = wrapCompRender(cr.RenderC(), req.Protocol.Version).Render(ctx, c, req.Scenario, event, req.Protocol.GlobalState)
+	if err != nil {
+		logrus.Errorf("render component failed, err: %s, scenario: %+v, component: %s", err.Error(), req.Scenario, cr.CompName)
+		return err
+	}
+	simplifyComp(c)
+	elapsed := time.Since(start)
+	logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, v.Name, elapsed)
+	return nil
 }
