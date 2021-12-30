@@ -23,37 +23,33 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/pkg/strutil"
-	"github.com/erda-project/erda-infra/providers/kubernetes/watcher"
-	"github.com/erda-project/erda-infra/providers/kubernetes/watcher/pod"
-
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	certutil "k8s.io/client-go/util/cert"
+
+	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
 // Interface .
 type Interface interface {
 	Client() *kubernetes.Clientset
-	WatchPod(ctx context.Context, log logs.Logger, selector watcher.Selector) <-chan pod.Event
 }
 
 var clientType = reflect.TypeOf((*kubernetes.Clientset)(nil))
 
 type config struct {
-	MasterURL  string `file:"master_url"`
-	ConfigPath string `file:"config_path"`
-	RootCAFile string `file:"root_ca_file"`
-	TokenFile  string `file:"token_file"`
+	MasterURL          string `file:"master_url"`
+	ConfigPath         string `file:"config_path"`
+	RootCAFile         string `file:"root_ca_file"`
+	TokenFile          string `file:"token_file"`
+	InsecureSkipVerify bool   `file:"insecure_skip_verify"`
+	ConnectionCheck    bool   `file:"connection_check" default:"true"`
 }
 
 // provider .
 type provider struct {
 	Cfg    *config
-	Log    logs.Logger
 	client *kubernetes.Clientset
 }
 
@@ -75,28 +71,14 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		return fmt.Errorf("create k8s client err: %w", err)
 	}
 
-	if err := HealthCheck(clientset, 30*time.Second); err != nil {
-		return fmt.Errorf("check connection err: %w", err)
+	if p.Cfg.ConnectionCheck {
+		if err := HealthCheck(clientset, 30*time.Second); err != nil {
+			return fmt.Errorf("check connection err: %w", err)
+		}
 	}
 
 	p.client = clientset
 	return nil
-}
-
-func (p *provider) WatchPod(ctx context.Context, log logs.Logger, selector watcher.Selector) <-chan pod.Event {
-	w := pod.NewWatcher(
-		ctx,
-		p.client,
-		p.Log.Sub(fmt.Sprintf("pod-"+strutil.RandStr(10))),
-		watcher.Selector{
-			Namespace:     selector.Namespace,
-			LabelSelector: selector.LabelSelector,
-			FieldSelector: selector.FieldSelector,
-		},
-	)
-	ch := make(chan pod.Event)
-	go w.Watch(ctx, ch)
-	return ch
 }
 
 func (p *provider) Client() *kubernetes.Clientset { return p.client }
@@ -121,8 +103,12 @@ func (p *provider) createRestConfig() (*rest.Config, error) {
 				}
 				config = cfg
 			}
-		} else if p.Cfg.RootCAFile != "" && p.Cfg.TokenFile != "" {
-			tlscfg := rest.TLSClientConfig{}
+		}
+
+		if p.Cfg.RootCAFile != "" && p.Cfg.TokenFile != "" {
+			tlscfg := rest.TLSClientConfig{
+				Insecure: p.Cfg.InsecureSkipVerify,
+			}
 			if _, err := certutil.NewPool(p.Cfg.RootCAFile); err != nil {
 				return nil, fmt.Errorf("expected to load root CA config from %s, but got err: %v", p.Cfg.RootCAFile, err)
 			} else {
