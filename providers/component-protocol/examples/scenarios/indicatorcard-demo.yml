@@ -1,0 +1,13 @@
+scenario: indicatorcard-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - indicatorcard
+
+components:
+  page:
+    type: Container
+  indicatorcard:
+    type: IndicatorCard

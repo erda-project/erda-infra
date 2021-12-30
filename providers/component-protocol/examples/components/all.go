@@ -18,6 +18,7 @@ import (
 	// easy to import all common components
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demo/demotable"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/filter_demo/filter"
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/indicatorcard_demo/indicatorcard"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/kanban_demo/kanban"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/linegraph_demo/linegraph"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/table_demo/table"
