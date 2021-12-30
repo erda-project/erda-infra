@@ -1,4 +1,6 @@
 kubernetes:
-    config_path: "config"
-
+#    config_path: "config"
+    master_url: ${MASTER_VIP_URL}
+    root_ca_file: ca.crt
+    token_file: token
 examples:

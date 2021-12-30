@@ -15,14 +15,20 @@
 package kubernetes
 
 import (
+	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+	"time"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	certutil "k8s.io/client-go/util/cert"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 // Interface .
@@ -33,8 +39,12 @@ type Interface interface {
 var clientType = reflect.TypeOf((*kubernetes.Clientset)(nil))
 
 type config struct {
-	ConfigPath string `file:"config_path"`
-	MasterURL  string `file:"master_url"`
+	MasterURL          string `file:"master_url"`
+	ConfigPath         string `file:"config_path"`
+	RootCAFile         string `file:"root_ca_file"`
+	TokenFile          string `file:"token_file"`
+	InsecureSkipVerify bool   `file:"insecure_skip_verify"`
+	ConnectionCheck    bool   `file:"connection_check" default:"true"`
 }
 
 // provider .
@@ -45,24 +55,24 @@ type provider struct {
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	if len(p.Cfg.ConfigPath) <= 0 {
-		if home := homeDir(); home != "" {
-			p.Cfg.ConfigPath = filepath.Join(home, ".kube", "config")
-		}
-	}
-	if len(p.Cfg.ConfigPath) <= 0 && len(p.Cfg.MasterURL) <= 0 {
-		return fmt.Errorf("kube config path or master url must not be empty")
-	}
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags(p.Cfg.MasterURL, p.Cfg.ConfigPath)
+
+	config, err := p.createRestConfig()
 	if err != nil {
-		return fmt.Errorf("fail to build kube config: %s", err)
+		return fmt.Errorf("create rest config err: %w", err)
 	}
+
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return fmt.Errorf("fail to create k8s client: %s", err)
+		return fmt.Errorf("create k8s client err: %w", err)
 	}
+
+	if p.Cfg.ConnectionCheck {
+		if err := HealthCheck(clientset, 30*time.Second); err != nil {
+			return fmt.Errorf("check connection err: %w", err)
+		}
+	}
+
 	p.client = clientset
 	return nil
 }
@@ -75,6 +85,60 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 		return p.client
 	}
 	return p
+}
+
+func (p *provider) createRestConfig() (*rest.Config, error) {
+	var config *rest.Config
+	if p.Cfg.MasterURL != "" {
+		if p.Cfg.RootCAFile != "" && p.Cfg.TokenFile != "" {
+			tlscfg := rest.TLSClientConfig{
+				Insecure: p.Cfg.InsecureSkipVerify,
+			}
+			if _, err := certutil.NewPool(p.Cfg.RootCAFile); err != nil {
+				return nil, fmt.Errorf("expected to load root CA config from %s, but got err: %v", p.Cfg.RootCAFile, err)
+			}
+			tlscfg.CAFile = p.Cfg.RootCAFile
+			token, err := ioutil.ReadFile(p.Cfg.TokenFile)
+			if err != nil {
+				return nil, err
+			}
+
+			config = &rest.Config{
+				TLSClientConfig: tlscfg,
+				Host:            p.Cfg.MasterURL,
+				BearerTokenFile: p.Cfg.TokenFile,
+				BearerToken:     string(token),
+			}
+		} else {
+			if p.Cfg.ConfigPath == "" {
+				if home := homeDir(); home != "" {
+					p.Cfg.ConfigPath = filepath.Join(home, ".kube", "config")
+				}
+			}
+			if _, err := os.Stat(p.Cfg.ConfigPath); err == nil {
+				// use the current context in kubeconfig
+				cfg, err := clientcmd.BuildConfigFromFlags(p.Cfg.MasterURL, p.Cfg.ConfigPath)
+				if err != nil {
+					return nil, fmt.Errorf("fail to build kube config: %s", err)
+				}
+				config = cfg
+			}
+		}
+	} else {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			return nil, fmt.Errorf("build from inCluster err: %w", err)
+		}
+		config = cfg
+	}
+	return config, nil
+}
+
+// HealthCheck check apiserver connection
+func HealthCheck(client *kubernetes.Clientset, to time.Duration) error {
+	ctx, _ := context.WithTimeout(context.TODO(), to)
+	_, err := client.Discovery().RESTClient().Get().AbsPath("/healthz").DoRaw(ctx)
+	return err
 }
 
 func homeDir() string {
