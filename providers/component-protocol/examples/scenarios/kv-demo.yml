@@ -1,0 +1,13 @@
+scenario: kv-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - kv
+
+components:
+  page:
+    type: Container
+  kv:
+    type: KV

@@ -39,3 +39,6 @@ component-protocol.components.filter-demo.filter:
 
 # table
 component-protocol.components.table-demo.table:
+
+# kv
+component-protocol.components.kv-demo:
