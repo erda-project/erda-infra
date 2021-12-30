@@ -111,10 +111,8 @@ func (p *provider) createRestConfig() (*rest.Config, error) {
 			}
 			if _, err := certutil.NewPool(p.Cfg.RootCAFile); err != nil {
 				return nil, fmt.Errorf("expected to load root CA config from %s, but got err: %v", p.Cfg.RootCAFile, err)
-			} else {
-				tlscfg.CAFile = p.Cfg.RootCAFile
 			}
-
+			tlscfg.CAFile = p.Cfg.RootCAFile
 			token, err := ioutil.ReadFile(p.Cfg.TokenFile)
 			if err != nil {
 				return nil, err
@@ -137,6 +135,7 @@ func (p *provider) createRestConfig() (*rest.Config, error) {
 	return config, nil
 }
 
+// check apiserver connection
 func HealthCheck(client *kubernetes.Clientset, to time.Duration) error {
 	ctx, _ := context.WithTimeout(context.TODO(), to)
 	_, err := client.Discovery().RESTClient().Get().AbsPath("/healthz").DoRaw(ctx)
