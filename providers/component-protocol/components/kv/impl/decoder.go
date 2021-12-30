@@ -23,14 +23,23 @@ import (
 // DecodeData .
 func (d *DefaultKV) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
 	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*kv.Data))
+	if custom, ok := d.Impl.(kv.CustomData); ok {
+		custom.DecodeToCustomData(d.StdDataPtr, custom.CustomDataPtr())
+	}
 }
 
 // DecodeState .
 func (d *DefaultKV) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
 	cputil.MustObjJSONTransfer(compState, modelStatePtr.(*cptype.ExtraMap))
+	if custom, ok := d.Impl.(kv.CustomState); ok {
+		custom.DecodeToCustomState(d.StdStatePtr, custom.CustomStatePtr())
+	}
 }
 
 // DecodeInParams .
 func (d *DefaultKV) DecodeInParams(compInParams cptype.InParams, modelInParamsPtr interface{}) {
 	cputil.MustObjJSONTransfer(compInParams, modelInParamsPtr.(*cptype.ExtraMap))
+	if custom, ok := d.Impl.(kv.CustomInParams); ok {
+		custom.DecodeToCustomInParams(d.StdInParamsPtr, custom.CustomInParamsPtr())
+	}
 }
