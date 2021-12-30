@@ -15,21 +15,31 @@
 package impl
 
 import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/kv"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
 // EncodeData .
 func (d *DefaultKV) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype.ComponentData) {
+	if custom, ok := d.Impl.(kv.CustomData); ok {
+		custom.EncodeFromCustomData(custom.CustomDataPtr(), srcStructPtr.(*kv.Data))
+	}
 	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }
 
 // EncodeState .
 func (d *DefaultKV) EncodeState(srcStructPtr interface{}, dstRawPtr *cptype.ComponentState) {
+	if custom, ok := d.Impl.(kv.CustomState); ok {
+		custom.EncodeFromCustomState(custom.CustomStatePtr(), srcStructPtr.(*cptype.ExtraMap))
+	}
 	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }
 
 // EncodeInParams .
 func (d *DefaultKV) EncodeInParams(srcStructPtr interface{}, dstRawPtr *cptype.InParams) {
+	if custom, ok := d.Impl.(kv.CustomState); ok {
+		custom.EncodeFromCustomState(custom.CustomStatePtr(), srcStructPtr.(*cptype.ExtraMap))
+	}
 	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }

@@ -23,14 +23,23 @@ import (
 // DecodeData .
 func (d *DefaultLineGraph) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
 	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*linegraph.Data))
+	if custom, ok := d.Impl.(linegraph.CustomData); ok {
+		custom.DecodeToCustomData(d.StdDataPtr, custom.CustomDataPtr())
+	}
 }
 
 // DecodeState .
 func (d *DefaultLineGraph) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
 	cputil.MustObjJSONTransfer(compState, modelStatePtr.(*cptype.ExtraMap))
+	if custom, ok := d.Impl.(linegraph.CustomState); ok {
+		custom.DecodeToCustomState(d.StdStatePtr, custom.CustomStatePtr())
+	}
 }
 
 // DecodeInParams .
 func (d *DefaultLineGraph) DecodeInParams(compInParams cptype.InParams, modelInParamsPtr interface{}) {
 	cputil.MustObjJSONTransfer(compInParams, modelInParamsPtr.(*cptype.ExtraMap))
+	if custom, ok := d.Impl.(linegraph.CustomInParams); ok {
+		custom.DecodeToCustomInParams(d.StdInParamsPtr, custom.CustomInParamsPtr())
+	}
 }
