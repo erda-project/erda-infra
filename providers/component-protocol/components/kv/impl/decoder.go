@@ -15,22 +15,22 @@
 package impl
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/indicatorcard"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/kv"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
 // DecodeData .
-func (d *DefaultIndicatorCard) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
-	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*indicatorcard.Data))
+func (d *DefaultKV) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
+	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*kv.Data))
 }
 
 // DecodeState .
-func (d *DefaultIndicatorCard) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
+func (d *DefaultKV) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
 	cputil.MustObjJSONTransfer(compState, modelStatePtr.(*cptype.ExtraMap))
 }
 
 // DecodeInParams .
-func (d *DefaultIndicatorCard) DecodeInParams(compInParams cptype.InParams, modelInParamsPtr interface{}) {
+func (d *DefaultKV) DecodeInParams(compInParams cptype.InParams, modelInParamsPtr interface{}) {
 	cputil.MustObjJSONTransfer(compInParams, modelInParamsPtr.(*cptype.ExtraMap))
 }

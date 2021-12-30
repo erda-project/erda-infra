@@ -20,16 +20,16 @@ import (
 )
 
 // EncodeData .
-func (d *DefaultIndicatorCard) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype.ComponentData) {
+func (d *DefaultKV) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype.ComponentData) {
 	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }
 
 // EncodeState .
-func (d *DefaultIndicatorCard) EncodeState(srcStructPtr interface{}, dstRawPtr *cptype.ComponentState) {
+func (d *DefaultKV) EncodeState(srcStructPtr interface{}, dstRawPtr *cptype.ComponentState) {
 	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }
 
 // EncodeInParams .
-func (d *DefaultIndicatorCard) EncodeInParams(srcStructPtr interface{}, dstRawPtr *cptype.InParams) {
+func (d *DefaultKV) EncodeInParams(srcStructPtr interface{}, dstRawPtr *cptype.InParams) {
 	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }

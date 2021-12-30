@@ -15,29 +15,29 @@
 package impl
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/indicatorcard"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/kv"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-// DefaultIndicatorCard default indicator card component
-type DefaultIndicatorCard struct {
-	Impl indicatorcard.IIndicatorCard
+// DefaultKV default indicator card component
+type DefaultKV struct {
+	Impl kv.IKV
 	*StdStructuredPtr
 }
 
 // Initialize .
-func (d *DefaultIndicatorCard) Initialize(sdk *cptype.SDK) {
+func (d *DefaultKV) Initialize(sdk *cptype.SDK) {
 }
 
 // Visible .
-func (d *DefaultIndicatorCard) Visible(sdk *cptype.SDK) bool {
+func (d *DefaultKV) Visible(sdk *cptype.SDK) bool {
 	return true
 }
 
 // StdStructuredPtr .
 type StdStructuredPtr struct {
 	StdInParamsPtr *cptype.ExtraMap
-	StdDataPtr     *indicatorcard.Data
+	StdDataPtr     *kv.Data
 	StdStatePtr    *cptype.ExtraMap
 }
 
@@ -51,34 +51,34 @@ func (s *StdStructuredPtr) StatePtr() interface{} { return s.StdStatePtr }
 func (s *StdStructuredPtr) InParamsPtr() interface{} { return s.StdInParamsPtr }
 
 // RegisterCompStdOps .
-func (d *DefaultIndicatorCard) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+func (d *DefaultKV) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return map[cptype.OperationKey]cptype.OperationFunc{}
 }
 
 // RegisterCompNonStdOps .
-func (d *DefaultIndicatorCard) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+func (d *DefaultKV) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return nil
 }
 
 // Finalize .
-func (d *DefaultIndicatorCard) Finalize(sdk *cptype.SDK) {}
+func (d *DefaultKV) Finalize(sdk *cptype.SDK) {}
 
 // SkipOp providers default impl for user.
-func (d *DefaultIndicatorCard) SkipOp(sdk *cptype.SDK) bool { return !d.Impl.Visible(sdk) }
+func (d *DefaultKV) SkipOp(sdk *cptype.SDK) bool { return !d.Impl.Visible(sdk) }
 
 // BeforeHandleOp providers default impl for user.
-func (d *DefaultIndicatorCard) BeforeHandleOp(sdk *cptype.SDK) {}
+func (d *DefaultKV) BeforeHandleOp(sdk *cptype.SDK) {}
 
 // AfterHandleOp providers default impl for user.
-func (d *DefaultIndicatorCard) AfterHandleOp(sdk *cptype.SDK) {}
+func (d *DefaultKV) AfterHandleOp(sdk *cptype.SDK) {}
 
 // StdStructuredPtrCreator .
-func (d *DefaultIndicatorCard) StdStructuredPtrCreator() func() cptype.IStdStructuredPtr {
+func (d *DefaultKV) StdStructuredPtrCreator() func() cptype.IStdStructuredPtr {
 	return func() cptype.IStdStructuredPtr {
 		return &StdStructuredPtr{
 			StdInParamsPtr: &cptype.ExtraMap{},
 			StdStatePtr:    &cptype.ExtraMap{},
-			StdDataPtr:     &indicatorcard.Data{},
+			StdDataPtr:     &kv.Data{},
 		}
 	}
 }

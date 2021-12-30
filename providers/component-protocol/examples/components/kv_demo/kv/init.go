@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package indicatorcard
+package kv
 
 import (
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/indicatorcard/impl"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/kv/impl"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 )
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	p.DefaultIndicatorCard = impl.DefaultIndicatorCard{}
+	p.DefaultKV = impl.DefaultKV{}
 	v := reflect.ValueOf(p)
 	v.Elem().FieldByName("Impl").Set(v)
-	compName := "indicatorcard"
+	compName := "kv"
 	if ctx.Label() != "" {
 		compName = ctx.Label()
 	}
 	protocol.MustRegisterComponent(&protocol.CompRenderSpec{
-		Scenario: "indicatorcard-demo",
+		Scenario: "kv-demo",
 		CompName: compName,
 		Creator:  func() cptype.IComponent { return p },
 	})
@@ -46,7 +46,7 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.Register("component-protocol.components.indicatorcard-demo", &servicehub.Spec{
+	servicehub.Register("component-protocol.components.kv-demo", &servicehub.Spec{
 		Creator: func() servicehub.Provider { return &provider{} },
 	})
 }

@@ -40,5 +40,5 @@ component-protocol.components.filter-demo.filter:
 # table
 component-protocol.components.table-demo.table:
 
-#indicatorcard
-component-protocol.components.indicatorcard-demo:
+# kv
+component-protocol.components.kv-demo:

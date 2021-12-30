@@ -12,40 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package indicatorcard
+package kv
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/indicatorcard"
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/indicatorcard/impl"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/kv"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/kv/impl"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 type provider struct {
-	impl.DefaultIndicatorCard
+	impl.DefaultKV
 }
 
 // RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
-		data := indicatorcard.Data{
-			[]*indicatorcard.IndicatorCard{
+		data := kv.Data{
+			List: []*kv.KV{
 				{
-					Value: 1,
-					Title: "test_title",
-					Tips:  "this is a demo",
-					Unit:  "ms",
+					Key:    "key",
+					SubKey: "ms",
+					Value:  1,
+					Tip:    "tip",
 				},
 				{
-					Value: 2,
-					Title: "test_title2",
-					Tips:  "this is a demo",
-					Unit:  "",
+					Key:    "key2",
+					SubKey: "",
+					Value:  2,
+					Tip:    "tip",
 				},
 				{
-					Value: 3,
-					Title: "test_title3",
-					Tips:  "this is a demo",
-					Unit:  "s",
+					Key:    "key3",
+					SubKey: "s",
+					Value:  1,
+					Tip:    "tip",
 				},
 			},
 		}

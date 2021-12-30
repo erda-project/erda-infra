@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package indicatorcard
+package kv
 
-import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+// Below is standard struct for kv related.
+type (
+	// Data includes list.
+	Data struct {
+		List []*KV `json:"list"`
+	}
 
-// IIndicatorCard line graph interface
-type IIndicatorCard interface {
-	cptype.IComponent
-	IIndicatorCardStdOps
-}
-
-// IIndicatorCardStdOps .
-type IIndicatorCardStdOps interface{}
+	// KV defined struct.
+	KV struct {
+		Key      string      `json:"key"`
+		SubKey   string      `json:"subKey"`
+		Value    interface{} `json:"value"`
+		SubValue interface{} `json:"subValue"`
+		Tip      string      `json:"tip"`
+	}
+)
