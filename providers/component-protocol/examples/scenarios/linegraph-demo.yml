@@ -1,0 +1,13 @@
+scenario: linegraph-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - linegraph
+
+components:
+  page:
+    type: Container
+  linegraph:
+    type: LineGraph

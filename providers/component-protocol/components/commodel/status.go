@@ -26,7 +26,7 @@ type IUnifiedStatus interface {
 	fmt.Stringer
 }
 
-// ErrorStatus .
+// UnifiedStatus .
 const (
 	ErrorStatus UnifiedStatus = iota
 	WarningStatus

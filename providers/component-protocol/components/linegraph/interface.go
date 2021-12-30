@@ -12,44 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package commodel
+package linegraph
 
-import (
-	"fmt"
-)
+import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
-// UnifiedColor .
-type UnifiedColor int
-
-// IUnifiedColor .
-type IUnifiedColor interface {
-	fmt.Stringer
+// ILineGraph line graph interface
+type ILineGraph interface {
+	cptype.IComponent
+	ILineGraphStdOps
 }
 
-// UnifiedColor .
-const (
-	ColorRed UnifiedColor = iota
-	ColorYellow
-	ColorGreen
-	ColorBlue
-	ColorPurple
-	ColorDefault
-)
-
-// String .
-func (c UnifiedColor) String() string {
-	switch c {
-	case 0:
-		return "red"
-	case 1:
-		return "yellow"
-	case 2:
-		return "green"
-	case 3:
-		return "blue"
-	case 4:
-		return "purple"
-	default:
-		return "default"
-	}
-}
+// ILineGraphStdOps .
+type ILineGraphStdOps interface{}

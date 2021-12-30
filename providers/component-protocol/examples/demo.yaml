@@ -31,6 +31,11 @@ component-protocol.components.kanban-demo.kanban:
 ## top
 component-protocol.components.top-demo.top:
 
+## line graph
+component-protocol.components.linegraph-demo.linegraph:
 
 ## filter
 component-protocol.components.filter-demo.filter:
+
+# table
+component-protocol.components.table-demo.table:

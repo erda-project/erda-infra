@@ -12,30 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package commodel
+package impl
 
 import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
-// Labels .
-type Labels struct {
-	Labels []Label `json:"labels,omitempty"`
-
-	Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
+// EncodeData .
+func (d *DefaultLineGraph) EncodeData(srcStructPtr interface{}, dstRawPtr *cptype.ComponentData) {
+	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }
 
-// ModelType .
-func (l Labels) ModelType() string { return "labels" }
-
-// Label .
-type Label struct {
-	ID    string       `json:"id,omitempty"`
-	Title string       `json:"title,omitempty"`
-	Color UnifiedColor `json:"color,omitempty"`
-
-	Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
+// EncodeState .
+func (d *DefaultLineGraph) EncodeState(srcStructPtr interface{}, dstRawPtr *cptype.ComponentState) {
+	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
 }
 
-// ModelType .
-func (l Label) ModelType() string { return "label" }
+// EncodeInParams .
+func (d *DefaultLineGraph) EncodeInParams(srcStructPtr interface{}, dstRawPtr *cptype.InParams) {
+	cputil.MustObjJSONTransfer(srcStructPtr, dstRawPtr)
+}

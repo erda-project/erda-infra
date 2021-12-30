@@ -69,6 +69,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 		F.handleOp(sdk, stdStructuredCompPtr)
 		F.IC.AfterHandleOp(sdk)
 		// encoder
+		ensureCompFieldsBeforeEncode(sdk)
 		F.IC.EncodeData(stdStructuredCompPtr.DataPtr(), &sdk.Comp.Data)
 		F.IC.EncodeState(stdStructuredCompPtr.StatePtr(), &sdk.Comp.State)
 		F.IC.EncodeInParams(stdStructuredCompPtr.InParamsPtr(), &sdk.InParams)
@@ -110,6 +111,13 @@ func ensureCompFields(sdk *cptype.SDK, comp *cptype.Component) *cptype.Component
 		comp.Options = &cptype.ComponentOptions{}
 	}
 	return comp
+}
+
+// ensureCompFieldsBeforeEncode ensure data/state/inParams to empty to avoid `omitempty` issue.
+func ensureCompFieldsBeforeEncode(sdk *cptype.SDK) {
+	sdk.Comp.Data = cptype.ComponentData{}
+	sdk.Comp.State = cptype.ComponentState{}
+	sdk.InParams = cptype.InParams{}
 }
 
 func (F FRAMEWORK) flatExtra(comp *cptype.Component) {
