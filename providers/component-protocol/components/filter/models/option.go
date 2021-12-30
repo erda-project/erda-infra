@@ -18,6 +18,7 @@ package model
 type OptionBase struct {
 	Label string      `json:"label,omitempty"`
 	Value interface{} `json:"value,omitempty"`
+	Fix   bool        `json:"fix,omitempty"`
 }
 
 // SelectOption .
@@ -57,4 +58,10 @@ func NewTagsSelectOption(label string, value interface{}, color string) *TagsSel
 		SelectOption: *NewSelectOption(label, value),
 		Color:        color,
 	}
+}
+
+// WithFix .
+func (o *SelectOption) WithFix(fix bool) *SelectOption {
+	o.Fix = fix
+	return o
 }
