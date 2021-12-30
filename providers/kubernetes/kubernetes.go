@@ -135,7 +135,7 @@ func (p *provider) createRestConfig() (*rest.Config, error) {
 	return config, nil
 }
 
-// check apiserver connection
+// HealthCheck check apiserver connection
 func HealthCheck(client *kubernetes.Clientset, to time.Duration) error {
 	ctx, _ := context.WithTimeout(context.TODO(), to)
 	_, err := client.Discovery().RESTClient().Get().AbsPath("/healthz").DoRaw(ctx)
