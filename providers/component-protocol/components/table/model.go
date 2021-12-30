@@ -63,7 +63,7 @@ type (
 
 		FieldBindToOrder string `json:"fieldBindToOrder,omitempty"` // bind which field to order
 		AscOrder         *bool  `json:"ascOrder,omitempty"`         // true for asc, false for desc, nil for no sort
-		Sorter           bool   `json:"sorter"`                     // true can sort
+		EnableSort       bool   `json:"enableSort"`                 // true can sort
 		cptype.Extra
 	}
 
