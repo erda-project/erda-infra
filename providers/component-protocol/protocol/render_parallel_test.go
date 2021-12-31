@@ -57,12 +57,12 @@ hierarchy:
     leftContent:
       - head
       - workTabs
-      - workContainer
       - messageTabs
-      - messageContainer
     workContainer:
       - workCards
       - workList
+    messageContainer:
+      - messageList
 `
 	var p cptype.ComponentProtocol
 	assert.NoError(t, yaml.Unmarshal([]byte(py), &p))
@@ -75,6 +75,8 @@ hierarchy:
 	node, err := parseParallelRendering(&p, compRenderings)
 	assert.NoError(t, err)
 	fmt.Println(node.String())
+
+	//assert.NoError(t, renderFromNode(context.Background(), nil, nil, node))
 }
 
 func Test_removeOneNode(t *testing.T) {
@@ -84,10 +86,10 @@ func Test_removeOneNode(t *testing.T) {
 }
 
 func TestNode_calcRenderableNextNodes(t *testing.T) {
-	pageNode := &Node{Name: "page"}
-	filterNode := &Node{Name: "filter"}
-	gridNode := &Node{Name: "grid"}
-	chartNode := &Node{Name: "chart"}
+	pageNode := &Node{Name: "page", doneNextNodesByName: map[string]*Node{}}
+	filterNode := &Node{Name: "filter", doneNextNodesByName: map[string]*Node{}}
+	gridNode := &Node{Name: "grid", doneNextNodesByName: map[string]*Node{}}
+	chartNode := &Node{Name: "chart", doneNextNodesByName: map[string]*Node{}}
 
 	pageNode.NextNodes = []*Node{filterNode, gridNode, chartNode}
 	filterNode.Parallel = true
@@ -101,5 +103,22 @@ func TestNode_calcRenderableNextNodes(t *testing.T) {
 	pageNode.doneNextNodesByName = map[string]*Node{filterNode.Name: filterNode, gridNode.Name: gridNode}
 	renderableNodes = pageNode.calcRenderableNextNodes()
 	assert.Equal(t, 1, len(renderableNodes))
+	fmt.Println(renderableNodes)
+
+	//////
+
+	pageNode.NextNodes = []*Node{filterNode, gridNode, chartNode}
+	pageNode.doneNextNodesByName = map[string]*Node{}
+	filterNode.Parallel = true
+	gridNode.Parallel = false
+	chartNode.Parallel = true
+
+	renderableNodes = pageNode.calcRenderableNextNodes()
+	assert.Equal(t, 1, len(renderableNodes))
+	fmt.Println(renderableNodes)
+
+	pageNode.doneNextNodesByName = map[string]*Node{filterNode.Name: filterNode}
+	renderableNodes = pageNode.calcRenderableNextNodes()
+	assert.Equal(t, 2, len(renderableNodes))
 	fmt.Println(renderableNodes)
 }

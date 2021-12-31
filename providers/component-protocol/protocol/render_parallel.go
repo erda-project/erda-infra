@@ -278,9 +278,9 @@ func printRenderableNodes(nodes []*Node) {
 //}
 
 func (n *Node) calcRenderableNextNodes() []*Node {
-	//if n.doneNextNodesByName == nil {
-	//	n.doneNextNodesByName = make(map[string]*Node)
-	//}
+	if n.doneNextNodesByName == nil {
+		n.doneNextNodesByName = make(map[string]*Node)
+	}
 	var renderableNodes []*Node
 	defer func() {
 		for _, node := range renderableNodes {
@@ -293,19 +293,22 @@ func (n *Node) calcRenderableNextNodes() []*Node {
 		if _, done := n.doneNextNodesByName[next.Name]; done {
 			continue
 		}
+		// add if empty
 		if len(renderableNodes) == 0 {
 			renderableNodes = append(renderableNodes, next)
 			continue
 		}
-		// stop if have serial-node
-		for _, node := range renderableNodes {
-			if !node.Parallel {
-				return renderableNodes
-			}
-			if !next.Parallel {
-				return renderableNodes
-			}
+
+		// if first is serial, stop until next serial node come(exclude)
+		// s->p->s => s->p
+		// s->s    => s
+		// p->p->s => p->p
+		// p->s    => p
+		if !next.Parallel {
+			return renderableNodes
 		}
+
+		// add
 		renderableNodes = append(renderableNodes, next)
 	}
 	return renderableNodes
