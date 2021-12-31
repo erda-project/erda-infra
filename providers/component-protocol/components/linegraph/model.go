@@ -21,11 +21,11 @@ type (
 	// Data includes list.
 	Data struct {
 		Title      string   `json:"title"`
+		SubTitle   string   `json:"subTitle"`
 		Dimensions []string `json:"dimensions"`
-		XAxis      *Axis    `json:"xAxis"`     // x axis
-		YAxis      []*Axis  `json:"yAxis"`     // y axis
-		Formatter  string   `json:"formatter"` // data formatter
-		Inverse    bool     `json:"inverse"`   // inverted xAxis and yAxis
+		XAxis      *Axis    `json:"xAxis"`   // x axis
+		YAxis      []*Axis  `json:"yAxis"`   // y axis
+		Inverse    bool     `json:"inverse"` // inverted xAxis and yAxis
 		sync.RWMutex
 	}
 
