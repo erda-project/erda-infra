@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -118,7 +119,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 	polishProtocol(req.Protocol)
 
-	// if hierarchy specified, use new rendering
+	// if hierarchy.Parallel specified, use new rendering
 	if len(req.Protocol.Hierarchy.Parallel) > 0 {
 		rootNode, err := parseParallelRendering(req.Protocol, compRending)
 		if err != nil {
@@ -334,4 +335,40 @@ func simplifyComp(comp *cptype.Component) {
 	if len(comp.Props) == 0 {
 		comp.Props = nil
 	}
+}
+
+func renderOneComp(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, v cptype.RendingItem) error {
+	// 组件状态渲染
+	err := protoCompStateRending(ctx, req.Protocol, v)
+	if err != nil {
+		logrus.Errorf("protocol component state rending failed, request: %+v, err: %v", v, err)
+		return err
+	}
+	// 获取协议中相关组件
+	c, err := getProtoComp(ctx, req.Protocol, v.Name)
+	if err != nil {
+		logrus.Errorf("get component from protocol failed, scenario: %s, component: %s", req.Scenario.ScenarioKey, req.Event.Component)
+		return nil
+	}
+	// 获取组件渲染函数
+	cr, err := getCompRender(ctx, sr, v.Name, c.Type)
+	if err != nil {
+		logrus.Errorf("get component render failed, scenario: %s, component: %s", req.Scenario.ScenarioKey, req.Event.Component)
+		return err
+	}
+	// 生成组件对应事件，如果不是组件自身事件则为默认事件
+	event := eventConvert(v.Name, req.Event)
+	// 运行组件渲染函数
+	start := time.Now() // 获取当前时间
+	_, instanceName := getCompNameAndInstanceName(v.Name)
+	c.Name = instanceName
+	err = wrapCompRender(cr.RenderC(), req.Protocol.Version).Render(ctx, c, req.Scenario, event, req.Protocol.GlobalState)
+	if err != nil {
+		logrus.Errorf("render component failed, err: %s, scenario: %+v, component: %s", err.Error(), req.Scenario, cr.CompName)
+		return err
+	}
+	simplifyComp(c)
+	elapsed := time.Since(start)
+	logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, v.Name, elapsed)
+	return nil
 }

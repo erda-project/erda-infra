@@ -15,7 +15,6 @@
 package cputil
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 

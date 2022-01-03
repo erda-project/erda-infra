@@ -15,13 +15,14 @@
 package cputil
 
 import (
-	"encoding/json"
 	"fmt"
+
+	jsi "github.com/json-iterator/go"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-//var json = jsi.ConfigFastest
+var json = jsi.ConfigFastest
 
 // ObjJSONTransfer transfer from src to dst using json.
 func ObjJSONTransfer(src interface{}, dst interface{}) error {
