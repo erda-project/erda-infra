@@ -36,6 +36,7 @@ func (this *ComponentProtocol) Validate() error {
 }
 func (this *Hierarchy) Validate() error {
 	// Validation of proto3 map<> fields is unsupported.
+	// Validation of proto3 map<> fields is unsupported.
 	return nil
 }
 func (this *Component) Validate() error {

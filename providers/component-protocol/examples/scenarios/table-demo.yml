@@ -11,8 +11,8 @@ components:
     type: Container
   table:
     type: Table
-#    options:
-#      asyncAtInit: true
+    options:
+      asyncAtInit: true
 
 #options:
 #  syncIntervalSecond: 10

@@ -42,3 +42,9 @@ component-protocol.components.table-demo.table:
 
 # kv
 component-protocol.components.kv-demo:
+
+## parallel
+component-protocol.components.parallel-demo.grid:
+component-protocol.components.parallel-demo.topN:
+component-protocol.components.parallel-demo.chart:
+component-protocol.components.parallel-demo.filter:

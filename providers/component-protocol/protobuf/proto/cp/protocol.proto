@@ -47,6 +47,9 @@ message Hierarchy {
   // structure means concrete structure of components.
   // value may be list or map.
   map<string, google.protobuf.Value> structure = 2;
+
+  // parallel defines parallel components.
+  map<string, google.protobuf.Value> parallel = 3;
 }
 
 // Component defines a component.

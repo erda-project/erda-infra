@@ -45,7 +45,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 			err = fmt.Errorf(msg)
 		}
 	}()
-	sdk := cputil.SDK(ctx)
+	sdk := cputil.SDK(ctx).Clone()
 	sdk.GlobalState = gs
 	sdk.Comp = ensureCompFields(sdk, c)
 	sdk.Event = event

@@ -1,0 +1,43 @@
+scenario: parallel-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - filter
+      - grid
+      - chartList
+    grid:
+      - topN@1
+      - topN@2
+    chartList:
+      - chart@1
+      - chart@2
+  parallel:
+    page:
+      - filter
+      - grid
+    grid:
+      - topN@1
+      - topN@2
+    chartList:
+      - chart@1
+      - chart@2
+
+components:
+  page:
+    type: Container
+  filter:
+    type: Filter
+  grid:
+    type: Grid
+  topN@1:
+    type: TopN
+  topN@2:
+    type: TopN
+  chartList:
+    type: Container
+  chart@1:
+    type: LineGraph
+  chart@2:
+    type: LineGraph
