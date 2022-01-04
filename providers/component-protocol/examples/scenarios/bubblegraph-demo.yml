@@ -1,0 +1,13 @@
+scenario: bubblegraph-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - bubblegraph
+
+components:
+  page:
+    type: Container
+  bubblegraph:
+    type: BubbleGraph
