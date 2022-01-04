@@ -16,10 +16,13 @@ package list
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/sirupsen/logrus"
+
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
 func TestItemExtra(t *testing.T) {
@@ -35,4 +38,12 @@ func TestItemExtra(t *testing.T) {
 	b, _ := json.Marshal(item)
 	// output: {"id":"ID","extra":{"extKey1":"extVal1","extKey2":"extVal2"}}"
 	logrus.Infof("item bytes: %s", string(b))
+}
+
+func TestModel(t *testing.T) {
+	data := Data{Total: 0}
+	compData := cptype.ComponentData{"total": 45}
+	cputil.MustObjJSONTransfer(&data, &compData)
+	fmt.Printf("%#v", compData)
+	_ = data
 }

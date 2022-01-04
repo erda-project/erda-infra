@@ -25,17 +25,31 @@ import (
 
 // SDK .
 type SDK struct {
-	Ctx      context.Context
-	Scenario string
-	Tran     i18n.Translator
-	Identity *pb.IdentityInfo
-	InParams InParams
-	Lang     i18n.LanguageCodes
-
+	Ctx         context.Context
+	Scenario    string
+	Tran        i18n.Translator
+	Identity    *pb.IdentityInfo
+	InParams    InParams
+	Lang        i18n.LanguageCodes
 	GlobalState *GlobalStateData
+
+	// ONLY FOR STD COMPONENT USE
 	Event       ComponentEvent
 	CompOpFuncs map[OperationKey]OperationFunc
 	Comp        *Component
+}
+
+// Clone only return general-part of sdk to avoid concurrency issue.
+func (sdk *SDK) Clone() *SDK {
+	return &SDK{
+		Ctx:         sdk.Ctx,
+		Scenario:    sdk.Scenario,
+		Tran:        sdk.Tran,
+		Identity:    sdk.Identity,
+		InParams:    sdk.InParams,
+		Lang:        sdk.Lang,
+		GlobalState: sdk.GlobalState,
+	}
 }
 
 // I18n .
