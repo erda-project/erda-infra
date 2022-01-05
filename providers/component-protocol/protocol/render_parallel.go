@@ -173,7 +173,10 @@ func parseParallelRendering(p *cptype.ComponentProtocol, compRenderingItems []cp
 		if err := cputil.ObjJSONTransfer(&v, &subCompNames); err != nil {
 			continue
 		}
-		node := nodesMap[nodeName]
+		node, ok := nodesMap[nodeName]
+		if !ok {
+			continue
+		}
 		for _, subNodeName := range subCompNames {
 			// set subNode's previous again
 			subNode := nodesMap[subNodeName]
@@ -190,13 +193,13 @@ func parseParallelRendering(p *cptype.ComponentProtocol, compRenderingItems []cp
 		// check firstly
 		parentNode, ok := nodesMap[parentNodeName]
 		if !ok {
-			return nil, fmt.Errorf("invalid parallel definition, %s not exist", parentNodeName)
+			continue
 		}
 		for _, subNodeName := range subParallelNodeNames {
 			// check firstly
 			subNode, ok := nodesMap[subNodeName]
 			if !ok {
-				return nil, fmt.Errorf("invalid parallel definition, %s not exist", subNodeName)
+				continue
 			}
 			// link parent and sub node
 			parentNode.linkSubParallelNode(subNode)
