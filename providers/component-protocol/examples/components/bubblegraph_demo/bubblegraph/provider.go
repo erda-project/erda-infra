@@ -34,16 +34,16 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 		data := bubblegraph.NewDataBuilder().
 			WithTitle("test bubble graph component").
 			WithBubble(bubblegraph.NewBubbleBuilder().
-				WithX(&bubblegraph.Axis{Value: 1}).
-				WithY(&bubblegraph.Axis{Value: 100}).
-				WithSize(&bubblegraph.BubbleSize{Value: 10}).
+				WithValueX(1).
+				WithValueY(100).
+				WithValueSize(10).
 				WithGroup("test group").
 				WithDimension("test dimension").
 				Build()).
 			WithBubble(bubblegraph.NewBubbleBuilder().
-				WithX(&bubblegraph.Axis{Value: 2}).
-				WithY(&bubblegraph.Axis{Value: 200}).
-				WithSize(&bubblegraph.BubbleSize{Value: 20}).
+				WithValueX(2).
+				WithValueY(200).
+				WithValueSize(20).
 				WithGroup("test group").
 				WithDimension("test dimension").
 				Build()).

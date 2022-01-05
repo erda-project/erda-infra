@@ -80,9 +80,21 @@ func NewBubbleBuilder() *BubbleBuilder {
 	return &BubbleBuilder{bubble: &Bubble{}}
 }
 
+// WithValueX .
+func (bb *BubbleBuilder) WithValueX(v interface{}) *BubbleBuilder {
+	bb.bubble.X.Value = v
+	return bb
+}
+
 // WithX .
 func (bb *BubbleBuilder) WithX(x *Axis) *BubbleBuilder {
 	bb.bubble.X = x
+	return bb
+}
+
+// WithValueY .
+func (bb *BubbleBuilder) WithValueY(v interface{}) *BubbleBuilder {
+	bb.bubble.Y.Value = v
 	return bb
 }
 
@@ -95,6 +107,12 @@ func (bb *BubbleBuilder) WithY(y *Axis) *BubbleBuilder {
 // WithSize .
 func (bb *BubbleBuilder) WithSize(size *BubbleSize) *BubbleBuilder {
 	bb.bubble.Size = size
+	return bb
+}
+
+// WithValueSize .
+func (bb *BubbleBuilder) WithValueSize(v float64) *BubbleBuilder {
+	bb.bubble.Size.Value = v
 	return bb
 }
 
