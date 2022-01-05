@@ -25,6 +25,10 @@ import (
 
 type provider struct {
 	impl.DefaultKanban
+
+	// custom type
+	StatePtr    *CustomState
+	InParamsPtr *CustomInParams
 }
 
 const (
@@ -79,6 +83,7 @@ func (p *provider) registerNonStdOp1() cptype.OperationFunc {
 	}
 }
 
+// RegisterCompNonStdOps .
 func (p *provider) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return map[cptype.OperationKey]cptype.OperationFunc{
 		nonStdOp1Key: p.registerNonStdOp1(),
@@ -95,6 +100,9 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 		boardUrgent.Cards = append([]kanban.Card{}, card1)
 		boardUrgent.Total = 1
 		p.StdDataPtr = &data
+		// custom state
+		p.StatePtr.Name = "Bob"
+		p.InParamsPtr.ProjectID = 20
 	}
 }
 
