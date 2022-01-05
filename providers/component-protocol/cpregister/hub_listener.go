@@ -20,6 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 )
 
 // AllExplicitProviderCreatorMap contains all user specified provider.
@@ -37,12 +38,18 @@ func NewHubListener(fs ...embed.FS) *HubListener {
 
 // BeforeInitialization .
 func (l *HubListener) BeforeInitialization(h *servicehub.Hub, config map[string]interface{}) error {
-	logrus.Info("auto register component provider to hub.config")
 	// auto register explicit component provider firstly
+	logrus.Info("auto register component provider to hub.config")
 	for providerName, creator := range AllExplicitProviderCreatorMap {
 		config[providerName] = creator
 		logrus.Infof("auto register component provider to hub.config: %s", providerName)
 	}
+
+	// register default protocols from FS
+	for _, fs := range l.ScenarioFSs {
+		protocol.MustRegisterProtocolsFromFS(fs)
+	}
+
 	return nil
 }
 
