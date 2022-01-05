@@ -25,14 +25,17 @@ import (
 // AllExplicitProviderCreatorMap contains all user specified provider.
 var AllExplicitProviderCreatorMap = map[string]servicehub.Provider{}
 
+// HubListener .
 type HubListener struct {
 	ScenarioFSs []embed.FS
 }
 
+// NewHubListener .
 func NewHubListener(fs ...embed.FS) *HubListener {
 	return &HubListener{ScenarioFSs: fs}
 }
 
+// BeforeInitialization .
 func (l *HubListener) BeforeInitialization(h *servicehub.Hub, config map[string]interface{}) error {
 	logrus.Info("auto register component provider to hub.config")
 	// auto register explicit component provider firstly
@@ -43,6 +46,11 @@ func (l *HubListener) BeforeInitialization(h *servicehub.Hub, config map[string]
 	return nil
 }
 
-func (l *HubListener) AfterInitialization(h *servicehub.Hub) error   { return nil }
-func (l *HubListener) AfterStart(h *servicehub.Hub) error            { return nil }
+// AfterInitialization .
+func (l *HubListener) AfterInitialization(h *servicehub.Hub) error { return nil }
+
+// AfterStart .
+func (l *HubListener) AfterStart(h *servicehub.Hub) error { return nil }
+
+// BeforeExit .
 func (l *HubListener) BeforeExit(h *servicehub.Hub, err error) error { return nil }

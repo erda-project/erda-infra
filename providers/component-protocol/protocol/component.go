@@ -40,7 +40,7 @@ func ensureRender(spec *CompRenderSpec) {
 		return
 	}
 	if spec.Creator == nil {
-		panic("no RenderCreator or ComponentCreator specified when register")
+		panic(fmt.Errorf("no RenderCreator or ComponentCreator specified when register, scenario: %s, comp: %s", spec.Scenario, spec.CompName))
 	}
 	spec.RenderC = convertToRenderC(spec.Creator)
 }

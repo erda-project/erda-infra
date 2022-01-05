@@ -22,8 +22,10 @@ import (
 const (
 	componentProviderNamePrefix        = "component-protocol.components."
 	defaultComponentProviderNamePrefix = "component-protocol.default-components."
+	defaultComponentProviderNamespace  = "default-components"
 )
 
+// MustGetScenarioAndCompNameFromProviderKey .
 func MustGetScenarioAndCompNameFromProviderKey(providerKey string) (scenario, compName, instanceName string) {
 	scenario, compName, instanceName, err := GetScenarioAndCompNameFromProviderKey(providerKey)
 	if err != nil {
@@ -33,6 +35,7 @@ func MustGetScenarioAndCompNameFromProviderKey(providerKey string) (scenario, co
 	return scenario, compName, instanceName
 }
 
+// GetScenarioAndCompNameFromProviderKey .
 func GetScenarioAndCompNameFromProviderKey(providerKey string) (scenario, compName, instanceName string, err error) {
 	if strings.HasPrefix(providerKey, defaultComponentProviderNamePrefix) {
 		ss := strings.SplitN(providerKey, ".", 3)
@@ -56,6 +59,7 @@ func GetScenarioAndCompNameFromProviderKey(providerKey string) (scenario, compNa
 	return ss[2], compName, instanceName, nil
 }
 
+// MakeComponentProviderName .
 func MakeComponentProviderName(scenario, compType string) string {
 	return fmt.Sprintf("%s%s.%s", componentProviderNamePrefix, scenario, compType)
 }
