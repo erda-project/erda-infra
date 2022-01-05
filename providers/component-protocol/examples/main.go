@@ -21,6 +21,7 @@ import (
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	componentprotocol "github.com/erda-project/erda-infra/providers/component-protocol"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 	"github.com/erda-project/erda-infra/providers/i18n"
 	_ "github.com/erda-project/erda-infra/providers/serviceregister"
@@ -72,7 +73,7 @@ func init() {
 }
 
 func main() {
-	hub := servicehub.New()
+	hub := servicehub.New(servicehub.WithListener(cpregister.NewHubListener()))
 	hub.Run("demo", "", os.Args...)
 }
 

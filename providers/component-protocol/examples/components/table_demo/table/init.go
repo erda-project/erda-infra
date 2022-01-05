@@ -15,38 +15,10 @@
 package table
 
 import (
-	"reflect"
-
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/table/impl"
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
-	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
 )
 
-// Init .
-func (p *provider) Init(ctx servicehub.Context) error {
-	p.DefaultTable = impl.DefaultTable{}
-	v := reflect.ValueOf(p)
-	v.Elem().FieldByName("Impl").Set(v)
-	compName := "table"
-	if ctx.Label() != "" {
-		compName = ctx.Label()
-	}
-	protocol.MustRegisterComponent(&protocol.CompRenderSpec{
-		Scenario: "table-demo",
-		CompName: compName,
-		Creator:  func() cptype.IComponent { return p },
-	})
-	return nil
-}
-
-// Provide .
-func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
-	return p
-}
-
 func init() {
-	servicehub.Register("component-protocol.components.table-demo.table", &servicehub.Spec{
-		Creator: func() servicehub.Provider { return &provider{} },
-	})
+	base.InitProviderWithCreator("table-demo", "table", func() servicehub.Provider { return &provider{} })
 }

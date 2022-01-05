@@ -18,6 +18,7 @@ import (
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 )
 
@@ -35,34 +36,17 @@ type provider struct {
 	Cfg *config
 }
 
-// Init .
-func (p *provider) Init(ctx servicehub.Context) error {
-	compName := "demoTable"
-	if ctx.Label() != "" {
-		compName = ctx.Label()
-	}
-	protocol.MustRegisterComponent(&protocol.CompRenderSpec{
-		Scenario: p.Cfg.Scenario,
-		CompName: compName,
-		RenderC:  func() protocol.CompRender { return &provider{} },
-	})
-	return nil
-}
-
-// Provide .
-func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
-	return p
-}
-
 func init() {
-	interfaceType := reflect.TypeOf((*Interface)(nil)).Elem()
-	servicehub.Register("component-protocol.components.yet-another-demo.table", &servicehub.Spec{
-		Types: []reflect.Type{interfaceType},
-		ConfigFunc: func() interface{} {
-			return &config{}
-		},
-		Creator: func() servicehub.Provider {
-			return &provider{}
-		},
+	base.InitProviderWithCreator("yet-another-demo", "table", func() servicehub.Provider {
+		interfaceType := reflect.TypeOf((*Interface)(nil)).Elem()
+		return &servicehub.Spec{
+			Types: []reflect.Type{interfaceType},
+			ConfigFunc: func() interface{} {
+				return &config{}
+			},
+			Creator: func() servicehub.Provider {
+				return &provider{}
+			},
+		}
 	})
 }

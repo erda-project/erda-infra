@@ -5,14 +5,18 @@ hierarchy:
   structure:
     page:
       - kanban
+      - xxx@instance1
+      - xxx@instance2
+      - sssss@instance1
 
 components:
   page:
     type: Container
   kanban:
     type: Kanban
-#    options:
-#      asyncAtInit: true
-
-#options:
-#  syncIntervalSecond: 10
+  xxx@instance1:
+    type: Kanban
+  xxx@instance2:
+    type: Kanban
+  sssss@instance1:
+    type: Kanban

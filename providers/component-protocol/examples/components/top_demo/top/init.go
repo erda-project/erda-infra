@@ -15,38 +15,10 @@
 package top
 
 import (
-	"reflect"
-
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/topn/impl"
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
-	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
 )
 
-// Init .
-func (p *provider) Init(ctx servicehub.Context) error {
-	p.DefaultTop = impl.DefaultTop{}
-	v := reflect.ValueOf(p)
-	v.Elem().FieldByName("Impl").Set(v)
-	compName := "top"
-	if ctx.Label() != "" {
-		compName = ctx.Label()
-	}
-	protocol.MustRegisterComponent(&protocol.CompRenderSpec{
-		Scenario: "top-demo",
-		CompName: compName,
-		Creator:  func() cptype.IComponent { return p },
-	})
-	return nil
-}
-
-// Provide .
-func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
-	return p
-}
-
 func init() {
-	servicehub.Register("component-protocol.components.top-demo.top", &servicehub.Spec{
-		Creator: func() servicehub.Provider { return &provider{} },
-	})
+	base.InitProviderWithCreator("top-demo", "top", func() servicehub.Provider { return &provider{} })
 }

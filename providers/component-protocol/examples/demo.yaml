@@ -15,39 +15,3 @@ i18n:
 
 # component-protocol framework
 component-protocol:
-
-# scenario components
-## demo
-component-protocol.components.demo.table:
-  scenario: demo
-component-protocol.components.demo.table@demoTable2: # multi-instances
-
-## yetAnotherDemo
-component-protocol.components.yet-another-demo.table:
-
-## kanban
-component-protocol.components.kanban-demo.kanban:
-
-## top
-component-protocol.components.top-demo.top:
-
-## line graph
-component-protocol.components.linegraph-demo.linegraph:
-
-## bubble graph
-component-protocol.components.bubblegraph-demo:
-
-## filter
-component-protocol.components.filter-demo.filter:
-
-# table
-component-protocol.components.table-demo.table:
-
-# kv
-component-protocol.components.kv-demo:
-
-## parallel
-component-protocol.components.parallel-demo.grid:
-component-protocol.components.parallel-demo.topN:
-component-protocol.components.parallel-demo.chart:
-component-protocol.components.parallel-demo.filter:

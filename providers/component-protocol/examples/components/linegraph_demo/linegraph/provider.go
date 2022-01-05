@@ -20,6 +20,7 @@ import (
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/linegraph"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/linegraph/impl"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 )
@@ -69,7 +70,5 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 }
 
 func init() {
-	servicehub.Register("component-protocol.components.linegraph-demo.linegraph", &servicehub.Spec{
-		Creator: func() servicehub.Provider { return &provider{} },
-	})
+	base.InitProviderWithCreator("linegraph-demo", "linegraph", func() servicehub.Provider { return &provider{} })
 }
