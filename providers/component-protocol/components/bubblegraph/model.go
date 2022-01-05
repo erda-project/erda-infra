@@ -18,8 +18,8 @@ package bubblegraph
 type (
 	// Data includes List.
 	Data struct {
-		Title string
-		List  []*Bubble
+		Title string    `json:"title"`
+		List  []*Bubble `json:"list"`
 	}
 
 	// Bubble .
@@ -77,7 +77,7 @@ func (d *DataBuilder) Build() *Data {
 
 // NewBubbleBuilder .
 func NewBubbleBuilder() *BubbleBuilder {
-	return &BubbleBuilder{bubble: &Bubble{}}
+	return &BubbleBuilder{bubble: &Bubble{X: &Axis{}, Y: &Axis{}, Size: &BubbleSize{}}}
 }
 
 // WithValueX .
