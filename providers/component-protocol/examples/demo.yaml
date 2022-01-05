@@ -34,6 +34,9 @@ component-protocol.components.top-demo.top:
 ## line graph
 component-protocol.components.linegraph-demo.linegraph:
 
+## bubble graph
+component-protocol.components.bubblegraph-demo:
+
 ## filter
 component-protocol.components.filter-demo.filter:
 
