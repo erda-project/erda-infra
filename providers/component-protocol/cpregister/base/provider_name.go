@@ -22,7 +22,6 @@ import (
 const (
 	componentProviderNamePrefix        = "component-protocol.components."
 	defaultComponentProviderNamePrefix = "component-protocol.default-components."
-	defaultComponentProviderNamespace  = "default-components"
 )
 
 // MustGetScenarioAndCompNameFromProviderKey .

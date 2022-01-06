@@ -35,7 +35,7 @@ func InitProvider(scenario, compName string) {
 
 // InitProviderToDefaultNamespace register component as provider to default-namespace.
 func InitProviderToDefaultNamespace(compName string, creator servicehub.Creator) {
-	initProviderToNamespace(defaultComponentProviderNamespace, compName, creator)
+	initProviderToNamespace(cptype.DefaultComponentNamespace, compName, creator)
 }
 
 // InitProviderWithCreator register component as provider with custom providerCreator to scenario-namespace.
