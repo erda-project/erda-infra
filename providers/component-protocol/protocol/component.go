@@ -63,8 +63,10 @@ type CompRender interface {
 // MustRegisterComponent .
 func MustRegisterComponent(r *CompRenderSpec) {
 	if err := RegisterComponent(r); err != nil {
+		logrus.Errorf("failed to register component render, scenario: %s, component: %s, err: %s", r.Scenario, r.CompName, err)
 		panic(err)
 	}
+	logrus.Infof("register component render success, scenario: %s, component: %s", r.Scenario, r.CompName)
 }
 
 // RegisterComponent register a component under scenario
@@ -81,7 +83,6 @@ func RegisterComponent(r *CompRenderSpec) error {
 		return fmt.Errorf("component name is empty")
 	}
 
-	logrus.Infof("begin register component, scenario: %s, component: %s", r.Scenario, r.CompName)
 	// if scenario not exit, create it
 	if _, ok := ScenarioRenders[r.Scenario]; !ok {
 		s := make(ScenarioRender)
@@ -92,7 +93,6 @@ func RegisterComponent(r *CompRenderSpec) error {
 	if _, ok := (*s)[r.CompName]; !ok {
 		(*s)[r.CompName] = r
 	}
-	logrus.Infof("register component render success, scenario: %s, component: %s", r.Scenario, r.CompName)
 	return nil
 }
 
