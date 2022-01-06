@@ -12,13 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package filter
+package base
 
 import (
+	"context"
+
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-func init() {
-	base.InitProviderWithCreator("filter-demo", "filter", func() servicehub.Provider { return &provider{} })
+// DefaultProvider .
+type DefaultProvider struct{}
+
+// Render is empty implement.
+func (p *DefaultProvider) Render(ctx context.Context, c *cptype.Component, scenario cptype.Scenario, event cptype.ComponentEvent, gs *cptype.GlobalStateData) error {
+	return nil
 }
+
+// Init .
+func (p *DefaultProvider) Init(ctx servicehub.Context) error { return nil }

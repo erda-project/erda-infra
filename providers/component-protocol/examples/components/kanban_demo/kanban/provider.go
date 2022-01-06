@@ -97,11 +97,22 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 			Boards:     []kanban.Board{boardUrgent, boardNormal},
 			Operations: nil,
 		}
+		// multi instance demo
+		switch sdk.Comp.Name {
+		case "instance1":
+			fmt.Println("this is instance1")
+			p.StatePtr.Name = "instance1"
+		case "instance2":
+			fmt.Println("this is instance2")
+			p.StatePtr.Name = "instance2"
+		default:
+			fmt.Println("this is a kanban instance")
+			p.StatePtr.Name = "Bob"
+		}
 		boardUrgent.Cards = append([]kanban.Card{}, card1)
 		boardUrgent.Total = 1
 		p.StdDataPtr = &data
-		// custom state
-		p.StatePtr.Name = "Bob"
+		// custom inParams
 		p.InParamsPtr.ProjectID = 20
 	}
 }

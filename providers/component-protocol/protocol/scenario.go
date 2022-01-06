@@ -17,6 +17,8 @@ package protocol
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
@@ -45,7 +47,7 @@ func getScenarioRenders(scenario string) (*ScenarioRender, error) {
 	if !ok {
 		return nil, fmt.Errorf("failed to get scenario renders, default protocol not exist, scenario: %s", scenario)
 	}
-	for compName, comp := range p.Components {
+	for compName := range p.Components {
 		compName, _ = getCompNameAndInstanceName(compName)
 		// skip if scenario-level component render exist
 		_, renderExist := (*renders)[compName]
@@ -56,16 +58,12 @@ func getScenarioRenders(scenario string) (*ScenarioRender, error) {
 		defaultCompRender, dOK := (*defaultRenders)[compName]
 		if dOK {
 			(*renders)[compName] = defaultCompRender
+			logrus.Infof("use default comp render, scenario: %s, comp: %s", scenario, compName)
 			continue
 		}
-		// built-in component renders
-		switch comp.Type {
-		case "Container", "LRContainer", "RowContainer", "SplitPage", "Popover", "Title", "Drawer":
-			(*renders)[compName] = &CompRenderSpec{RenderC: emptyRenderFunc}
-			continue
-		}
-		return nil, fmt.Errorf("failed to found component render neither in scenario renders nor default renders, "+
-			"scenario: %s, component: %s", scenario, compName)
+		// use empty component renders
+		logrus.Infof("use empty comp render, scenario: %s, comp: %s", scenario, compName)
+		(*renders)[compName] = &CompRenderSpec{RenderC: emptyRenderFunc}
 	}
 
 	return renders, nil
