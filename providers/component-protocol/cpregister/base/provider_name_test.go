@@ -73,11 +73,21 @@ func TestGetScenarioAndCompNameFromProviderKey(t *testing.T) {
 		{
 			name: "valid default namespace key",
 			args: args{
-				providerKey: "component-protocol.default-components.filter",
+				providerKey: componentProviderDefaultNamespacePrefix + "filter",
 			},
 			wantScenario:     "",
 			wantCompName:     "filter",
 			wantInstanceName: "filter",
+			haveErr:          false,
+		},
+		{
+			name: "valid default namespace key with label",
+			args: args{
+				providerKey: componentProviderDefaultNamespacePrefix + "filter@filter2",
+			},
+			wantScenario:     "",
+			wantCompName:     "filter",
+			wantInstanceName: "filter2",
 			haveErr:          false,
 		},
 	}

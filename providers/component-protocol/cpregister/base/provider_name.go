@@ -17,11 +17,17 @@ package base
 import (
 	"fmt"
 	"strings"
+
+	"github.com/erda-project/erda-infra/pkg/strutil"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 const (
-	componentProviderNamePrefix        = "component-protocol.components."
-	defaultComponentProviderNamePrefix = "component-protocol.default-components."
+	componentProviderNamePrefix = "component-protocol.components."
+)
+
+var (
+	componentProviderDefaultNamespacePrefix = componentProviderNamePrefix + cptype.DefaultComponentNamespace + "."
 )
 
 // MustGetScenarioAndCompNameFromProviderKey .
@@ -36,26 +42,37 @@ func MustGetScenarioAndCompNameFromProviderKey(providerKey string) (scenario, co
 
 // GetScenarioAndCompNameFromProviderKey .
 func GetScenarioAndCompNameFromProviderKey(providerKey string) (scenario, compName, instanceName string, err error) {
-	if strings.HasPrefix(providerKey, defaultComponentProviderNamePrefix) {
-		ss := strings.SplitN(providerKey, ".", 3)
-		return "", ss[2], ss[2], nil
-	}
-	if !strings.HasPrefix(providerKey, componentProviderNamePrefix) {
+	// validate prefix
+	if !strutil.HasPrefixes(providerKey, componentProviderNamePrefix, componentProviderDefaultNamespacePrefix) {
 		return "", "", "", fmt.Errorf("invalid prefix")
 	}
+	// parse as std comp providerKey
 	ss := strings.SplitN(providerKey, ".", 4)
 	if len(ss) != 4 {
 		return "", "", "", fmt.Errorf("not standard provider key: %s", providerKey)
 	}
-	vv := strings.SplitN(ss[3], "@", 2)
+	scenario = ss[2]
+	// default namespace doesn't belong to any scenario
+	if scenario == cptype.DefaultComponentNamespace {
+		scenario = ""
+	}
+	// split comp and instance name
+	compName, instanceName = splitCompAndInstance(ss[3])
+
+	return
+}
+
+// splitCompAndInstance split compPartKey to compName and instanceName.
+func splitCompAndInstance(compPartKey string) (compName, instanceName string) {
+	vv := strings.SplitN(compPartKey, "@", 2)
 	if len(vv) == 2 {
 		compName = vv[0]
 		instanceName = vv[1]
 	} else {
-		compName = ss[3]
+		compName = compPartKey
 		instanceName = compName
 	}
-	return ss[2], compName, instanceName, nil
+	return
 }
 
 // MakeComponentProviderName .
