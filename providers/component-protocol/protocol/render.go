@@ -138,6 +138,8 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 	handleContinueRender(compRending, req.Protocol)
 
+	onlyReturnRenderingComps(compRending, req.Protocol)
+
 	return nil
 }
 
@@ -390,4 +392,17 @@ func handleContinueRender(renderingItems []cptype.RendingItem, req *cptype.Compo
 		req.Options = &cptype.ProtocolOptions{}
 	}
 	req.Options.ParallelContinueRenders = result
+}
+
+// onlyReturnRenderingComps only return rendering components.
+func onlyReturnRenderingComps(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
+	renderingItemByName := map[string]struct{}{}
+	for _, item := range renderingItems {
+		renderingItemByName[item.Name] = struct{}{}
+	}
+	for name := range req.Components {
+		if _, ok := renderingItemByName[name]; !ok {
+			req.Components[name] = nil
+		}
+	}
 }
