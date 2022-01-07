@@ -88,11 +88,11 @@ func NewTextCell(text string) ITypedCellBuilder {
 	return cb.typed()
 }
 
-// NewTextCellWithAll .
-func NewTextCellWithAll(text *commodel.Text) ITypedCellBuilder {
+// NewCompleteTextCell .
+func NewCompleteTextCell(text commodel.Text) ITypedCellBuilder {
 	cb := newCellBuilder()
 	cb.Cell.Type = CellType(commodel.Text{}.ModelType())
-	cputil.MustObjJSONTransfer(text, &cb.Data)
+	cputil.MustObjJSONTransfer(&text, &cb.Data)
 	return cb.typed()
 }
 
