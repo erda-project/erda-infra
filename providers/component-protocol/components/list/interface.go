@@ -28,4 +28,5 @@ type IListStdOps interface {
 	RegisterItemStarOp(opData OpItemStar) (opFunc cptype.OperationFunc)
 	RegisterItemClickGotoOp(opData OpItemClickGoto) (opFunc cptype.OperationFunc)
 	RegisterItemClickOp(opData OpItemClick) (opFunc cptype.OperationFunc)
+	RegisterBatchOp(opData OpBatchRowsHandle) (opFunc cptype.OperationFunc)
 }

@@ -40,7 +40,7 @@ type Operation struct {
 // OpClientData .
 type OpClientData struct {
 	DataRef ExtraMap `json:"dataRef,omitempty"`
-	Extra   ExtraMap `json:"extra,omitempty"`
+	ExtraMap
 }
 
 // OpServerData .
