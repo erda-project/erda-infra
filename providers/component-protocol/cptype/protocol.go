@@ -163,5 +163,5 @@ type ProtocolOptions struct {
 	SyncIntervalSecond float64 `json:"syncIntervalSecond" yaml:"syncIntervalSecond"`
 
 	// ParallelContinueRenders contains all component-level continue-render.
-	ParallelContinueRenders map[string]ContinueRender `json:"continueRenders,omitempty" yaml:"continueRenders,omitempty"`
+	ParallelContinueRenders map[string]ContinueRender `json:"parallelContinueRenders,omitempty" yaml:"parallelContinueRenders,omitempty"`
 }
