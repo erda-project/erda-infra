@@ -86,9 +86,17 @@ type ComponentOptions struct {
 	Visible     bool `json:"visible,omitempty" yaml:"visible,omitempty"`
 	AsyncAtInit bool `json:"asyncAtInit,omitempty" yaml:"asyncAtInit,omitempty"`
 
+	// enable continueRender if not nil
+	ContinueRender *ContinueRender `json:"continueRender,omitempty" yaml:"continueRender,omitempty"`
+
 	// extra related
 	FlatExtra            bool `json:"flatExtra,omitempty" yaml:"flatExtra,omitempty"`
 	RemoveExtraAfterFlat bool `json:"removeExtraAfterFlat,omitempty" yaml:"removeExtraAfterFlat,omitempty"`
+}
+
+// ContinueRender .
+type ContinueRender struct {
+	OpKey string `json:"opKey,omitempty"`
 }
 
 // RendingItem .
@@ -153,4 +161,7 @@ type ComponentProtocolDebugOptions struct {
 type ProtocolOptions struct {
 	// SyncIntervalSecond can be float64, such as 10, 1, 0.5 .
 	SyncIntervalSecond float64 `json:"syncIntervalSecond" yaml:"syncIntervalSecond"`
+
+	// ParallelContinueRenders contains all component-level continue-render.
+	ParallelContinueRenders map[string]ContinueRender `json:"continueRenders,omitempty" yaml:"continueRenders,omitempty"`
 }
