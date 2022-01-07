@@ -23,14 +23,23 @@ import (
 // DecodeData .
 func (d *DefaultTable) DecodeData(compData cptype.ComponentData, modelDataPtr interface{}) {
 	cputil.MustObjJSONTransfer(compData, modelDataPtr.(*table.Data))
+	if custom, ok := d.Impl.(table.CustomData); ok {
+		custom.DecodeToCustomData(d.StdDataPtr, custom.CustomDataPtr())
+	}
 }
 
 // DecodeState .
 func (d *DefaultTable) DecodeState(compState cptype.ComponentState, modelStatePtr interface{}) {
 	cputil.MustObjJSONTransfer(compState, modelStatePtr.(*cptype.ExtraMap))
+	if custom, ok := d.Impl.(table.CustomState); ok {
+		custom.DecodeToCustomState(d.StdStatePtr, custom.CustomStatePtr())
+	}
 }
 
 // DecodeInParams .
 func (d *DefaultTable) DecodeInParams(compInParams cptype.InParams, modelInParamsPtr interface{}) {
 	cputil.MustObjJSONTransfer(compInParams, modelInParamsPtr.(*cptype.ExtraMap))
+	if custom, ok := d.Impl.(table.CustomInParams); ok {
+		custom.DecodeToCustomInParams(d.StdInParamsPtr, custom.CustomInParamsPtr())
+	}
 }
