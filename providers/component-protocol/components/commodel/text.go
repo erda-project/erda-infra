@@ -16,7 +16,8 @@ package commodel
 
 // Text .
 type Text struct {
-	Text string `json:"text,omitempty"`
+	Text       string `json:"text,omitempty"`
+	EnableCopy bool   `json:"enableCopy,omitempty"`
 }
 
 // ModelType .
