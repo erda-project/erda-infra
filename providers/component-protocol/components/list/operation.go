@@ -26,6 +26,8 @@ const (
 	OpItemClickGotoKey = "clickGoto"
 	// OpItemClickKey .
 	OpItemClickKey = "click"
+	// OpBatchRowsHandleKey .
+	OpBatchRowsHandleKey = "batchRowsHandle"
 )
 
 // list-level
@@ -117,9 +119,50 @@ type (
 
 	// OpItemClickClientData data
 	OpItemClickClientData struct {
-		DataRef *Item `json:"dataRef,omitempty"`
+		DataRef      *Item      `json:"dataRef,omitempty"`
+		OperationRef MoreOpItem `json:"operationRef"`
 	}
 )
 
 // OpKey .
 func (o OpItemClick) OpKey() cptype.OperationKey { return OpItemClickKey }
+
+// OpBatchRowsHandleOptionServerData .
+type OpBatchRowsHandleOptionServerData struct {
+	// AllowedRowIDs which rows has this op
+	AllowedRowIDs []string `json:"allowedRowIDs"`
+	// Icon .
+	Icon string `json:"icon"`
+	// ID of this op.
+	ID string `json:"id"`
+	// Text
+	Text string `json:"text"`
+}
+
+// OpBatchRowsHandleBasicServerData .
+type OpBatchRowsHandleBasicServerData struct {
+	Options []OpBatchRowsHandleOptionServerData
+}
+type (
+	// OpBatchRowsHandle .
+	OpBatchRowsHandle struct {
+		cptype.Operation
+		ServerData OpBatchRowsHandleServerData `json:"serverData,omitempty"`
+		ClientData OpBatchRowsHandleClientData `json:"clientData,omitempty"`
+	}
+
+	// OpBatchRowsHandleServerData server data
+	OpBatchRowsHandleServerData struct {
+		OpBatchRowsHandleBasicServerData
+	}
+
+	// OpBatchRowsHandleClientData data
+	OpBatchRowsHandleClientData struct {
+		DataRef           *Item    `json:"dataRef,omitempty"`
+		SelectedOptionsID string   `json:"selectedOptionsID"`
+		SelectedRowIDs    []string `json:"selectedRowIDs"`
+	}
+)
+
+// OpKey .
+func (o OpBatchRowsHandle) OpKey() cptype.OperationKey { return OpBatchRowsHandleKey }

@@ -59,6 +59,7 @@ type (
 		Description      string      `json:"description,omitempty"`
 		BackgroundImgURL string      `json:"backgroundImgURL,omitempty"`
 		KvInfos          []KvInfo    `json:"kvInfos,omitempty"`
+		Selectable       bool        `json:"selectable,omitempty"`
 		// columns show in the item, e.g user, time
 		ColumnsInfo map[string]interface{} `json:"columnsInfo,omitempty"`
 		// operations on the frond
@@ -72,6 +73,9 @@ type (
 	StateInfo struct {
 		Text   string         `json:"text,omitempty"`
 		Status ItemCommStatus `json:"status,omitempty"`
+		// right or left
+		SuffixIcon string                                   `json:"suffixIcon,omitempty"`
+		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}
 
 	// KvInfo .
@@ -81,6 +85,8 @@ type (
 		Value string `json:"value,omitempty"`
 		Icon  string `json:"icon,omitempty"`
 		Tip   string `json:"tip,omitempty"`
+		// red green etc.
+		Color string `json:"color,omitempty"`
 		// metaInfo related operations
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}
@@ -88,8 +94,9 @@ type (
 	// MoreOpItem more operation item info
 	MoreOpItem struct {
 		ID   string `json:"id,omitempty"`
-		Text string `json:"key,omitempty"`
+		Text string `json:"text,omitempty"`
 		Icon string `json:"icon,omitempty"`
+		Key  string `json:"key,omitempty"`
 		// more operation related operations
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}

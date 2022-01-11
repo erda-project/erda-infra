@@ -48,18 +48,21 @@ func (d *DefaultList) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cpty
 	return map[cptype.OperationKey]cptype.OperationFunc{
 		// list level
 		list.OpChangePage{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterChangePage(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpChangePage{}).(*list.OpChangePage))
+			d.Impl.RegisterChangePage(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpChangePage{}).(*list.OpChangePage))(sdk)
 		},
 
 		// item level
 		list.OpItemStar{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterItemStarOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemStar{}).(*list.OpItemStar))
+			d.Impl.RegisterItemStarOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemStar{}).(*list.OpItemStar))(sdk)
 		},
 		list.OpItemClickGoto{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterItemClickGotoOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemClickGoto{}).(*list.OpItemClickGoto))
+			d.Impl.RegisterItemClickGotoOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemClickGoto{}).(*list.OpItemClickGoto))(sdk)
 		},
 		list.OpItemClick{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterItemClickOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemClick{}).(*list.OpItemClick))
+			d.Impl.RegisterItemClickOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpItemClick{}).(*list.OpItemClick))(sdk)
+		},
+		list.OpBatchRowsHandle{}.OpKey(): func(sdk *cptype.SDK) {
+			d.Impl.RegisterBatchOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &list.OpBatchRowsHandle{}).(*list.OpBatchRowsHandle))(sdk)
 		},
 	}
 }
