@@ -25,6 +25,7 @@ import (
 
 	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol/posthook"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
@@ -135,6 +136,10 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 			return err
 		}
 	}
+
+	posthook.HandleContinueRender(compRending, req.Protocol)
+	posthook.OnlyReturnRenderingComps(compRending, req.Protocol)
+
 	return nil
 }
 
