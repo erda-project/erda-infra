@@ -25,6 +25,7 @@ import (
 
 	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/protocol/posthook"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
@@ -136,9 +137,8 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		}
 	}
 
-	handleContinueRender(compRending, req.Protocol)
-
-	onlyReturnRenderingComps(compRending, req.Protocol)
+	posthook.HandleContinueRender(compRending, req.Protocol)
+	posthook.OnlyReturnRenderingComps(compRending, req.Protocol)
 
 	return nil
 }
@@ -376,33 +376,4 @@ func renderOneComp(ctx context.Context, req *cptype.ComponentProtocolRequest, sr
 	elapsed := time.Since(start)
 	logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, v.Name, elapsed)
 	return nil
-}
-
-// handleContinueRender set continueRender to globalOptions from rendering components.
-func handleContinueRender(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
-	result := make(map[string]cptype.ContinueRender)
-	for _, comp := range renderingItems {
-		compOptions := req.Components[comp.Name].Options
-		if compOptions == nil || compOptions.ContinueRender == nil || compOptions.ContinueRender.OpKey == "" {
-			continue
-		}
-		result[comp.Name] = *compOptions.ContinueRender
-	}
-	if req.Options == nil {
-		req.Options = &cptype.ProtocolOptions{}
-	}
-	req.Options.ParallelContinueRenders = result
-}
-
-// onlyReturnRenderingComps only return rendering components.
-func onlyReturnRenderingComps(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
-	renderingItemByName := map[string]struct{}{}
-	for _, item := range renderingItems {
-		renderingItemByName[item.Name] = struct{}{}
-	}
-	for name := range req.Components {
-		if _, ok := renderingItemByName[name]; !ok {
-			req.Components[name] = nil
-		}
-	}
 }
