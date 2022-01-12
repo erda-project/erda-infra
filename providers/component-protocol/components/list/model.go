@@ -96,7 +96,6 @@ type (
 		ID   string `json:"id,omitempty"`
 		Text string `json:"text,omitempty"`
 		Icon string `json:"icon,omitempty"`
-		Key  string `json:"key,omitempty"`
 		// more operation related operations
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations"`
 	}
