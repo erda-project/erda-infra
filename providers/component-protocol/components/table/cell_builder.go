@@ -143,3 +143,11 @@ func NewUserSelectorCell(selector commodel.UserSelector) ITypedCellBuilder {
 	cputil.MustObjJSONTransfer(&selector, &cb.Data)
 	return cb.typed()
 }
+
+// NewMoreOperationsCell .
+func NewMoreOperationsCell(moreOperations commodel.MoreOperations) ITypedCellBuilder {
+	cb := newCellBuilder()
+	cb.Cell.Type = CellType(commodel.MoreOperations{}.ModelType())
+	cputil.MustObjJSONTransfer(&moreOperations, &cb.Data)
+	return cb.typed()
+}
