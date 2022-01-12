@@ -27,14 +27,15 @@ type provider struct {
 }
 
 const (
-	columnMergedTitle table.ColumnKey = "mergedTitle"
-	columnIcon        table.ColumnKey = "icon"
-	columnTitle       table.ColumnKey = "title"
-	columnLabels      table.ColumnKey = "labels"
-	columnPriority    table.ColumnKey = "priority"
-	columnState       table.ColumnKey = "state"
-	columnAssignee    table.ColumnKey = "assignee"
-	columnFinishedAt  table.ColumnKey = "finishedAt"
+	columnMergedTitle    table.ColumnKey = "mergedTitle"
+	columnIcon           table.ColumnKey = "icon"
+	columnTitle          table.ColumnKey = "title"
+	columnLabels         table.ColumnKey = "labels"
+	columnPriority       table.ColumnKey = "priority"
+	columnState          table.ColumnKey = "state"
+	columnAssignee       table.ColumnKey = "assignee"
+	columnFinishedAt     table.ColumnKey = "finishedAt"
+	columnMoreOperations table.ColumnKey = "moreOperations"
 )
 
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
@@ -175,6 +176,39 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 					},
 					{
 						ID: "issue-id-3",
+					},
+					{
+						ID: "pipeline-definition-1",
+						CellsMap: map[table.ColumnKey]table.Cell{
+							columnMoreOperations: table.NewMoreOperationsCell(commodel.MoreOperations{
+								Ops: []commodel.MoreOpItem{
+									{
+										ID:   "star",
+										Text: "标星",
+										Operations: map[cptype.OperationKey]cptype.Operation{
+											commodel.OpMoreOperationsItemClick{}.OpKey(): cputil.NewOpBuilder().Build(),
+										},
+									},
+									{
+										ID:   "goto-detail-page",
+										Text: "查看详情",
+										Operations: map[cptype.OperationKey]cptype.Operation{
+											commodel.OpMoreOperationsItemClickGoto{}.OpKey(): cputil.NewOpBuilder().
+												WithServerDataPtr(&commodel.OpMoreOperationsItemClickGotoServerData{
+													OpClickGotoServerData: commodel.OpClickGotoServerData{
+														JumpOut: false,
+														Target:  "projectPipelineDetail",
+														Params: map[string]interface{}{
+															"pipelineDefinitionID": "1",
+														},
+														Query: nil,
+													}}).
+												Build(),
+										},
+									},
+								},
+							}).Build(),
+						},
 					},
 				},
 				PageNo:   1,
