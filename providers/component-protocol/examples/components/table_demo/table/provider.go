@@ -186,7 +186,9 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 										ID:   "star",
 										Text: "标星",
 										Operations: map[cptype.OperationKey]cptype.Operation{
-											commodel.OpMoreOperationsItemClick{}.OpKey(): cputil.NewOpBuilder().Build(),
+											commodel.OpMoreOperationsItemClick{}.OpKey(): cputil.NewOpBuilder().
+												WithServerDataPtr(&commodel.OpMoreOperationsItemClickServerData{}).
+												Build(),
 										},
 									},
 									{

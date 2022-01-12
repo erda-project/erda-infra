@@ -39,6 +39,8 @@ type (
 	// OpMoreOperationsItemClick .
 	OpMoreOperationsItemClick struct {
 		OpClick
+		ServerData OpMoreOperationsItemClickServerData `json:"serverData,omitempty"`
+		ClientData OpMoreOperationsItemClickClientData `json:"clientData,omitempty"`
 	}
 	// OpMoreOperationsItemClickServerData .
 	OpMoreOperationsItemClickServerData struct {
