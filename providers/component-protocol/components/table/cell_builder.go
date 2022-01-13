@@ -116,7 +116,7 @@ func NewIconCell(icon commodel.Icon) ITypedCellBuilder {
 func NewUserCell(user commodel.User) ITypedCellBuilder {
 	cb := newCellBuilder()
 	cb.Cell.Type = CellType(commodel.User{}.ModelType())
-	cputil.MustObjJSONTransfer(&commodel.User{ID: "1", Name: "Bob"}, &cb.Data)
+	cputil.MustObjJSONTransfer(&user, &cb.Data)
 	return cb.typed()
 }
 
