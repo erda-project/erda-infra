@@ -28,6 +28,8 @@ type (
 		Conditions []interface{}                            `json:"conditions,omitempty"`
 		FilterSet  []SetItem                                `json:"filterSet,omitempty"`
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
+		// HideSave hide saveFilterSet
+		HideSave bool `json:"hideSave,omitempty"`
 	}
 
 	// SetItem custom filter conditions
