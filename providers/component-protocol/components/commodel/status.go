@@ -19,7 +19,7 @@ import (
 )
 
 // UnifiedStatus .
-type UnifiedStatus int
+type UnifiedStatus string
 
 // IUnifiedStatus .
 type IUnifiedStatus interface {
@@ -28,27 +28,14 @@ type IUnifiedStatus interface {
 
 // UnifiedStatus .
 const (
-	ErrorStatus UnifiedStatus = iota
-	WarningStatus
-	SuccessStatus
-	ProcessingStatus
-	DefaultStatus
+	ErrorStatus      UnifiedStatus = "error"
+	WarningStatus    UnifiedStatus = "warning"
+	SuccessStatus    UnifiedStatus = "success"
+	ProcessingStatus UnifiedStatus = "processing"
+	DefaultStatus    UnifiedStatus = "default"
 )
 
 // String .
 func (g UnifiedStatus) String() string {
-	switch g {
-	case 0:
-		return "error"
-	case 1:
-		return "warning"
-	case 2:
-		return "success"
-	case 3:
-		return "processing"
-	case 4:
-		return "default"
-	default:
-		return "default"
-	}
+	return string(g)
 }
