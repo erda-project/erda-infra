@@ -14,12 +14,16 @@
 
 package bubblegraph
 
+import structure "github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
+
 // Below is standard struct for bubble graph related.
 type (
 	// Data includes List.
 	Data struct {
-		Title string    `json:"title"`
-		List  []*Bubble `json:"list"`
+		Title    string     `json:"title"`
+		List     []*Bubble  `json:"list"`
+		XOptions *Options   `json:"xOptions"`
+		YOptions []*Options `json:"yOptions"`
 	}
 
 	// Bubble .
@@ -42,6 +46,12 @@ type (
 		Unit  string      `json:"unit"`
 	}
 
+	// Options .
+	Options struct {
+		Dimension string                   `json:"dimension,omitempty"`
+		Structure *structure.DataStructure `json:"structure"`
+	}
+
 	// BubbleBuilder .
 	BubbleBuilder struct {
 		bubble *Bubble
@@ -51,11 +61,44 @@ type (
 	DataBuilder struct {
 		data *Data
 	}
+
+	// OptionsBuilder .
+	OptionsBuilder struct {
+		options *Options
+	}
 )
+
+// NewOptionsBuilder .
+func NewOptionsBuilder() *OptionsBuilder {
+	return &OptionsBuilder{options: &Options{Structure: &structure.DataStructure{}}}
+}
+
+// WithDimension .
+func (o *OptionsBuilder) WithDimension(dimension string) *OptionsBuilder {
+	o.options.Dimension = dimension
+	return o
+}
+
+// WithType .
+func (o *OptionsBuilder) WithType(dataType structure.Type) *OptionsBuilder {
+	o.options.Structure.Type = dataType
+	return o
+}
+
+// WithPrecision .
+func (o *OptionsBuilder) WithPrecision(precision structure.Precision) *OptionsBuilder {
+	o.options.Structure.Precision = precision
+	return o
+}
+
+// Build .
+func (o *OptionsBuilder) Build() *Options {
+	return o.options
+}
 
 // NewDataBuilder .
 func NewDataBuilder() *DataBuilder {
-	return &DataBuilder{data: &Data{}}
+	return &DataBuilder{data: &Data{XOptions: &Options{}, YOptions: []*Options{}}}
 }
 
 // WithTitle .
@@ -67,6 +110,18 @@ func (d *DataBuilder) WithTitle(title string) *DataBuilder {
 // WithBubble .
 func (d *DataBuilder) WithBubble(bubbles ...*Bubble) *DataBuilder {
 	d.data.List = append(d.data.List, bubbles...)
+	return d
+}
+
+// WithXOptions .
+func (d *DataBuilder) WithXOptions(options *Options) *DataBuilder {
+	d.data.XOptions = options
+	return d
+}
+
+// WithYOptions .
+func (d *DataBuilder) WithYOptions(options ...*Options) *DataBuilder {
+	d.data.YOptions = append(d.data.YOptions, options...)
 	return d
 }
 

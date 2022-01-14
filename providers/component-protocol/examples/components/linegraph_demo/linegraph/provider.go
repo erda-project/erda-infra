@@ -15,6 +15,7 @@
 package linegraph
 
 import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -33,10 +34,30 @@ type provider struct {
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
 
+		// Demo case 1
 		d := linegraph.New("line graph demo")
 		d.SetXAxis("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 		d.SetYAxis("Dimension", 1, 2, 3, 4, 5, 6, 7)
+		d.SetXOptions(&linegraph.Options{
+			DataStructure: &structure.DataStructure{Type: structure.String},
+		})
+		d.SetYOptions([]*linegraph.Options{
+			{Dimension: "Dimension", DataStructure: &structure.DataStructure{Type: structure.Number}},
+			{Dimension: "Dimension2", DataStructure: &structure.DataStructure{Type: structure.Number}},
+		}...)
 		d.SetYAxis("Dimension2", 7, 6, 5, 4, 3, 2, 1)
+
+		// Demo case 2
+		d = linegraph.NewDataBuilder().
+			WithTitle("line graph demo").
+			WithXAxis("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday").
+			WithXOptions(linegraph.NewOptionsBuilder().WithType(structure.String).Build()).
+			WithYAxis("Dimension", 1, 2, 3, 4, 5, 6, 7).
+			WithYAxis("Dimension2", 7, 6, 5, 4, 3, 2, 1).
+			WithYOptions([]*linegraph.Options{
+				linegraph.NewOptionsBuilder().WithDimension("Dimension").WithType(structure.Number).Build(),
+				linegraph.NewOptionsBuilder().WithDimension("Dimension2").WithType(structure.Number).Build(),
+			}...).Build()
 
 		p.StdDataPtr = d
 	}

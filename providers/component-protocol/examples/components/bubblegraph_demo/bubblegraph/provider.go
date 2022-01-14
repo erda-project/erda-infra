@@ -20,6 +20,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/bubblegraph/impl"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	structure "github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
 )
 
 type provider struct {
@@ -31,6 +32,8 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
 		data := bubblegraph.NewDataBuilder().
 			WithTitle("test bubble graph component").
+			WithXOptions(bubblegraph.NewOptionsBuilder().WithType(structure.Number).Build()).
+			WithYOptions(bubblegraph.NewOptionsBuilder().WithType(structure.Number).Build()).
 			WithBubble(bubblegraph.NewBubbleBuilder().
 				WithValueX(1).
 				WithValueY(100).
