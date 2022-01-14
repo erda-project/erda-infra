@@ -17,7 +17,7 @@ package linegraph
 import (
 	"sync"
 
-	"github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
+	structure "github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
 )
 
 // Below is standard struct for line graph related.

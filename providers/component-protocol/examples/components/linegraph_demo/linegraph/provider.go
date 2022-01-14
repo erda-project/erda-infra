@@ -15,7 +15,6 @@
 package linegraph
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -24,6 +23,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
 )
 
 type provider struct {
@@ -39,11 +39,11 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 		d.SetXAxis("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 		d.SetYAxis("Dimension", 1, 2, 3, 4, 5, 6, 7)
 		d.SetXOptions(&linegraph.Options{
-			DataStructure: &structure.DataStructure{Type: structure.String},
+			Structure: &structure.DataStructure{Type: structure.String},
 		})
 		d.SetYOptions([]*linegraph.Options{
-			{Dimension: "Dimension", DataStructure: &structure.DataStructure{Type: structure.Number}},
-			{Dimension: "Dimension2", DataStructure: &structure.DataStructure{Type: structure.Number}},
+			{Dimension: "Dimension", Structure: &structure.DataStructure{Type: structure.Number}},
+			{Dimension: "Dimension2", Structure: &structure.DataStructure{Type: structure.Number}},
 		}...)
 		d.SetYAxis("Dimension2", 7, 6, 5, 4, 3, 2, 1)
 

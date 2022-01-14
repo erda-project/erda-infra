@@ -14,6 +14,7 @@
 
 package structure
 
+//Type defined
 const (
 	String      Type = "string"
 	Number      Type = "number"
@@ -27,6 +28,7 @@ const (
 	Throughput  Type = "throughput"
 )
 
+//Precision defined
 const (
 	K           Precision = "K"
 	M           Precision = "M"
@@ -56,8 +58,11 @@ const (
 )
 
 type (
-	Type          string
-	Precision     string
+	//Type .
+	Type string
+	//Precision .
+	Precision string
+	//DataStructure .
 	DataStructure struct {
 		Type      Type      `json:"type"`
 		Precision Precision `json:"precision"`
