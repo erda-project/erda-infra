@@ -17,21 +17,14 @@ package kanban
 import (
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister"
-	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 func init() {
-	// register provider
-	servicehub.Register("your-provider-name", &servicehub.Spec{
-		Dependencies: []string{"i18n"},
-		Creator:      func() servicehub.Provider { return &component{} },
-	})
+	cpregister.RegisterProviderComponent("kanban-demo", "kanban", &component{})
+	cpregister.RegisterProviderComponent("kanban-demo", "xxx", &component{})
+	cpregister.RegisterProviderComponent("kanban-demo", "sssss", &component{})
 }
 
 func (c *component) Init(ctx servicehub.Context) error {
-	// register component
-	cpregister.RegisterComponent("kanban-demo", "xxx", func() cptype.IComponent { return c })
-	cpregister.RegisterComponent("kanban-demo", "sssss", func() cptype.IComponent { return c })
-	cpregister.RegisterComponent("kanban-demo", "kanban", func() cptype.IComponent { return c })
 	return nil
 }

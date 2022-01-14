@@ -21,6 +21,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
 type creators struct {
@@ -46,7 +47,7 @@ func InitProviderWithCreator(scenario, compName string, creator servicehub.Creat
 // initProviderToNamespace register component as provider to specific namespace.
 func initProviderToNamespace(scenario, compName string, creator servicehub.Creator) {
 	// generate std providerName
-	providerName := MakeComponentProviderName(scenario, compName)
+	providerName := cputil.MakeComponentProviderName(scenario, compName)
 	if creator == nil {
 		creator = func() servicehub.Provider { return &DefaultProvider{} }
 	}
