@@ -30,37 +30,37 @@ type CustomInParams struct {
 }
 
 // CustomStatePtr .
-func (p *provider) CustomStatePtr() interface{} {
-	if p.StatePtr == nil {
-		p.StatePtr = &CustomState{}
+func (c *component) CustomStatePtr() interface{} {
+	if c.StatePtr == nil {
+		c.StatePtr = &CustomState{}
 	}
-	return p.StatePtr
+	return c.StatePtr
 }
 
 // EncodeFromCustomState .
-func (p *provider) EncodeFromCustomState(customStatePtr interface{}, stdStatePtr *cptype.ExtraMap) {
+func (c *component) EncodeFromCustomState(customStatePtr interface{}, stdStatePtr *cptype.ExtraMap) {
 	cputil.MustObjJSONTransfer(customStatePtr, stdStatePtr)
 }
 
 // DecodeToCustomState .
-func (p *provider) DecodeToCustomState(stdStatePtr *cptype.ExtraMap, customStatePtr interface{}) {
+func (c *component) DecodeToCustomState(stdStatePtr *cptype.ExtraMap, customStatePtr interface{}) {
 	cputil.MustObjJSONTransfer(stdStatePtr, customStatePtr)
 }
 
 // CustomInParamsPtr .
-func (p *provider) CustomInParamsPtr() interface{} {
-	if p.InParamsPtr == nil {
-		p.InParamsPtr = &CustomInParams{}
+func (c *component) CustomInParamsPtr() interface{} {
+	if c.InParamsPtr == nil {
+		c.InParamsPtr = &CustomInParams{}
 	}
-	return p.InParamsPtr
+	return c.InParamsPtr
 }
 
 // EncodeFromCustomInParams .
-func (p *provider) EncodeFromCustomInParams(customInParamsPtr interface{}, stdInParamsPtr *cptype.ExtraMap) {
+func (c *component) EncodeFromCustomInParams(customInParamsPtr interface{}, stdInParamsPtr *cptype.ExtraMap) {
 	cputil.MustObjJSONTransfer(customInParamsPtr, stdInParamsPtr)
 }
 
 // DecodeToCustomInParams .
-func (p *provider) DecodeToCustomInParams(stdInParamsPtr *cptype.ExtraMap, customInParamsPtr interface{}) {
+func (c *component) DecodeToCustomInParams(stdInParamsPtr *cptype.ExtraMap, customInParamsPtr interface{}) {
 	cputil.MustObjJSONTransfer(stdInParamsPtr, customInParamsPtr)
 }

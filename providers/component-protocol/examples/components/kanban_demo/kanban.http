@@ -1,0 +1,9 @@
+# kanban
+POST http://localhost:8080/api/component-protocol/actions/render
+Content-Type: application/json
+
+{
+  "scenario": {
+    "scenarioKey": "kanban-demo"
+  }
+}
