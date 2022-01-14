@@ -21,10 +21,13 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/kanban/impl"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
+	"github.com/erda-project/erda-infra/providers/i18n"
 )
 
-type provider struct {
+type component struct {
 	impl.DefaultKanban
+
+	Tran i18n.Translator `translator:"notbelong"`
 
 	// custom type
 	StatePtr    *CustomState
@@ -77,21 +80,21 @@ var (
 	}
 )
 
-func (p *provider) registerNonStdOp1() cptype.OperationFunc {
+func (c *component) registerNonStdOp1() cptype.OperationFunc {
 	return func(sdk *cptype.SDK) {
 		fmt.Println("This is NonStdOp1")
 	}
 }
 
 // RegisterCompNonStdOps .
-func (p *provider) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
+func (c *component) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return map[cptype.OperationKey]cptype.OperationFunc{
-		nonStdOp1Key: p.registerNonStdOp1(),
+		nonStdOp1Key: c.registerNonStdOp1(),
 	}
 }
 
 // RegisterInitializeOp .
-func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
+func (c *component) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
 		data := kanban.Data{
 			Boards:     []kanban.Board{boardUrgent, boardNormal},
@@ -101,40 +104,41 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 		switch sdk.Comp.Name {
 		case "instance1":
 			fmt.Println("this is instance1")
-			p.StatePtr.Name = "instance1"
+			c.StatePtr.Name = "instance1"
 		case "instance2":
 			fmt.Println("this is instance2")
-			p.StatePtr.Name = "instance2"
+			c.StatePtr.Name = "instance2"
 		default:
 			fmt.Println("this is a kanban instance")
-			p.StatePtr.Name = "Bob"
+			c.StatePtr.Name = "Bob"
 		}
 		boardUrgent.Cards = append([]kanban.Card{}, card1)
 		boardUrgent.Total = 1
-		p.StdDataPtr = &data
+		c.StdDataPtr = &data
 		// custom inParams
-		p.InParamsPtr.ProjectID = 20
+		c.InParamsPtr.ProjectID = 20
+		fmt.Println("hello", c.Tran.Text(i18n.LanguageCodes{{Code: "zh"}}, "hello"))
 	}
 }
 
 // RegisterRenderingOp .
-func (p *provider) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
-	return p.RegisterInitializeOp()
+func (c *component) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
+	return c.RegisterInitializeOp()
 }
 
 // RegisterCardMoveToOp .
-func (p *provider) RegisterCardMoveToOp(opData kanban.OpCardMoveTo) (opFunc cptype.OperationFunc) {
+func (c *component) RegisterCardMoveToOp(opData kanban.OpCardMoveTo) (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
 		fmt.Println("hello world, i am drag:", opData)
-		switch v := (cptype.ExtraMap)(*p.StdStatePtr).String("DropTarget"); v {
+		switch v := (cptype.ExtraMap)(*c.StdStatePtr).String("DropTarget"); v {
 		case boardLabelUrgent:
 			boardUrgent.Cards = append(boardUrgent.Cards, card1)
 			boardNormal.Cards = nil
-			p.StdDataPtr.Boards = []kanban.Board{boardUrgent, boardNormal}
+			c.StdDataPtr.Boards = []kanban.Board{boardUrgent, boardNormal}
 		case boardLabelNormal:
 			boardUrgent.Cards = nil
 			boardNormal.Cards = append(boardNormal.Cards, card1)
-			p.StdDataPtr.Boards = []kanban.Board{boardUrgent, boardNormal}
+			c.StdDataPtr.Boards = []kanban.Board{boardUrgent, boardNormal}
 		default:
 			panic(fmt.Errorf("invalid drop target: %s", v))
 		}
@@ -142,32 +146,32 @@ func (p *provider) RegisterCardMoveToOp(opData kanban.OpCardMoveTo) (opFunc cpty
 }
 
 // RegisterBoardLoadMoreOp .
-func (p *provider) RegisterBoardLoadMoreOp(opData kanban.OpBoardLoadMore) (opFunc cptype.OperationFunc) {
+func (c *component) RegisterBoardLoadMoreOp(opData kanban.OpBoardLoadMore) (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
 		fmt.Println("hello change page no op:", opData)
 	}
 }
 
 // RegisterBoardCreateOp .
-func (p *provider) RegisterBoardCreateOp(opData kanban.OpBoardCreate) (opFunc cptype.OperationFunc) {
+func (c *component) RegisterBoardCreateOp(opData kanban.OpBoardCreate) (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) {
 		fmt.Println("hello create board op:", opData)
-		p.StdDataPtr.Boards = append(p.StdDataPtr.Boards, kanban.Board{ID: opData.ClientData.Title, Title: opData.ClientData.Title})
+		c.StdDataPtr.Boards = append(c.StdDataPtr.Boards, kanban.Board{ID: opData.ClientData.Title, Title: opData.ClientData.Title})
 	}
 }
 
 // Initialize .
-func (p *provider) Initialize(sdk *cptype.SDK) { return }
+func (c *component) Initialize(sdk *cptype.SDK) { return }
 
 // Visible .
-func (p *provider) Visible(sdk *cptype.SDK) bool { return true }
+func (c *component) Visible(sdk *cptype.SDK) bool { return true }
 
 // RegisterBoardUpdateOp .
-func (p *provider) RegisterBoardUpdateOp(opData kanban.OpBoardUpdate) (opFunc cptype.OperationFunc) {
+func (c *component) RegisterBoardUpdateOp(opData kanban.OpBoardUpdate) (opFunc cptype.OperationFunc) {
 	return nil
 }
 
 // RegisterBoardDeleteOp .
-func (p *provider) RegisterBoardDeleteOp(opData kanban.OpBoardDelete) (opFunc cptype.OperationFunc) {
+func (c *component) RegisterBoardDeleteOp(opData kanban.OpBoardDelete) (opFunc cptype.OperationFunc) {
 	return nil
 }
