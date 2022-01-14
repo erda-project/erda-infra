@@ -42,9 +42,9 @@ type (
 
 	// Options .
 	Options struct {
-		Dimension string `json:"dimension,omitempty"`
-		Structure *structure.DataStructure
-		Inverse   bool `json:"inverse"` // inverted values
+		Dimension string                   `json:"dimension,omitempty"`
+		Structure *structure.DataStructure `json:"structure"`
+		Inverse   bool                     `json:"inverse"` // inverted values
 	}
 
 	// DataBuilder .

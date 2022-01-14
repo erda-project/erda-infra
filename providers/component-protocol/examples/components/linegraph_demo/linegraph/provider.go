@@ -15,10 +15,10 @@
 package linegraph
 
 import (
-	"github.com/erda-project/erda-infra/providers/component-protocol/components/commodel/data-structure"
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/commodel/data-structure"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/linegraph"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/linegraph/impl"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister/base"
