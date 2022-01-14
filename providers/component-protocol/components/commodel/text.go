@@ -19,6 +19,7 @@ type Text struct {
 	Text       string        `json:"text,omitempty"`
 	EnableCopy bool          `json:"enableCopy,omitempty"`
 	Status     UnifiedStatus `json:"status,omitempty"`
+	Tip        string        `json:"tip,omitempty"` // Hover on the text, use '\n' for newlines
 }
 
 // ModelType .
