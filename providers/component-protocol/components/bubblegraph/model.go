@@ -15,7 +15,7 @@
 package bubblegraph
 
 import (
-	structure "github.com/erda-project/erda-infra/providers/component-protocol/utils/data-structure"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/commodel/data-structure"
 )
 
 // Below is standard struct for bubble graph related.
