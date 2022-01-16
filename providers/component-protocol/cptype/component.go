@@ -14,6 +14,10 @@
 
 package cptype
 
+const (
+	FieldImplForInject = "Impl"
+)
+
 // IComponent combines IDefaultComponent and BaseOperationRegister.
 type IComponent interface {
 	IDefaultComponent
@@ -24,6 +28,8 @@ type IComponent interface {
 type CompBaseOperationRegister interface {
 	RegisterInitializeOp() (opFunc OperationFunc)
 	RegisterRenderingOp() (opFunc OperationFunc)
+	RegisterInitializeOpV2() (opFunc EnhancedOperationFunc)
+	RegisterRenderingOpV2() (opFunc EnhancedOperationFunc)
 }
 
 // CompOperationRegister includes a component's all operations.

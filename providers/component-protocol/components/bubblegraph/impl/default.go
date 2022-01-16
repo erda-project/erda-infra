@@ -16,11 +16,13 @@ package impl
 
 import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/bubblegraph"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 // DefaultBubbleGraph default bubble graph component
 type DefaultBubbleGraph struct {
+	defaults.DefaultImpl
 	Impl bubblegraph.IBubbleGraph
 	*StdStructuredPtr
 }

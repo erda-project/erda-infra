@@ -15,6 +15,7 @@
 package impl
 
 import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/kanban"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
@@ -22,6 +23,7 @@ import (
 
 // DefaultKanban .
 type DefaultKanban struct {
+	defaults.DefaultImpl
 	Impl kanban.IKanban
 
 	*StdStructuredPtr

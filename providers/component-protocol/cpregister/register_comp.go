@@ -17,6 +17,7 @@ package cpregister
 import (
 	"reflect"
 
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
 )
@@ -30,7 +31,8 @@ func RegisterComponent(scenario, componentName string, componentCreator protocol
 		Creator: func() cptype.IComponent {
 			compInstance := componentCreator()
 			ref := reflect.ValueOf(compInstance)
-			ref.Elem().FieldByName("Impl").Set(ref)
+			ref.Elem().FieldByName(cptype.FieldImplForInject).Set(ref)
+			ref.Elem().FieldByName(defaults.FieldActualImplRef).Set(ref)
 			return compInstance
 		},
 	})
