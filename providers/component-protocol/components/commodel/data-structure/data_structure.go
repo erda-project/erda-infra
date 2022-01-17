@@ -22,10 +22,7 @@ const (
 	TrafficRate Type = "trafficRate"
 	Storage     Type = "storage"
 	Timestamp   Type = "timestamp"
-	Rate        Type = "rate"
-	Date        Type = "date"
-	Percent     Type = "percent"
-	Throughput  Type = "throughput"
+	Time        Type = "time"
 )
 
 //Precision defined
