@@ -15,6 +15,7 @@
 package cptype
 
 const (
+	// FieldImplForInject used to inject `Impl` field by framework.
 	FieldImplForInject = "Impl"
 )
 

@@ -18,27 +18,33 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
+// FieldActualImplRef .
 const (
 	FieldActualImplRef = "ActualImplRef"
 )
 
+// DefaultImpl .
 type DefaultImpl struct {
 	// ActualImplRef inject by framework according to field FieldActualImplRef
 	ActualImplRef cptype.IComponent
 }
 
+// RegisterInitializeOp .
 func (d *DefaultImpl) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return nil
 }
 
+// RegisterRenderingOp .
 func (d *DefaultImpl) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
 	return d.ActualImplRef.RegisterInitializeOp()
 }
 
+// RegisterInitializeOpV2 .
 func (d *DefaultImpl) RegisterInitializeOpV2() (opFunc cptype.EnhancedOperationFunc) {
 	return nil
 }
 
+// RegisterRenderingOpV2 .
 func (d *DefaultImpl) RegisterRenderingOpV2() (opFunc cptype.EnhancedOperationFunc) {
 	return d.ActualImplRef.RegisterInitializeOpV2()
 }
