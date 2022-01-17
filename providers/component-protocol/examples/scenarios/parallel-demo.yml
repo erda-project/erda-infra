@@ -1,43 +1,28 @@
 scenario: parallel-demo
 
 hierarchy:
-  root: page
+  root: grid
   structure:
-    page:
-      - filter
-      - grid
-      - chartList
     grid:
-      - topN@1
-      - topN@2
-    chartList:
-      - chart@1
-      - chart@2
+      - kv@1
+      - kv@2
+      - kv@3
+      - kv@4
   parallel:
-    page:
-      - filter
-      - grid
     grid:
-      - topN@1
-      - topN@2
-    chartList:
-      - chart@1
-      - chart@2
+      - kv@1
+      - kv@2
+      - kv@3
+      - kv@4
 
 components:
-  page:
-    type: Container
-  filter:
-    type: Filter
   grid:
     type: Grid
-  topN@1:
-    type: TopN
-  topN@2:
-    type: TopN
-  chartList:
-    type: Container
-  chart@1:
-    type: LineGraph
-  chart@2:
-    type: LineGraph
+  kv@1:
+    type: KV
+  kv@2:
+    type: KV
+  kv@3:
+    type: KV
+  kv@4:
+    type: KV

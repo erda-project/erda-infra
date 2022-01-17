@@ -15,12 +15,14 @@
 package impl
 
 import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/topn"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 // DefaultTop default top component
 type DefaultTop struct {
+	defaults.DefaultImpl
 	Impl topn.ITop
 	*StdStructuredPtr
 }

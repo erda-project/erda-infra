@@ -15,12 +15,14 @@
 package impl
 
 import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/kv"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 // DefaultKV default indicator card component
 type DefaultKV struct {
+	defaults.DefaultImpl
 	Impl kv.IKV
 	*StdStructuredPtr
 }

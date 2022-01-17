@@ -16,6 +16,8 @@ package cptype
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 	"strconv"
 
 	"github.com/erda-project/erda-infra/pkg/strutil"
@@ -35,7 +37,7 @@ type SDK struct {
 
 	// ONLY FOR STD COMPONENT USE
 	Event       ComponentEvent
-	CompOpFuncs map[OperationKey]OperationFunc
+	CompOpFuncs map[OperationKey]EnhancedOperationFunc
 	Comp        *Component
 }
 
@@ -96,8 +98,17 @@ func (p InParams) Uint64(key string) uint64 {
 }
 
 // RegisterOperation .
-func (sdk *SDK) RegisterOperation(opKey OperationKey, opFunc OperationFunc) {
-	sdk.CompOpFuncs[opKey] = opFunc
+func (sdk *SDK) RegisterOperation(opKey OperationKey, opFunc interface{}) {
+	var opFuncV2 EnhancedOperationFunc
+	switch opf := opFunc.(type) {
+	case OperationFunc:
+		opFuncV2 = func(sdk *SDK) IStdStructuredPtr { opf(sdk); return nil }
+	case EnhancedOperationFunc:
+		opFuncV2 = opf
+	default:
+		panic(fmt.Errorf("invalid operationFunc type: %v", reflect.TypeOf(opFunc).String()))
+	}
+	sdk.CompOpFuncs[opKey] = opFuncV2
 }
 
 // SetUserIDs .

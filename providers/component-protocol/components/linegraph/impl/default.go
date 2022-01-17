@@ -15,12 +15,14 @@
 package impl
 
 import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/linegraph"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
 // DefaultLineGraph default line graph component
 type DefaultLineGraph struct {
+	defaults.DefaultImpl
 	Impl linegraph.ILineGraph
 	*StdStructuredPtr
 }
