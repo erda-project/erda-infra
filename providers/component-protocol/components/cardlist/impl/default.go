@@ -48,8 +48,8 @@ func (s *StdStructuredPtr) InParamsPtr() interface{} { return s.StdInParamsPtr }
 // RegisterCompStdOps .
 func (d *DefaultCard) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return map[cptype.OperationKey]cptype.OperationFunc{
-		cardlist.OpCardListStar{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterCardListStarOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListStar{}).(*cardlist.OpCardListStar))(sdk)
+		cardlist.OpCardListStar{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterCardListStarOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &cardlist.OpCardListStar{}).(*cardlist.OpCardListStar))(sdk)
 		},
 	}
 }

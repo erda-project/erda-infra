@@ -48,14 +48,14 @@ func (s *StdStructuredPtr) InParamsPtr() interface{} { return s.StdInParamsPtr }
 // RegisterCompStdOps .
 func (d *DefaultFilter) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return map[cptype.OperationKey]cptype.OperationFunc{
-		filter.OpFilter{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterFilterOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &filter.OpFilter{}).(*filter.OpFilter))(sdk)
+		filter.OpFilter{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterFilterOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &filter.OpFilter{}).(*filter.OpFilter))(sdk)
 		},
-		filter.OpFilterItemSave{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterFilterItemSaveOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &filter.OpFilterItemSave{}).(*filter.OpFilterItemSave))(sdk)
+		filter.OpFilterItemSave{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterFilterItemSaveOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &filter.OpFilterItemSave{}).(*filter.OpFilterItemSave))(sdk)
 		},
-		filter.OpFilterItemDelete{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterFilterItemDeleteOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &filter.OpFilterItemDelete{}).(*filter.OpFilterItemDelete))(sdk)
+		filter.OpFilterItemDelete{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterFilterItemDeleteOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &filter.OpFilterItemDelete{}).(*filter.OpFilterItemDelete))(sdk)
 		},
 	}
 }

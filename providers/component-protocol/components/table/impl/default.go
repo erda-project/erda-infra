@@ -49,27 +49,27 @@ func (s *StdStructuredPtr) InParamsPtr() interface{} { return s.StdInParamsPtr }
 func (d *DefaultTable) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
 	return map[cptype.OperationKey]cptype.OperationFunc{
 		// table-level
-		table.OpTableChangePage{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterTableChangePageOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpTableChangePage{}).(*table.OpTableChangePage))(sdk)
+		table.OpTableChangePage{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterTableChangePageOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpTableChangePage{}).(*table.OpTableChangePage))(sdk)
 		},
-		table.OpTableChangeSort{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterTableSortOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpTableChangeSort{}).(*table.OpTableChangeSort))(sdk)
+		table.OpTableChangeSort{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterTableSortOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpTableChangeSort{}).(*table.OpTableChangeSort))(sdk)
 		},
-		table.OpBatchRowsHandle{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterBatchRowsHandleOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpBatchRowsHandle{}).(*table.OpBatchRowsHandle))(sdk)
+		table.OpBatchRowsHandle{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterBatchRowsHandleOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpBatchRowsHandle{}).(*table.OpBatchRowsHandle))(sdk)
 		},
 		// row-level
-		table.OpRowSelect{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterRowSelectOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowSelect{}).(*table.OpRowSelect))(sdk)
+		table.OpRowSelect{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterRowSelectOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowSelect{}).(*table.OpRowSelect))(sdk)
 		},
-		table.OpRowAdd{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterRowAddOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowAdd{}).(*table.OpRowAdd))(sdk)
+		table.OpRowAdd{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterRowAddOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowAdd{}).(*table.OpRowAdd))(sdk)
 		},
-		table.OpRowEdit{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterRowEditOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowEdit{}).(*table.OpRowEdit))(sdk)
+		table.OpRowEdit{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterRowEditOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowEdit{}).(*table.OpRowEdit))(sdk)
 		},
-		table.OpRowDelete{}.OpKey(): func(sdk *cptype.SDK) {
-			d.Impl.RegisterRowDeleteOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowDelete{}).(*table.OpRowDelete))(sdk)
+		table.OpRowDelete{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+			return d.Impl.RegisterRowDeleteOp(*cputil.MustObjJSONTransfer(sdk.Event.OperationData, &table.OpRowDelete{}).(*table.OpRowDelete))(sdk)
 		},
 		// cell-level
 	}
