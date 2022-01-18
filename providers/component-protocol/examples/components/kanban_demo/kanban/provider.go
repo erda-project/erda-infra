@@ -81,8 +81,9 @@ var (
 )
 
 func (c *component) registerNonStdOp1() cptype.OperationFunc {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		fmt.Println("This is NonStdOp1")
+		return nil
 	}
 }
 
@@ -95,7 +96,7 @@ func (c *component) RegisterCompNonStdOps() (opFuncs map[cptype.OperationKey]cpt
 
 // RegisterInitializeOp .
 func (c *component) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		data := kanban.Data{
 			Boards:     []kanban.Board{boardUrgent, boardNormal},
 			Operations: nil,
@@ -118,6 +119,7 @@ func (c *component) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 		// custom inParams
 		c.InParamsPtr.ProjectID = 20
 		fmt.Println("hello", c.Tran.Text(i18n.LanguageCodes{{Code: "zh"}}, "hello"))
+		return nil
 	}
 }
 
@@ -128,7 +130,7 @@ func (c *component) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
 
 // RegisterCardMoveToOp .
 func (c *component) RegisterCardMoveToOp(opData kanban.OpCardMoveTo) (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		fmt.Println("hello world, i am drag:", opData)
 		switch v := (cptype.ExtraMap)(*c.StdStatePtr).String("DropTarget"); v {
 		case boardLabelUrgent:
@@ -142,21 +144,24 @@ func (c *component) RegisterCardMoveToOp(opData kanban.OpCardMoveTo) (opFunc cpt
 		default:
 			panic(fmt.Errorf("invalid drop target: %s", v))
 		}
+		return nil
 	}
 }
 
 // RegisterBoardLoadMoreOp .
 func (c *component) RegisterBoardLoadMoreOp(opData kanban.OpBoardLoadMore) (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		fmt.Println("hello change page no op:", opData)
+		return nil
 	}
 }
 
 // RegisterBoardCreateOp .
 func (c *component) RegisterBoardCreateOp(opData kanban.OpBoardCreate) (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		fmt.Println("hello create board op:", opData)
 		c.StdDataPtr.Boards = append(c.StdDataPtr.Boards, kanban.Board{ID: opData.ClientData.Title, Title: opData.ClientData.Title})
+		return nil
 	}
 }
 

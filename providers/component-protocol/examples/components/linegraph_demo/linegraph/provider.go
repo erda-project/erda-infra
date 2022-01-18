@@ -32,7 +32,7 @@ type provider struct {
 
 // RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 
 		// Demo case 1
 		d := linegraph.New("line graph demo")
@@ -60,6 +60,7 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 			}...).Build()
 
 		p.StdDataPtr = d
+		return nil
 	}
 }
 

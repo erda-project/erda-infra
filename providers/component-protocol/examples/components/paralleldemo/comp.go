@@ -30,7 +30,7 @@ type comp struct {
 	Tran i18n.Translator `translator:"hello"`
 }
 
-func (c *comp) RegisterInitializeOpV2() (opFunc cptype.EnhancedOperationFunc) {
+func (c *comp) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	opFunc = func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		return &impl.StdStructuredPtr{
 			StdDataPtr: &kv.Data{List: []*kv.KV{{

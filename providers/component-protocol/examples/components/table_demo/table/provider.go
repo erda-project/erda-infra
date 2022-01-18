@@ -39,7 +39,7 @@ const (
 )
 
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		p.StdDataPtr = &table.Data{
 			Table: table.Table{
 				Columns: table.ColumnsInfo{
@@ -236,6 +236,7 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 				}).Build(),
 			},
 		}
+		return nil
 	}
 }
 
