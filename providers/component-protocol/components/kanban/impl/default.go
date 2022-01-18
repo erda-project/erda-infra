@@ -15,8 +15,6 @@
 package impl
 
 import (
-	"reflect"
-
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/components/kanban"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
@@ -49,10 +47,6 @@ func (s *StdStructuredPtr) InParamsPtr() interface{} { return s.StdInParamsPtr }
 
 // RegisterCompStdOps .
 func (d *DefaultKanban) RegisterCompStdOps() (opFuncs map[cptype.OperationKey]cptype.OperationFunc) {
-	for i := 0; i < reflect.TypeOf(d.ActualImplRef).Elem().NumMethod(); i++ {
-
-	}
-
 	return map[cptype.OperationKey]cptype.OperationFunc{
 		// kanban-level
 		kanban.OpBoardCreate{}.OpKey(): func(sdk *cptype.SDK) cptype.IStdStructuredPtr {

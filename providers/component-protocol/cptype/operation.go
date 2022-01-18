@@ -14,7 +14,7 @@
 
 package cptype
 
-// OperationFunc return response.
+// OperationFunc return std structured response.
 type OperationFunc func(sdk *SDK) IStdStructuredPtr
 
 // IOperation .
