@@ -18,6 +18,7 @@ import (
 	"reflect"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/defaults"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cpregister"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol"
@@ -64,6 +65,7 @@ func initProviderToNamespace(scenario, compName string, creator servicehub.Creat
 				rr := creator().(cptype.IComponent)
 				ref := reflect.ValueOf(rr)
 				ref.Elem().FieldByName("Impl").Set(ref)
+				ref.Elem().FieldByName(defaults.FieldActualImplRef).Set(ref)
 				return rr
 			}}
 		case protocol.CompRender:
