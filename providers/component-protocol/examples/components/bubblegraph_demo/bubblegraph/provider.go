@@ -29,7 +29,7 @@ type provider struct {
 
 // RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		data := bubblegraph.NewDataBuilder().
 			WithTitle("test bubble graph component").
 			WithXOptions(bubblegraph.NewOptionsBuilder().WithType(structure.Number).Build()).
@@ -86,6 +86,7 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 			Build()
 
 		p.StdDataPtr = data
+		return nil
 	}
 }
 

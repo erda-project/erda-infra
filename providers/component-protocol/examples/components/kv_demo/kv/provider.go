@@ -26,7 +26,7 @@ type provider struct {
 
 // RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
-	return func(sdk *cptype.SDK) {
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		data := kv.Data{
 			List: []*kv.KV{
 				{
@@ -50,6 +50,7 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 			},
 		}
 		p.StdDataPtr = &data
+		return nil
 	}
 }
 
