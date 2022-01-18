@@ -93,7 +93,7 @@ func ensureCompFields(sdk *cptype.SDK, comp *cptype.Component) *cptype.Component
 		sdk.GlobalState = &cptype.GlobalStateData{}
 	}
 	if sdk.CompOpFuncs == nil {
-		sdk.CompOpFuncs = make(map[cptype.OperationKey]cptype.EnhancedOperationFunc)
+		sdk.CompOpFuncs = make(map[cptype.OperationKey]cptype.OperationFunc)
 	}
 	if comp.Data == nil {
 		comp.Data = make(cptype.ComponentData)
@@ -133,8 +133,6 @@ func (F FRAMEWORK) flatExtra(comp *cptype.Component) {
 func (F FRAMEWORK) registerOperations(sdk *cptype.SDK) {
 	sdk.RegisterOperation(cptype.InitializeOperation, F.IC.RegisterInitializeOp())
 	sdk.RegisterOperation(cptype.RenderingOperation, F.IC.RegisterRenderingOp())
-	sdk.RegisterOperation(cptype.InitializeOperation, F.IC.RegisterInitializeOpV2())
-	sdk.RegisterOperation(cptype.RenderingOperation, F.IC.RegisterRenderingOpV2())
 	// comp standard ops
 	for opKey, opFunc := range F.IC.RegisterCompStdOps() {
 		sdk.RegisterOperation(opKey, opFunc)
@@ -157,6 +155,7 @@ func (F FRAMEWORK) handleOp(sdk *cptype.SDK, stdPtr cptype.IStdStructuredPtr) {
 	}
 	// do op
 	stdResp := opFunc(sdk)
+	// if stdResp is not nil, set stdPtr to stdResp
 	if stdResp != nil {
 		reflect.ValueOf(stdPtr).Elem().Set(reflect.ValueOf(stdResp).Elem())
 	}

@@ -29,28 +29,7 @@ type DefaultImpl struct {
 	ActualImplRef cptype.IComponent
 }
 
-// RegisterInitializeOp .
-func (d *DefaultImpl) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
-	return nil
-}
-
 // RegisterRenderingOp .
 func (d *DefaultImpl) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
 	return d.ActualImplRef.RegisterInitializeOp()
-}
-
-// RegisterInitializeOpV2 .
-func (d *DefaultImpl) RegisterInitializeOpV2() (opFunc cptype.EnhancedOperationFunc) {
-	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
-		d.ActualImplRef.RegisterInitializeOp()(sdk)
-		return nil
-	}
-}
-
-// RegisterRenderingOpV2 .
-func (d *DefaultImpl) RegisterRenderingOpV2() (opFunc cptype.EnhancedOperationFunc) {
-	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
-		d.ActualImplRef.RegisterInitializeOp()(sdk)
-		return nil
-	}
 }

@@ -14,12 +14,8 @@
 
 package cptype
 
-// OperationFunc .
-// Deprecated. Use EnhancedOperationFunc please.
-type OperationFunc func(sdk *SDK)
-
-// EnhancedOperationFunc is enhanced version of OperationFunc with std response.
-type EnhancedOperationFunc func(sdk *SDK) IStdStructuredPtr
+// OperationFunc return response.
+type OperationFunc func(sdk *SDK) IStdStructuredPtr
 
 // IOperation .
 type IOperation interface {
