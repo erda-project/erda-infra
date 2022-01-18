@@ -31,6 +31,7 @@ type ConditionBase struct {
 	Label       string        `json:"label,omitempty"`
 	Type        ConditionType `json:"type,omitempty"`
 	Placeholder string        `json:"placeholder,omitempty"`
+	Disabled    bool          `json:"disabled,omitempty"`
 }
 
 // SelectCondition .
