@@ -41,10 +41,16 @@ func (d *DefaultImpl) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
 
 // RegisterInitializeOpV2 .
 func (d *DefaultImpl) RegisterInitializeOpV2() (opFunc cptype.EnhancedOperationFunc) {
-	return nil
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+		d.ActualImplRef.RegisterInitializeOp()(sdk)
+		return nil
+	}
 }
 
 // RegisterRenderingOpV2 .
 func (d *DefaultImpl) RegisterRenderingOpV2() (opFunc cptype.EnhancedOperationFunc) {
-	return d.ActualImplRef.RegisterInitializeOpV2()
+	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
+		d.ActualImplRef.RegisterInitializeOp()(sdk)
+		return nil
+	}
 }
