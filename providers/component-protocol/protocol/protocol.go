@@ -18,17 +18,21 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
+	pi18n "github.com/erda-project/erda-infra/providers/i18n"
 )
 
 // defaultProtocols contains all default protocols.
 // map key: scenarioKey
 // map value: default protocol
 var defaultProtocols = make(map[string]cptype.ComponentProtocol)
+var defaultProtocolsRaw = make(map[string]string)
 
 // RegisterDefaultProtocols register protocol contents.
 func RegisterDefaultProtocols(protocolYAMLs ...[]byte) {
@@ -41,6 +45,7 @@ func RegisterDefaultProtocols(protocolYAMLs ...[]byte) {
 			continue
 		}
 		defaultProtocols[p.Scenario] = p
+		defaultProtocolsRaw[p.Scenario] = string(protocolYAML)
 		logrus.Infof("default protocol registered for scenario: %s", p.Scenario)
 	}
 }
@@ -85,12 +90,33 @@ func RegisterDefaultProtocolsFromBasePath(basePath string) {
 }
 
 // getDefaultProtocol get default protocol by scenario.
-func getDefaultProtocol(ctx context.Context, scenario string) (cptype.ComponentProtocol, error) {
-	s, ok := defaultProtocols[scenario]
+func getDefaultProtocol(ctx context.Context, scenario string, tran pi18n.Translator) (cptype.ComponentProtocol, error) {
+	lang := cputil.Language(ctx)
+	if lang.Len() == 0 {
+		c, ok := defaultProtocols[scenario]
+		if !ok {
+			return cptype.ComponentProtocol{}, fmt.Errorf(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
+		}
+		return c, nil
+	}
+	s, ok := defaultProtocolsRaw[scenario]
 	if !ok {
 		return cptype.ComponentProtocol{}, fmt.Errorf(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
 	}
-	return s, nil
+	for _, v := range CpRe.FindAllStringSubmatch(s, -1) {
+		if len(v) == 2 && strings.HasPrefix(v[1], I18n+".") {
+			key := strings.TrimPrefix(v[1], I18n+".")
+			if len(key) > 0 {
+				value := tran.Text(lang, key)
+				s = strings.ReplaceAll(s, fmt.Sprintf("%s %s.%s %s", "${{", I18n, key, "}}"), value)
+			}
+		}
+	}
+	var p cptype.ComponentProtocol
+	if err := yaml.Unmarshal([]byte(s), &p); err != nil {
+		return cptype.ComponentProtocol{}, fmt.Errorf("failed to parse protocol yaml i18n, err: %v", err)
+	}
+	return p, nil
 }
 
 // getProtoComp .

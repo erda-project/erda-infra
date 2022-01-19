@@ -16,6 +16,7 @@ package protocol
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol/translator"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
@@ -37,3 +38,7 @@ func i18n(ctx context.Context, key string, args ...interface{}) string {
 	}
 	return tran.Sprintf(cputil.Language(ctx), key, args...)
 }
+
+var CpRe = regexp.MustCompile(`\${{[ ]{1}([^{}\s]+)[ ]{1}}}`)
+
+const I18n = "i18n"

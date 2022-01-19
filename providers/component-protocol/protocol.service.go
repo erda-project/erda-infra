@@ -58,7 +58,7 @@ func (s *protocolService) Render(ctx context.Context, req *pb.RenderRequest) (*p
 	sdk.Ctx = ctx
 
 	// render concrete scenario
-	if err := protocol.RunScenarioRender(ctx, renderReq); err != nil {
+	if err := protocol.RunScenarioRender(ctx, renderReq, sdk.Tran); err != nil {
 		return nil, err
 	}
 
