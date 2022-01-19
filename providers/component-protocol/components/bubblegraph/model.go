@@ -39,7 +39,8 @@ type (
 
 	// BubbleSize .
 	BubbleSize struct {
-		Value float64 `json:"value"`
+		Value     float64                  `json:"value"`
+		Structure *structure.DataStructure `json:"structure"`
 	}
 
 	// Axis .
@@ -84,6 +85,12 @@ func (o *OptionsBuilder) WithDimension(dimension string) *OptionsBuilder {
 // WithType .
 func (o *OptionsBuilder) WithType(dataType structure.Type) *OptionsBuilder {
 	o.options.Structure.Type = dataType
+	return o
+}
+
+// WithEnable .
+func (o *OptionsBuilder) WithEnable(enable bool) *OptionsBuilder {
+	o.options.Structure.Enable = enable
 	return o
 }
 
