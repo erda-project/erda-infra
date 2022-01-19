@@ -76,6 +76,12 @@ func (o *OptionsBuilder) WithType(dataType structure.Type) *OptionsBuilder {
 	return o
 }
 
+// WithEnable .
+func (o *OptionsBuilder) WithEnable(enable bool) *OptionsBuilder {
+	o.options.Structure.Enable = enable
+	return o
+}
+
 // WithPrecision .
 func (o *OptionsBuilder) WithPrecision(precision structure.Precision) *OptionsBuilder {
 	o.options.Structure.Precision = precision
