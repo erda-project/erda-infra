@@ -59,7 +59,7 @@ type (
 		Description      string      `json:"description,omitempty"`
 		BackgroundImgURL string      `json:"backgroundImgURL,omitempty"`
 		KvInfos          []KvInfo    `json:"kvInfos,omitempty"`
-		Selectable       bool        `json:"selectable,omitempty"`
+		Selectable       bool        `json:"selectable"`
 		// columns show in the item, e.g user, time
 		ColumnsInfo map[string]interface{} `json:"columnsInfo,omitempty"`
 		// operations on the frond
