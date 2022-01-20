@@ -27,11 +27,10 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protocol/posthook"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
-	pi18n "github.com/erda-project/erda-infra/providers/i18n"
 )
 
 // RunScenarioRender .
-func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest, tran pi18n.Translator) error {
+func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest) error {
 	// check debug options
 	if err := checkDebugOptions(ctx, req.DebugOptions); err != nil {
 		return err
@@ -46,7 +45,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 	var useDefaultProtocol bool
 	if req.Protocol == nil || req.Event.Component == "" {
 		useDefaultProtocol = true
-		p, err := getDefaultProtocol(ctx, sk, tran)
+		p, err := getDefaultProtocol(ctx, sk)
 		if err != nil {
 			return err
 		}
