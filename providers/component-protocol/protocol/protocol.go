@@ -45,7 +45,9 @@ func RegisterDefaultProtocols(protocolYAMLs ...[]byte) {
 			continue
 		}
 		defaultProtocols[p.Scenario] = p
-		defaultProtocolsRaw[p.Scenario] = string(protocolYAML)
+		if CpPlaceHolderRe.Match(protocolYAML) {
+			defaultProtocolsRaw[p.Scenario] = string(protocolYAML)
+		}
 		logrus.Infof("default protocol registered for scenario: %s", p.Scenario)
 	}
 }
@@ -95,9 +97,14 @@ func getDefaultProtocol(ctx context.Context, scenario string) (cptype.ComponentP
 	tran := ctx.Value(cptype.GlobalInnerKeyCtxSDK).(*cptype.SDK).Tran
 	s, ok := defaultProtocolsRaw[scenario]
 	if !ok {
-		return cptype.ComponentProtocol{}, fmt.Errorf(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
+		// protocol not have cp placeholder
+		s, ok := defaultProtocols[scenario]
+		if !ok {
+			return cptype.ComponentProtocol{}, fmt.Errorf(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
+		}
+		return s, nil
 	}
-	replaced := strutil.ReplaceAllStringSubmatchFunc(CpRe, s, func(v []string) string {
+	replaced := strutil.ReplaceAllStringSubmatchFunc(CpPlaceHolderRe, s, func(v []string) string {
 		if len(v) == 2 && strings.HasPrefix(v[1], I18n+".") {
 			key := strings.TrimPrefix(v[1], I18n+".")
 			if len(key) > 0 {
