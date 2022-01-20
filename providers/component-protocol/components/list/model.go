@@ -14,7 +14,10 @@
 
 package list
 
-import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/commodel"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+)
 
 // ItemCommStatus .
 type ItemCommStatus string
@@ -52,7 +55,7 @@ type (
 		Title        string `json:"title,omitempty"`
 		TitleSummary string `json:"titleSummary,omitempty"`
 		// logo link url of title
-		LogoURL          string      `json:"logoURL,omitempty"`
+		//LogoURL          string      `json:"logoURL,omitempty"`
 		Star             *bool       `json:"star,omitempty"`
 		MainState        *StateInfo  `json:"mainState,omitempty"`
 		TitleState       []StateInfo `json:"titleState,omitempty"`
@@ -65,7 +68,8 @@ type (
 		// operations on the frond
 		Operations map[cptype.OperationKey]cptype.Operation `json:"operations,omitempty"`
 		// operations folded
-		MoreOperations []MoreOpItem `json:"moreOperations,omitempty"`
+		MoreOperations []MoreOpItem   `json:"moreOperations,omitempty"`
+		Icon           *commodel.Icon `json:"icon,omitempty"`
 		cptype.Extra
 	}
 
