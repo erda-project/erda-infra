@@ -5,9 +5,29 @@ hierarchy:
   structure:
     page:
       - filter
+      - taskButton
+      - bugButton
 
 components:
   page:
     type: Container
   filter:
     type: ConfigurableFilter
+  taskButton:
+    type: "Button"
+    operations:
+      click:
+        key: "addTask"
+        reload: true
+    props:
+      text: ${{ i18n.addTask }}
+      type: "primary"
+  bugButton:
+    type: "Button"
+    operations:
+      click:
+        key: "addBug"
+        reload: true
+    props:
+      text: ${{ i18n.addBug }}
+      type: "primary"
