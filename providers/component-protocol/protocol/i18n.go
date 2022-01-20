@@ -39,6 +39,8 @@ func i18n(ctx context.Context, key string, args ...interface{}) string {
 	return tran.Sprintf(cputil.Language(ctx), key, args...)
 }
 
+// CpRe ${{ configs.key }} only one space
 var CpRe = regexp.MustCompile(`\${{[ ]{1}([^{}\s]+)[ ]{1}}}`)
 
+// I18n ${{ i18n.button }} i18n prefix
 const I18n = "i18n"
