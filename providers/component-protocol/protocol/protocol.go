@@ -93,18 +93,18 @@ func RegisterDefaultProtocolsFromBasePath(basePath string) {
 
 // getDefaultProtocol get default protocol by scenario.
 func getDefaultProtocol(ctx context.Context, scenario string) (cptype.ComponentProtocol, error) {
-	lang := cputil.Language(ctx)
-	tran := ctx.Value(cptype.GlobalInnerKeyCtxSDK).(*cptype.SDK).Tran
-	s, ok := defaultProtocolsRaw[scenario]
+	rawYamlStr, ok := defaultProtocolsRaw[scenario]
 	if !ok {
 		// protocol not have cp placeholder
-		s, ok := defaultProtocols[scenario]
+		p, ok := defaultProtocols[scenario]
 		if !ok {
 			return cptype.ComponentProtocol{}, fmt.Errorf(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
 		}
-		return s, nil
+		return p, nil
 	}
-	replaced := strutil.ReplaceAllStringSubmatchFunc(CpPlaceHolderRe, s, func(v []string) string {
+	lang := cputil.Language(ctx)
+	tran := ctx.Value(cptype.GlobalInnerKeyCtxSDK).(*cptype.SDK).Tran
+	replaced := strutil.ReplaceAllStringSubmatchFunc(CpPlaceHolderRe, rawYamlStr, func(v []string) string {
 		if len(v) == 2 && strings.HasPrefix(v[1], I18n+".") {
 			key := strings.TrimPrefix(v[1], I18n+".")
 			if len(key) > 0 {
