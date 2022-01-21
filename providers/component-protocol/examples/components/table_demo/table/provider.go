@@ -183,7 +183,7 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 						ID: "issue-id-2",
 						CellsMap: map[table.ColumnKey]table.Cell{
 							columnProgress: table.NewProgressBarCell(commodel.ProgressBar{
-								BarCompletedNum: 7,
+								BarCompletedNum: 0,
 								BarTotalNum:     10,
 								Status:          commodel.ProcessingStatus,
 							}).Build(),

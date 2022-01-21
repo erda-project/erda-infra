@@ -19,13 +19,14 @@ package commodel
 // example: 7/10 * 100 = 70
 type ProgressBar struct {
 	// BarCompletedNum is Numerator.
-	BarCompletedNum float64 `json:"barCompletedNum,omitempty"`
+	BarCompletedNum int64 `json:"barCompletedNum,omitempty"`
 	// BarTotalNum is Denominator.
-	BarTotalNum float64 `json:"barTotalNum,omitempty"`
+	BarTotalNum int64 `json:"barTotalNum,omitempty"`
 
 	// BarPercent is the calculated result.
 	// Optional.
 	// If not present, BarCompletedNum and BarTotalNum must provide.
+	// For some situations, backend only have percent value.
 	BarPercent float64 `json:"barPercent,omitempty"` // optional, percent, range: [0,100], such as: 0.1, 20, 100
 
 	Text   string        `json:"text,omitempty"`   // optional, bar detail text
