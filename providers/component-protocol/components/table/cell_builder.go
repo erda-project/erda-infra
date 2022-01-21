@@ -108,7 +108,7 @@ func NewKVCell(k, v string) ITypedCellBuilder {
 func NewIconCell(icon commodel.Icon) ITypedCellBuilder {
 	cb := newCellBuilder()
 	cb.Cell.Type = CellType(commodel.Icon{}.ModelType())
-	cputil.MustObjJSONTransfer(commodel.NewTypedIcon("ISSUE_ICON.issue.TASK"), &cb.Data)
+	cputil.MustObjJSONTransfer(&icon, &cb.Data)
 	return cb.typed()
 }
 
