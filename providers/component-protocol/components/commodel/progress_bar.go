@@ -28,7 +28,7 @@ type ProgressBar struct {
 	// If not present, BarCompletedNum and BarTotalNum must provide.
 	BarPercent float64 `json:"barPercent,omitempty"` // optional, percent, range: [0,100], such as: 0.1, 20, 100
 
-	Text   Text          `json:"text,omitempty"`   // optional, bar detail text
+	Text   string        `json:"text,omitempty"`   // optional, bar detail text
 	Tip    string        `json:"tip,omitempty"`    // optional, tip
 	Status UnifiedStatus `json:"status,omitempty"` // optional, status
 }

@@ -167,7 +167,7 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 							columnFinishedAt: table.NewTextCell("2021-12-29").Build(),
 							columnProgress: table.NewProgressBarCell(commodel.ProgressBar{
 								BarPercent: 70,
-								Text:       commodel.Text{Text: "7/10", Tip: "more tip about text"},
+								Text:       "7/10",
 								Tip:        "7 executed of total 10",
 								Status:     commodel.ProcessingStatus,
 							}).Build(),
