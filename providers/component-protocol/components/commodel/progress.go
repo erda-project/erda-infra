@@ -14,12 +14,23 @@
 
 package commodel
 
-// ProgressBar .
+// ProgressBar is progress bar.
+// formula: BarPercent = BarCompletedNum / BarTotalNum * 100
+// example: 7/10 * 100 = 70
 type ProgressBar struct {
-	BarPercent float64       `json:"barPercent,omitempty"` // required, percent, range: [0,100], such as: 0.1, 20, 100
-	Text       Text          `json:"text,omitempty"`       // optional, bar detail text
-	Tip        string        `json:"tip,omitempty"`        // optional, tip
-	Status     UnifiedStatus `json:"status,omitempty"`     // optional, status
+	// BarCompletedNum is Numerator.
+	BarCompletedNum float64 `json:"barCompletedNum,omitempty"`
+	// BarTotalNum is Denominator.
+	BarTotalNum float64 `json:"barTotalNum,omitempty"`
+
+	// BarPercent is the calculated result.
+	// Optional.
+	// If not present, BarCompletedNum and BarTotalNum must provide.
+	BarPercent float64 `json:"barPercent,omitempty"` // optional, percent, range: [0,100], such as: 0.1, 20, 100
+
+	Text   Text          `json:"text,omitempty"`   // optional, bar detail text
+	Tip    string        `json:"tip,omitempty"`    // optional, tip
+	Status UnifiedStatus `json:"status,omitempty"` // optional, status
 }
 
 // ModelType .
