@@ -24,5 +24,5 @@ type ProgressBar struct {
 
 // ModelType .
 func (p ProgressBar) ModelType() string {
-	return "progress"
+	return "progressBar"
 }
