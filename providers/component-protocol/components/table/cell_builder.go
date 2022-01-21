@@ -151,3 +151,11 @@ func NewMoreOperationsCell(moreOperations commodel.MoreOperations) ITypedCellBui
 	cputil.MustObjJSONTransfer(&moreOperations, &cb.Data)
 	return cb.typed()
 }
+
+// NewDurationCell .
+func NewDurationCell(duration commodel.Duration) ITypedCellBuilder {
+	cb := newCellBuilder()
+	cb.Cell.Type = CellType(commodel.Duration{}.ModelType())
+	cputil.MustObjJSONTransfer(&duration, &cb.Data)
+	return cb.typed()
+}
