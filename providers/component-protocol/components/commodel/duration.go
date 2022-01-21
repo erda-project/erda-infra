@@ -15,7 +15,7 @@
 package commodel
 
 // Duration A Duration represents the elapsed time between two instants
-// Like 10s 360s
+// Such as 10s 360s, if the value is -1 means not started
 type Duration struct {
 	Value int64  `json:"value,omitempty"`
 	Tip   string `json:"tip,omitempty"` // Hover on the text, use '\n' for newlines
