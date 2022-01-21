@@ -36,6 +36,7 @@ const (
 	columnAssignee       table.ColumnKey = "assignee"
 	columnFinishedAt     table.ColumnKey = "finishedAt"
 	columnMoreOperations table.ColumnKey = "moreOperations"
+	columnProgress       table.ColumnKey = "progress"
 )
 
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
@@ -46,13 +47,14 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 					Merges: map[table.ColumnKey]table.MergedColumn{
 						columnMergedTitle: {Orders: []table.ColumnKey{columnIcon, columnTitle, columnLabels}},
 					},
-					Orders: []table.ColumnKey{columnTitle, columnPriority, columnState, columnAssignee, columnFinishedAt},
+					Orders: []table.ColumnKey{columnTitle, columnPriority, columnState, columnAssignee, columnFinishedAt, columnProgress, columnMoreOperations},
 					ColumnsMap: map[table.ColumnKey]table.Column{
 						columnTitle:      {Title: "标题"},
 						columnPriority:   {Title: "优先级"},
 						columnState:      {Title: "状态"},
 						columnAssignee:   {Title: "处理人"},
 						columnFinishedAt: {Title: "截止日期"},
+						columnProgress:   {Title: "进度条"},
 					},
 				},
 				Rows: []table.Row{
@@ -163,6 +165,12 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 								},
 							}).Build(),
 							columnFinishedAt: table.NewTextCell("2021-12-29").Build(),
+							columnProgress: table.NewProgressBarCell(commodel.ProgressBar{
+								BarPercent: 70,
+								Text:       "7/10",
+								Tip:        "7 executed of total 10",
+								Status:     commodel.ProcessingStatus,
+							}).Build(),
 						},
 						Operations: map[cptype.OperationKey]cptype.Operation{
 							table.OpRowSelect{}.OpKey(): cputil.NewOpBuilder().Build(),
@@ -173,6 +181,13 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 					},
 					{
 						ID: "issue-id-2",
+						CellsMap: map[table.ColumnKey]table.Cell{
+							columnProgress: table.NewProgressBarCell(commodel.ProgressBar{
+								BarCompletedNum: 0,
+								BarTotalNum:     10,
+								Status:          commodel.ProcessingStatus,
+							}).Build(),
+						},
 					},
 					{
 						ID: "issue-id-3",

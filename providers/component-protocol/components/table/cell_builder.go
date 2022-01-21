@@ -159,3 +159,11 @@ func NewDurationCell(duration commodel.Duration) ITypedCellBuilder {
 	cputil.MustObjJSONTransfer(&duration, &cb.Data)
 	return cb.typed()
 }
+
+// NewProgressBarCell .
+func NewProgressBarCell(progressBar commodel.ProgressBar) ITypedCellBuilder {
+	cb := newCellBuilder()
+	cb.Cell.Type = CellType(commodel.ProgressBar{}.ModelType())
+	cputil.MustObjJSONTransfer(&progressBar, &cb.Data)
+	return cb.typed()
+}
