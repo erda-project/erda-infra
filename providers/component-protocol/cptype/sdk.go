@@ -17,6 +17,7 @@ package cptype
 import (
 	"context"
 	"strconv"
+	"sync"
 
 	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
@@ -37,19 +38,37 @@ type SDK struct {
 	Event       ComponentEvent
 	CompOpFuncs map[OperationKey]OperationFunc
 	Comp        *Component
+
+	Lock       sync.Mutex
+	OriginLock *sync.Mutex
 }
 
 // Clone only return general-part of sdk to avoid concurrency issue.
 func (sdk *SDK) Clone() *SDK {
-	return &SDK{
-		Ctx:         sdk.Ctx,
-		Scenario:    sdk.Scenario,
-		Tran:        sdk.Tran,
-		Identity:    sdk.Identity,
-		InParams:    sdk.InParams,
-		Lang:        sdk.Lang,
-		GlobalState: sdk.GlobalState,
+	sdk.Lock.Lock()
+	defer sdk.Lock.Unlock()
+
+	clonedSDK := SDK{
+		Ctx:      sdk.Ctx,
+		Scenario: sdk.Scenario,
+		Tran:     sdk.Tran,
+		Identity: sdk.Identity,
+		Lang:     sdk.Lang,
+
+		OriginLock: &sdk.Lock,
 	}
+	// inParams
+	clonedInParams := make(InParams)
+	for k, v := range sdk.InParams {
+		clonedInParams[k] = v
+	}
+	// globalStates
+	clonedGlobalStates := make(GlobalStateData)
+	for k, v := range *sdk.GlobalState {
+		clonedGlobalStates[k] = v
+	}
+
+	return &clonedSDK
 }
 
 // I18n .
@@ -102,5 +121,7 @@ func (sdk *SDK) RegisterOperation(opKey OperationKey, opFunc OperationFunc) {
 
 // SetUserIDs .
 func (sdk *SDK) SetUserIDs(userIDs []string) {
+	sdk.Lock.Lock()
+	defer sdk.Lock.Unlock()
 	(*sdk.GlobalState)[GlobalInnerKeyUserIDs.String()] = strutil.DedupSlice(userIDs, true)
 }
