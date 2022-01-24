@@ -53,6 +53,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 	// structured comp ptr
 	stdStructuredCompPtr := F.IC.StdStructuredPtrCreator()()
 	F.injectStdStructurePtr(stdStructuredCompPtr)
+	sdk.StdStructuredPtr = stdStructuredCompPtr
 	// register operations
 	F.registerOperations(sdk)
 	// init

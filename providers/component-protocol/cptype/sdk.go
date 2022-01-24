@@ -39,6 +39,9 @@ type SDK struct {
 	CompOpFuncs map[OperationKey]OperationFunc
 	Comp        *Component
 
+	// for parallel use, it's request level
+	StdStructuredPtr IStdStructuredPtr
+
 	Lock       sync.Mutex
 	OriginLock *sync.Mutex
 }
@@ -62,11 +65,13 @@ func (sdk *SDK) Clone() *SDK {
 	for k, v := range sdk.InParams {
 		clonedInParams[k] = v
 	}
+	clonedSDK.InParams = clonedInParams
 	// globalStates
 	clonedGlobalStates := make(GlobalStateData)
 	for k, v := range *sdk.GlobalState {
 		clonedGlobalStates[k] = v
 	}
+	clonedSDK.GlobalState = &clonedGlobalStates
 
 	return &clonedSDK
 }
