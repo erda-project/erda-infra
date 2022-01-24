@@ -18,6 +18,7 @@ import (
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
+	"reflect"
 )
 
 // ComponentCreatorAndProvider used for RegisterProviderComponent.
@@ -52,9 +53,15 @@ func RegisterProviderComponent(scenario, componentName string, providerPtr Compo
 	// generate provider name
 	providerName := cputil.MakeComponentProviderName(scenario, componentName)
 
-	// register component
-	RegisterComponent(scenario, componentName, func() cptype.IComponent { return providerPtr })
+	//// register component
+	//RegisterComponent(scenario, componentName, func() cptype.IComponent { return providerPtr })
 
+	RegisterComponent(scenario, componentName, func() cptype.IComponent {
+		newProviderPtr := reflect.New(reflect.TypeOf(providerPtr).Elem())
+		newProviderPtr.Elem().Set(reflect.ValueOf(providerPtr).Elem())
+		copied := newProviderPtr.Interface()
+		return copied.(ComponentCreatorAndProvider)
+	})
 	// register as provider
 	opt.providerSpec.Creator = func() servicehub.Provider { return providerPtr }
 	servicehub.Register(providerName, opt.providerSpec)
