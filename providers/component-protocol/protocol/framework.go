@@ -54,6 +54,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 	// structured comp ptr
 	stdStructuredCompPtr := F.IC.StdStructuredPtrCreator()()
 	F.injectStdStructurePtr(stdStructuredCompPtr)
+	sdk.StdStructuredPtr = stdStructuredCompPtr
 	// register operations
 	F.registerOperations(sdk)
 	// init
@@ -62,7 +63,6 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 	F.IC.DecodeInParams(sdk.InParams, stdStructuredCompPtr.InParamsPtr())
 	F.IC.DecodeState(c.State, stdStructuredCompPtr.StatePtr())
 	F.IC.DecodeData(c.Data, stdStructuredCompPtr.DataPtr())
-	sdk.StdStructuredPtr = stdStructuredCompPtr
 
 	// visible
 	visible := F.IC.Visible(sdk)
@@ -76,6 +76,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 		ensureCompFieldsBeforeEncode(sdk)
 		F.IC.EncodeData(stdStructuredCompPtr.DataPtr(), &sdk.Comp.Data)
 		F.IC.EncodeState(stdStructuredCompPtr.StatePtr(), &sdk.Comp.State)
+		F.IC.EncodeInParams(stdStructuredCompPtr.InParamsPtr(), &sdk.InParams)
 		// global state
 		F.mergeClonedGlobalState(sdk, gs)
 		// flat extra

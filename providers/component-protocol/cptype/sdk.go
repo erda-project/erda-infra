@@ -26,19 +26,21 @@ import (
 
 // SDK .
 type SDK struct {
-	Ctx              context.Context
-	Scenario         string
-	Tran             i18n.Translator
-	Identity         *pb.IdentityInfo
-	InParams         InParams
-	Lang             i18n.LanguageCodes
-	GlobalState      *GlobalStateData
-	StdStructuredPtr IStdStructuredPtr
+	Ctx         context.Context
+	Scenario    string
+	Tran        i18n.Translator
+	Identity    *pb.IdentityInfo
+	InParams    InParams
+	Lang        i18n.LanguageCodes
+	GlobalState *GlobalStateData
 
 	// ONLY FOR STD COMPONENT USE
 	Event       ComponentEvent
 	CompOpFuncs map[OperationKey]OperationFunc
 	Comp        *Component
+
+	// for parallel use, it's request level
+	StdStructuredPtr IStdStructuredPtr
 
 	Lock       sync.Mutex
 	OriginLock *sync.Mutex
@@ -63,13 +65,14 @@ func (sdk *SDK) Clone() *SDK {
 	for k, v := range sdk.InParams {
 		clonedInParams[k] = v
 	}
+	clonedSDK.InParams = clonedInParams
 	// globalStates
 	clonedGlobalStates := make(GlobalStateData)
 	for k, v := range *sdk.GlobalState {
 		clonedGlobalStates[k] = v
 	}
-	clonedSDK.InParams = clonedInParams
 	clonedSDK.GlobalState = &clonedGlobalStates
+
 	return &clonedSDK
 }
 

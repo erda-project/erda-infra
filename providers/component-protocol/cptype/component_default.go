@@ -68,6 +68,7 @@ type CompFrameworkSteper interface {
 type CompEncoder interface {
 	EncodeData(srcStdStructPtr interface{}, dstRawPtr *ComponentData)
 	EncodeState(srcStdStructPtr interface{}, dstRawPtr *ComponentState)
+	EncodeInParams(srcStdStructPtr interface{}, dstRawPtr *InParams)
 }
 
 // CompDecoder is a protocol-level interface, convert raw-cp-result to structured-struct.
