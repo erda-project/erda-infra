@@ -138,7 +138,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 	}
 
 	posthook.HandleContinueRender(compRending, req.Protocol)
-	//posthook.OnlyReturnRenderingComps(compRending, req.Protocol)
+	posthook.OnlyReturnRenderingComps(compRending, req.Protocol)
 
 	return nil
 }
