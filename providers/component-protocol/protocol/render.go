@@ -128,7 +128,10 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 			return err
 		}
 		fmt.Println(rootNode.String())
-		return renderFromNode(ctx, req, *sr, rootNode)
+		if err := renderFromNode(ctx, req, *sr, rootNode); err != nil {
+			return err
+		}
+		goto POSTHOOK
 	}
 
 	for _, v := range compRending {
@@ -137,6 +140,7 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		}
 	}
 
+POSTHOOK:
 	posthook.HandleContinueRender(compRending, req.Protocol)
 	posthook.OnlyReturnRenderingComps(compRending, req.Protocol)
 
