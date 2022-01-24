@@ -108,7 +108,7 @@ func NewKVCell(k, v string) ITypedCellBuilder {
 func NewIconCell(icon commodel.Icon) ITypedCellBuilder {
 	cb := newCellBuilder()
 	cb.Cell.Type = CellType(commodel.Icon{}.ModelType())
-	cputil.MustObjJSONTransfer(commodel.NewTypedIcon("ISSUE_ICON.issue.TASK"), &cb.Data)
+	cputil.MustObjJSONTransfer(&icon, &cb.Data)
 	return cb.typed()
 }
 
@@ -157,5 +157,13 @@ func NewDurationCell(duration commodel.Duration) ITypedCellBuilder {
 	cb := newCellBuilder()
 	cb.Cell.Type = CellType(commodel.Duration{}.ModelType())
 	cputil.MustObjJSONTransfer(&duration, &cb.Data)
+	return cb.typed()
+}
+
+// NewProgressBarCell .
+func NewProgressBarCell(progressBar commodel.ProgressBar) ITypedCellBuilder {
+	cb := newCellBuilder()
+	cb.Cell.Type = CellType(commodel.ProgressBar{}.ModelType())
+	cputil.MustObjJSONTransfer(&progressBar, &cb.Data)
 	return cb.typed()
 }
