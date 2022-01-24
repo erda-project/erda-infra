@@ -45,10 +45,12 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 			err = fmt.Errorf(msg)
 		}
 	}()
-	sdk := cputil.SDK(ctx).Clone()
-	sdk.GlobalState = gs
+	originSDK := cputil.SDK(ctx)
+	originSDK.GlobalState = gs
+	sdk := originSDK.Clone()
 	sdk.Comp = ensureCompFields(sdk, c)
 	sdk.Event = event
+
 	// structured comp ptr
 	stdStructuredCompPtr := F.IC.StdStructuredPtrCreator()()
 	F.injectStdStructurePtr(stdStructuredCompPtr)
@@ -60,6 +62,8 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 	F.IC.DecodeInParams(sdk.InParams, stdStructuredCompPtr.InParamsPtr())
 	F.IC.DecodeState(c.State, stdStructuredCompPtr.StatePtr())
 	F.IC.DecodeData(c.Data, stdStructuredCompPtr.DataPtr())
+	sdk.StdStructuredPtr = stdStructuredCompPtr
+
 	// visible
 	visible := F.IC.Visible(sdk)
 	defer F.setVisible(sdk, visible)
@@ -72,7 +76,8 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 		ensureCompFieldsBeforeEncode(sdk)
 		F.IC.EncodeData(stdStructuredCompPtr.DataPtr(), &sdk.Comp.Data)
 		F.IC.EncodeState(stdStructuredCompPtr.StatePtr(), &sdk.Comp.State)
-		F.IC.EncodeInParams(stdStructuredCompPtr.InParamsPtr(), &sdk.InParams)
+		// global state
+		F.mergeClonedGlobalState(sdk, gs)
 		// flat extra
 		F.flatExtra(sdk.Comp)
 		// finalize
@@ -155,7 +160,7 @@ func (F FRAMEWORK) handleOp(sdk *cptype.SDK, stdPtr cptype.IStdStructuredPtr) {
 	}
 	// do op
 	stdResp := opFunc(sdk)
-	// if stdResp is not nil, set stdPtr to stdResp
+	// if stdResp is not nil, set stdResp to stdPtr
 	if stdResp != nil {
 		reflect.ValueOf(stdPtr).Elem().Set(reflect.ValueOf(stdResp).Elem())
 	}
@@ -164,4 +169,13 @@ func (F FRAMEWORK) handleOp(sdk *cptype.SDK, stdPtr cptype.IStdStructuredPtr) {
 func (F FRAMEWORK) injectStdStructurePtr(stdPtr cptype.IStdStructuredPtr) {
 	// inject std ptr
 	reflect.ValueOf(F.IC).Elem().FieldByName(fieldStdStructuredPtr).Set(reflect.ValueOf(stdPtr))
+}
+
+// mergeClonedGlobalState merge cloned global state to origin unified global state.
+func (F FRAMEWORK) mergeClonedGlobalState(sdk *cptype.SDK, gs *cptype.GlobalStateData) {
+	sdk.OriginLock.Lock()
+	defer sdk.OriginLock.Unlock()
+	for k, v := range *sdk.GlobalState {
+		(*gs)[k] = v
+	}
 }
