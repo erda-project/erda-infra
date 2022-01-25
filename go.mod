@@ -40,6 +40,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/mwitkow/go-proto-validators v0.3.2
 	github.com/olivere/elastic v6.2.35+incompatible
 	github.com/pelletier/go-toml v1.9.4 // indirect

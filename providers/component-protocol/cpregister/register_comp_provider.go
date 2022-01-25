@@ -56,10 +56,7 @@ func RegisterProviderComponent(scenario, componentName string, providerPtr Compo
 
 	// register component
 	RegisterComponent(scenario, componentName, func() cptype.IComponent {
-		newProviderPtr := reflect.New(reflect.TypeOf(providerPtr).Elem())
-		newProviderPtr.Elem().Set(reflect.ValueOf(providerPtr).Elem())
-		copied := newProviderPtr.Interface()
-		return copied.(ComponentCreatorAndProvider)
+		return copyProvider(providerPtr)
 	})
 
 	// register as provider
@@ -68,4 +65,14 @@ func RegisterProviderComponent(scenario, componentName string, providerPtr Compo
 
 	// mark for auto servicehub config adding
 	AllExplicitProviderCreatorMap[providerName] = nil
+}
+
+// copyProvider return a copied provider:
+// - copied-ptr-value is original
+// - copied-non-ptr value is new
+func copyProvider(providerPtr ComponentCreatorAndProvider) ComponentCreatorAndProvider {
+	newProviderPtr := reflect.New(reflect.TypeOf(providerPtr).Elem())
+	newProviderPtr.Elem().Set(reflect.ValueOf(providerPtr).Elem())
+	copied := newProviderPtr.Interface()
+	return copied.(ComponentCreatorAndProvider)
 }
