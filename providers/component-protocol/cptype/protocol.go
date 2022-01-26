@@ -164,4 +164,7 @@ type ProtocolOptions struct {
 
 	// ParallelContinueRenders contains all component-level continue-render.
 	ParallelContinueRenders map[string]ContinueRender `json:"parallelContinueRenders,omitempty" yaml:"parallelContinueRenders,omitempty"`
+
+	// EnableWebSocket enable WebSocket for current scenario.
+	EnableWebSocket bool `json:"enableWebSocket,omitempty" yaml:"enableWebSocket,omitempty"`
 }
