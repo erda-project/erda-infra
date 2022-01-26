@@ -17,6 +17,7 @@ package components
 import (
 	// easy to import all common components
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/bubblegraph_demo/bubblegraph"
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/complexgraph_demo/complexgraph"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/demo/demotable"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/filter_demo/filter"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/kanban_demo/kanban"

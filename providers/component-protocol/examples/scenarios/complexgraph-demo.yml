@@ -1,0 +1,13 @@
+scenario: complexgraph-demo
+
+hierarchy:
+  root: page
+  structure:
+    page:
+      - complexgraph
+
+components:
+  page:
+    type: Container
+  complexgraph:
+    type: ComplexGraph
