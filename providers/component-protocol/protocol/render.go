@@ -162,19 +162,14 @@ func prehookForCompsRendering(ctx context.Context, req *cptype.ComponentProtocol
 }
 
 func doCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, renderingItems []cptype.RendingItem) error {
+	// parallel
 	// if hierarchy.Parallel specified, use new rendering
 	if len(req.Protocol.Hierarchy.Parallel) > 0 {
 		return doParallelCompsRendering(ctx, req, sr, renderingItems)
 	}
 
-	// rendering in order
-	for _, v := range renderingItems {
-		if err := renderOneComp(ctx, req, sr, v); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	// serial
+	return doSerialCompsRendering(ctx, req, sr, renderingItems)
 }
 
 func doParallelCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, renderingItems []cptype.RendingItem) error {
@@ -186,6 +181,16 @@ func doParallelCompsRendering(ctx context.Context, req *cptype.ComponentProtocol
 	fmt.Println(rootNode.String())
 	if err := renderFromNode(ctx, req, sr, rootNode); err != nil {
 		return err
+	}
+	return nil
+}
+
+func doSerialCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, renderingItems []cptype.RendingItem) error {
+	// rendering in order
+	for _, v := range renderingItems {
+		if err := renderOneComp(ctx, req, sr, v); err != nil {
+			return err
+		}
 	}
 	return nil
 }
