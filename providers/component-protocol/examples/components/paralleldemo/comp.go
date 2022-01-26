@@ -41,6 +41,7 @@ func (c *comp) Init(ctx servicehub.Context) error {
 	return nil
 }
 
+// InParams .
 type InParams struct {
 	StartTime uint64 `json:"startTime,omitempty"`
 	EndTime   uint64 `json:"endTime,omitempty"`
