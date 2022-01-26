@@ -16,7 +16,7 @@ package complexgraph
 
 import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
-// IGraph bubble graph interface
+// IGraph complex graph interface
 type IGraph interface {
 	cptype.IComponent
 	IGraphStdOps

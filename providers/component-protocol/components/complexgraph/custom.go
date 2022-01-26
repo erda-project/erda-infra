@@ -18,21 +18,21 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-// CustomData is custom data handler of bubble graph.
+// CustomData is custom data handler of complex graph.
 type CustomData interface {
 	CustomDataPtr() interface{}
 	EncodeFromCustomData(customDataPtr interface{}, stdDataPtr *Data)
 	DecodeToCustomData(stdDataPtr *Data, customDataPtr interface{})
 }
 
-// CustomState is custom state handler of bubble graph.
+// CustomState is custom state handler of complex graph.
 type CustomState interface {
 	CustomStatePtr() interface{}
 	EncodeFromCustomState(customStatePtr interface{}, stdStatePtr *cptype.ExtraMap)
 	DecodeToCustomState(stdStatePtr *cptype.ExtraMap, customStatePtr interface{})
 }
 
-// CustomInParams is custom inParams handler of bubble graph.
+// CustomInParams is custom inParams handler of complex graph.
 type CustomInParams interface {
 	CustomInParamsPtr() interface{}
 	EncodeFromCustomInParams(customInParamsPtr interface{}, stdInParamsPtr *cptype.ExtraMap)
