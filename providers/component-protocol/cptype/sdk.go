@@ -42,14 +42,14 @@ type SDK struct {
 	// for parallel use, it's request level
 	StdStructuredPtr IStdStructuredPtr
 
-	Lock       sync.Mutex
-	OriginLock *sync.Mutex
+	lock      sync.Mutex
+	originSDK *SDK
 }
 
 // Clone only return general-part of sdk to avoid concurrency issue.
 func (sdk *SDK) Clone() *SDK {
-	sdk.Lock.Lock()
-	defer sdk.Lock.Unlock()
+	sdk.lock.Lock()
+	defer sdk.lock.Unlock()
 
 	clonedSDK := SDK{
 		Ctx:      sdk.Ctx,
@@ -58,7 +58,7 @@ func (sdk *SDK) Clone() *SDK {
 		Identity: sdk.Identity,
 		Lang:     sdk.Lang,
 
-		OriginLock: &sdk.Lock,
+		originSDK: sdk,
 	}
 	// inParams
 	clonedInParams := make(InParams)
@@ -126,7 +126,16 @@ func (sdk *SDK) RegisterOperation(opKey OperationKey, opFunc OperationFunc) {
 
 // SetUserIDs .
 func (sdk *SDK) SetUserIDs(userIDs []string) {
-	sdk.Lock.Lock()
-	defer sdk.Lock.Unlock()
+	sdk.lock.Lock()
+	defer sdk.lock.Unlock()
 	(*sdk.GlobalState)[GlobalInnerKeyUserIDs.String()] = strutil.DedupSlice(userIDs, true)
+}
+
+// MergeClonedGlobalState merge cloned global state to origin unified global state.
+func (sdk *SDK) MergeClonedGlobalState() {
+	sdk.originSDK.lock.Lock()
+	defer sdk.originSDK.lock.Unlock()
+	for k, v := range *sdk.GlobalState {
+		(*sdk.originSDK.GlobalState)[k] = v
+	}
 }
