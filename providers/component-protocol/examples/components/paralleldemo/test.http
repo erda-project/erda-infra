@@ -4,5 +4,9 @@ Content-Type: application/json
 {
   "scenario": {
     "scenarioKey": "parallel-demo"
+  },
+  "inParams": {
+    "startTime": 1234,
+    "endTime": 4321
   }
 }
