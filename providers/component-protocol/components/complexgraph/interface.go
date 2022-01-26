@@ -16,11 +16,11 @@ package complexgraph
 
 import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 
-// IGraph complex graph interface
-type IGraph interface {
+// IComplexGraph complex graph interface
+type IComplexGraph interface {
 	cptype.IComponent
-	IGraphStdOps
+	IComplexGraphStdOps
 }
 
-// IGraphStdOps .
-type IGraphStdOps interface{}
+// IComplexGraphStdOps .
+type IComplexGraphStdOps interface{}

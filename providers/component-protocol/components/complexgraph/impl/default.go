@@ -23,7 +23,7 @@ import (
 // DefaultComplexGraph default complex graph component
 type DefaultComplexGraph struct {
 	defaults.DefaultImpl
-	Impl complexgraph.IGraph
+	Impl complexgraph.IComplexGraph
 	*StdStructuredPtr
 }
 
