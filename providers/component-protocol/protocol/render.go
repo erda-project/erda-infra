@@ -31,8 +31,8 @@ import (
 
 // RunScenarioRender .
 func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest) error {
-	// check debug options
-	if err := checkDebugOptions(ctx, req.DebugOptions); err != nil {
+	// precheck request
+	if err := precheckRenderRequest(ctx, req); err != nil {
 		return err
 	}
 
@@ -42,53 +42,86 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 		return err
 	}
 
-	var useDefaultProtocol bool
-	if req.Protocol == nil || req.Event.Component == "" {
-		useDefaultProtocol = true
-		p, err := getDefaultProtocol(ctx, sk)
-		if err != nil {
-			return err
-		}
-		var tmp cptype.ComponentProtocol
-		if err := cputil.ObjJSONTransfer(&p, &tmp); err != nil {
-			logrus.Errorf("deep copy failed, err: %v", err)
-			return err
-
-		}
-		req.Protocol = &tmp
-	}
-
+	// get scenario renders
 	sr, err := getScenarioRenders(sk)
 	if err != nil {
 		logrus.Errorf("failed to get scenario render, err: %v", err)
 		return err
 	}
 
-	var compRending []cptype.RendingItem
+	// calculate renderingItems
+	renderingItems, err := calcCompsRendering(ctx, req, *sr, sk)
+	if err != nil {
+		logrus.Errorf("failed to calculate rendering items, err: %v", err)
+		return err
+	}
+
+	// prehook
+	if err := prehookForCompsRendering(ctx, req, *sr, renderingItems); err != nil {
+		return err
+	}
+
+	// do render
+	if err := doCompsRendering(ctx, req, *sr, renderingItems); err != nil {
+		return err
+	}
+
+	// posthook
+	posthookForCompsRendering(renderingItems, req)
+
+	return nil
+}
+
+func precheckRenderRequest(ctx context.Context, req *cptype.ComponentProtocolRequest) error {
+	// check debug options
+	if err := checkDebugOptions(ctx, req.DebugOptions); err != nil {
+		return err
+	}
+	return nil
+}
+
+func calcCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, sk string) ([]cptype.RendingItem, error) {
+	var useDefaultProtocol bool
+	if req.Protocol == nil || req.Event.Component == "" {
+		useDefaultProtocol = true
+		p, err := getDefaultProtocol(ctx, sk)
+		if err != nil {
+			return nil, err
+		}
+		var tmp cptype.ComponentProtocol
+		if err := cputil.ObjJSONTransfer(&p, &tmp); err != nil {
+			logrus.Errorf("deep copy failed, err: %v", err)
+			return nil, err
+
+		}
+		req.Protocol = &tmp
+	}
+
+	var renderingItems []cptype.RendingItem
 	if useDefaultProtocol {
 		crs, ok := req.Protocol.Rendering[cptype.DefaultRenderingKey]
 		if !ok {
 			orders, err := calculateDefaultRenderOrderByHierarchy(req.Protocol)
 			if err != nil {
 				logrus.Errorf("failed to calculate default render order by hierarchy: %v", err)
-				return err
+				return nil, err
 			}
 			for _, compName := range orders {
-				compRending = append(compRending, cptype.RendingItem{Name: compName})
+				renderingItems = append(renderingItems, cptype.RendingItem{Name: compName})
 			}
 		} else {
-			compRending = append(compRending, crs...)
+			renderingItems = append(renderingItems, crs...)
 		}
 
 	} else {
 		// root is always rendered
 		if req.Event.Component != req.Protocol.Hierarchy.Root {
-			compRending = append(compRending, cptype.RendingItem{Name: req.Protocol.Hierarchy.Root})
+			renderingItems = append(renderingItems, cptype.RendingItem{Name: req.Protocol.Hierarchy.Root})
 		}
 		// 如果是前端触发一个组件操作，则先渲染该组件;
 		// 再根据定义的渲染顺序，依次完成其他组件的state注入和渲染;
 		compName := req.Event.Component
-		compRending = append(compRending, cptype.RendingItem{Name: compName})
+		renderingItems = append(renderingItems, cptype.RendingItem{Name: compName})
 
 		crs, ok := req.Protocol.Rendering[compName]
 		if !ok {
@@ -96,19 +129,24 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 			orders, err := calculateDefaultRenderOrderByHierarchy(req.Protocol)
 			if err != nil {
 				logrus.Errorf("failed to calculate default render order by hierarchy for empty rendering: %v", err)
-				return err
+				return nil, err
 			}
 			subRenderingOrders := getDefaultHierarchyRenderOrderFromCompExclude(orders, compName)
 			for _, comp := range subRenderingOrders {
-				compRending = append(compRending, cptype.RendingItem{Name: comp})
+				renderingItems = append(renderingItems, cptype.RendingItem{Name: comp})
 			}
 		} else {
-			compRending = append(compRending, crs...)
+			renderingItems = append(renderingItems, crs...)
 		}
 	}
-	compRending = polishComponentRendering(req.DebugOptions, compRending)
-	compRending = polishComponentRenderingByInitOp(req.Protocol, req.Event, compRending)
-	compRending = polishComponentRenderingByAsyncAtInitOp(req.Protocol, req.Event, compRending)
+
+	return renderingItems, nil
+}
+
+func prehookForCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, renderingItems []cptype.RendingItem) error {
+	renderingItems = polishComponentRendering(req.DebugOptions, renderingItems)
+	renderingItems = polishComponentRenderingByInitOp(req.Protocol, req.Event, renderingItems)
+	renderingItems = polishComponentRenderingByAsyncAtInitOp(req.Protocol, req.Event, renderingItems)
 
 	if req.Protocol.GlobalState == nil {
 		gs := make(cptype.GlobalStateData)
@@ -120,31 +158,41 @@ func RunScenarioRender(ctx context.Context, req *cptype.ComponentProtocolRequest
 
 	polishProtocol(req.Protocol)
 
+	return nil
+}
+
+func doCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, renderingItems []cptype.RendingItem) error {
 	// if hierarchy.Parallel specified, use new rendering
 	if len(req.Protocol.Hierarchy.Parallel) > 0 {
-		rootNode, err := parseParallelRendering(req.Protocol, compRending)
-		if err != nil {
-			logrus.Errorf("failed to parse parallel rendering, err: %v", err)
-			return err
-		}
-		fmt.Println(rootNode.String())
-		if err := renderFromNode(ctx, req, *sr, rootNode); err != nil {
-			return err
-		}
-		goto POSTHOOK
+		return doParallelCompsRendering(ctx, req, sr, renderingItems)
 	}
 
-	for _, v := range compRending {
-		if err := renderOneComp(ctx, req, *sr, v); err != nil {
+	// rendering in order
+	for _, v := range renderingItems {
+		if err := renderOneComp(ctx, req, sr, v); err != nil {
 			return err
 		}
 	}
-
-POSTHOOK:
-	posthook.HandleContinueRender(compRending, req.Protocol)
-	posthook.OnlyReturnRenderingComps(compRending, req.Protocol)
 
 	return nil
+}
+
+func doParallelCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, renderingItems []cptype.RendingItem) error {
+	rootNode, err := parseParallelRendering(req.Protocol, renderingItems)
+	if err != nil {
+		logrus.Errorf("failed to parse parallel rendering, err: %v", err)
+		return err
+	}
+	fmt.Println(rootNode.String())
+	if err := renderFromNode(ctx, req, sr, rootNode); err != nil {
+		return err
+	}
+	return nil
+}
+
+func posthookForCompsRendering(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocolRequest) {
+	posthook.HandleContinueRender(renderingItems, req.Protocol)
+	posthook.OnlyReturnRenderingComps(renderingItems, req.Protocol)
 }
 
 func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions, compRendering []cptype.RendingItem) []cptype.RendingItem {
