@@ -17,6 +17,7 @@ package cptype
 import (
 	"context"
 	"strconv"
+	"sync"
 
 	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
@@ -37,19 +38,42 @@ type SDK struct {
 	Event       ComponentEvent
 	CompOpFuncs map[OperationKey]OperationFunc
 	Comp        *Component
+
+	// for parallel use, it's request level
+	StdStructuredPtr IStdStructuredPtr
+
+	lock      sync.Mutex
+	originSDK *SDK
 }
 
 // Clone only return general-part of sdk to avoid concurrency issue.
 func (sdk *SDK) Clone() *SDK {
-	return &SDK{
-		Ctx:         sdk.Ctx,
-		Scenario:    sdk.Scenario,
-		Tran:        sdk.Tran,
-		Identity:    sdk.Identity,
-		InParams:    sdk.InParams,
-		Lang:        sdk.Lang,
-		GlobalState: sdk.GlobalState,
+	sdk.lock.Lock()
+	defer sdk.lock.Unlock()
+
+	clonedSDK := SDK{
+		Ctx:      sdk.Ctx,
+		Scenario: sdk.Scenario,
+		Tran:     sdk.Tran,
+		Identity: sdk.Identity,
+		Lang:     sdk.Lang,
+
+		originSDK: sdk,
 	}
+	// inParams
+	clonedInParams := make(InParams)
+	for k, v := range sdk.InParams {
+		clonedInParams[k] = v
+	}
+	clonedSDK.InParams = clonedInParams
+	// globalStates
+	clonedGlobalStates := make(GlobalStateData)
+	for k, v := range *sdk.GlobalState {
+		clonedGlobalStates[k] = v
+	}
+	clonedSDK.GlobalState = &clonedGlobalStates
+
+	return &clonedSDK
 }
 
 // I18n .
@@ -102,5 +126,16 @@ func (sdk *SDK) RegisterOperation(opKey OperationKey, opFunc OperationFunc) {
 
 // SetUserIDs .
 func (sdk *SDK) SetUserIDs(userIDs []string) {
+	sdk.lock.Lock()
+	defer sdk.lock.Unlock()
 	(*sdk.GlobalState)[GlobalInnerKeyUserIDs.String()] = strutil.DedupSlice(userIDs, true)
+}
+
+// MergeClonedGlobalState merge cloned global state to origin unified global state.
+func (sdk *SDK) MergeClonedGlobalState() {
+	sdk.originSDK.lock.Lock()
+	defer sdk.originSDK.lock.Unlock()
+	for k, v := range *sdk.GlobalState {
+		(*sdk.originSDK.GlobalState)[k] = v
+	}
 }

@@ -15,6 +15,8 @@
 package cpregister
 
 import (
+	"reflect"
+
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
@@ -53,7 +55,9 @@ func RegisterProviderComponent(scenario, componentName string, providerPtr Compo
 	providerName := cputil.MakeComponentProviderName(scenario, componentName)
 
 	// register component
-	RegisterComponent(scenario, componentName, func() cptype.IComponent { return providerPtr })
+	RegisterComponent(scenario, componentName, func() cptype.IComponent {
+		return copyProvider(providerPtr)
+	})
 
 	// register as provider
 	opt.providerSpec.Creator = func() servicehub.Provider { return providerPtr }
@@ -61,4 +65,14 @@ func RegisterProviderComponent(scenario, componentName string, providerPtr Compo
 
 	// mark for auto servicehub config adding
 	AllExplicitProviderCreatorMap[providerName] = nil
+}
+
+// copyProvider return a copied provider:
+// - copied-ptr-value is original
+// - copied-non-ptr value is new
+func copyProvider(providerPtr ComponentCreatorAndProvider) ComponentCreatorAndProvider {
+	newProviderPtr := reflect.New(reflect.TypeOf(providerPtr).Elem())
+	newProviderPtr.Elem().Set(reflect.ValueOf(providerPtr).Elem())
+	copied := newProviderPtr.Interface()
+	return copied.(ComponentCreatorAndProvider)
 }

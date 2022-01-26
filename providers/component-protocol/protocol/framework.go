@@ -45,13 +45,15 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 			err = fmt.Errorf(msg)
 		}
 	}()
-	sdk := cputil.SDK(ctx).Clone()
-	sdk.GlobalState = gs
+	originSDK := cputil.SDK(ctx)
+	originSDK.GlobalState = gs
+	sdk := originSDK.Clone()
 	sdk.Comp = ensureCompFields(sdk, c)
 	sdk.Event = event
 	// structured comp ptr
 	stdStructuredCompPtr := F.IC.StdStructuredPtrCreator()()
 	F.injectStdStructurePtr(stdStructuredCompPtr)
+	sdk.StdStructuredPtr = stdStructuredCompPtr
 	// register operations
 	F.registerOperations(sdk)
 	// init
@@ -73,6 +75,8 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 		F.IC.EncodeData(stdStructuredCompPtr.DataPtr(), &sdk.Comp.Data)
 		F.IC.EncodeState(stdStructuredCompPtr.StatePtr(), &sdk.Comp.State)
 		F.IC.EncodeInParams(stdStructuredCompPtr.InParamsPtr(), &sdk.InParams)
+		// global state
+		sdk.MergeClonedGlobalState()
 		// flat extra
 		F.flatExtra(sdk.Comp)
 		// finalize
