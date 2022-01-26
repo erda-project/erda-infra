@@ -200,6 +200,7 @@ func (d *DataBuilder) WithDimensions(dimensions ...string) *DataBuilder {
 	return d
 }
 
+// EnableInverse .
 func (d *DataBuilder) EnableInverse() *DataBuilder {
 	d.data.Inverse = true
 	return d
