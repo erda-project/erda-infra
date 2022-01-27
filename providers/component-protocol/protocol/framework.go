@@ -62,9 +62,6 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 	F.IC.DecodeInParams(sdk.InParams, stdStructuredCompPtr.InParamsPtr())
 	F.IC.DecodeState(c.State, stdStructuredCompPtr.StatePtr())
 	F.IC.DecodeData(c.Data, stdStructuredCompPtr.DataPtr())
-	// visible
-	visible := F.IC.Visible(sdk)
-	defer F.setVisible(sdk, visible)
 	// handle op
 	if !F.IC.SkipOp(sdk) {
 		F.IC.BeforeHandleOp(sdk)
@@ -82,6 +79,9 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 		// finalize
 		F.IC.Finalize(sdk)
 	}
+	// visible
+	visible := F.IC.Visible(sdk)
+	F.setVisible(sdk, visible)
 	return nil
 }
 
