@@ -29,7 +29,7 @@ func Go(ctx context.Context, fn func()) {
 	})
 }
 
-// GoWithContext
+// GoWithContext .
 func GoWithContext(ctx context.Context, fn func(ctx context.Context)) {
 	if ctx == nil {
 		ctx = context.Background()
