@@ -32,6 +32,7 @@ type ConditionBase struct {
 	Type        ConditionType `json:"type,omitempty"`
 	Placeholder string        `json:"placeholder,omitempty"`
 	Disabled    bool          `json:"disabled,omitempty"`
+	IsExternal  bool          `json:"isExternal,omitempty"`
 }
 
 // SelectCondition .
@@ -39,6 +40,11 @@ type SelectCondition struct {
 	ConditionBase
 	Mode    string         `json:"mode,omitempty"`
 	Options []SelectOption `json:"options,omitempty"`
+}
+
+// InputCondition .
+type InputCondition struct {
+	ConditionBase
 }
 
 // SelectConditionWithChildren .
@@ -61,6 +67,11 @@ type TagsSelectCondition struct {
 // Type .
 func (o SelectCondition) Type() ConditionType {
 	return ConditionTypeSelect
+}
+
+// Type .
+func (o InputCondition) Type() ConditionType {
+	return ConditionTypeInput
 }
 
 // Type .
@@ -91,6 +102,15 @@ func NewSelectCondition(key string, label string, options []SelectOption) *Selec
 	var r = SelectCondition{
 		ConditionBase: *NewCondition(key, label),
 		Options:       options,
+	}
+	r.ConditionBase.Type = r.Type()
+	return &r
+}
+
+// NewInputCondition initial condition
+func NewInputCondition(key string, label string) *InputCondition {
+	var r = InputCondition{
+		ConditionBase: *NewCondition(key, label),
 	}
 	r.ConditionBase.Type = r.Type()
 	return &r
