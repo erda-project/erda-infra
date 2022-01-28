@@ -387,7 +387,7 @@ func simplifyComp(comp *cptype.Component) {
 		comp.Operations = nil
 	}
 	if comp.Options != nil {
-		if !comp.Options.Visible &&
+		if comp.Options.Visible &&
 			!comp.Options.AsyncAtInit &&
 			!comp.Options.FlatExtra &&
 			!comp.Options.RemoveExtraAfterFlat {
