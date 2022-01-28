@@ -33,7 +33,7 @@ type Group struct {
 	err     error
 }
 
-// GoGroup
+// GoGroup .
 func GoGroup(ctx context.Context, opts ...RunOption) *Group {
 	rOpts := &runOptions{}
 	for _, opt := range opts {
