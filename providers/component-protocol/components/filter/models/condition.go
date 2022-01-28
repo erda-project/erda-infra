@@ -32,7 +32,8 @@ type ConditionBase struct {
 	Type        ConditionType `json:"type,omitempty"`
 	Placeholder string        `json:"placeholder,omitempty"`
 	Disabled    bool          `json:"disabled,omitempty"`
-	IsExternal  bool          `json:"isExternal,omitempty"`
+	// condition relative location of filter form
+	Outside bool `json:"outside,omitempty"`
 }
 
 // SelectCondition .
