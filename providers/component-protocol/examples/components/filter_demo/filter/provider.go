@@ -39,7 +39,8 @@ func mockCondition() []interface{} {
 		WithMode("single").WithPlaceHolder("select a")
 	var c2 = model.NewSelectConditionWithChildren("b", "2", []model.SelectOptionWithChildren{*opt4})
 	var c3 = model.NewDateRangeCondition("d", "dasd")
-	return []interface{}{c1, c2, c3}
+	var c4 = model.NewInputCondition("a-5", "input123")
+	return []interface{}{c1, c2, c3, c4}
 }
 
 func mockFilterSet() []filter.SetItem {
