@@ -72,12 +72,12 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 		F.IC.EncodeData(stdStructuredCompPtr.DataPtr(), &sdk.Comp.Data)
 		F.IC.EncodeState(stdStructuredCompPtr.StatePtr(), &sdk.Comp.State)
 		F.IC.EncodeInParams(stdStructuredCompPtr.InParamsPtr(), &sdk.InParams)
-		// global state
-		sdk.MergeClonedGlobalState()
 		// flat extra
 		F.flatExtra(sdk.Comp)
 		// finalize
 		F.IC.Finalize(sdk)
+		// global state
+		sdk.MergeClonedGlobalState()
 	}
 	// visible
 	visible := F.IC.Visible(sdk)
