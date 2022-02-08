@@ -47,14 +47,15 @@ type config struct {
 	MySQLMaxOpenConns uint64        `file:"max_open_conns" env:"MYSQL_MAXOPENCONNS" default:"2"`
 	MySQLMaxLifeTime  time.Duration `file:"max_lifetime" env:"MYSQL_MAXLIFETIME" default:"30m"`
 	MySQLDebug        bool          `file:"debug" env:"MYSQL_DEBUG" default:"false"`
+	MySQLCharset      string        `file:"charset" env:"MYSQL_CHARSET" default:"utf8mb4"`
 }
 
 func (c *config) url() string {
 	if c.MySQLURL != "" {
 		return c.MySQLURL
 	}
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		c.MySQLUsername, c.MySQLPassword, c.MySQLHost, c.MySQLPort, c.MySQLDatabase)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
+		c.MySQLUsername, c.MySQLPassword, c.MySQLHost, c.MySQLPort, c.MySQLDatabase, c.MySQLCharset)
 }
 
 // provider .
