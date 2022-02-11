@@ -167,4 +167,7 @@ type ProtocolOptions struct {
 
 	// EnableWebSocket enable WebSocket for current scenario.
 	EnableWebSocket bool `json:"enableWebSocket,omitempty" yaml:"enableWebSocket,omitempty"`
+
+	// Only return rendering components if disabled
+	ReturnAllComponents bool `json:"returnAllComponents" yaml:"returnAllComponents"`
 }
