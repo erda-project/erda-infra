@@ -197,9 +197,7 @@ func doSerialCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRe
 
 func posthookForCompsRendering(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocolRequest) {
 	posthook.HandleContinueRender(renderingItems, req.Protocol)
-	if req.Protocol != nil && req.Protocol.Options != nil && !req.Protocol.Options.ReturnAllComponents {
-		posthook.OnlyReturnRenderingComps(renderingItems, req.Protocol)
-	}
+	posthook.OnlyReturnRenderingComps(renderingItems, req.Protocol)
 }
 
 func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions, compRendering []cptype.RendingItem) []cptype.RendingItem {
