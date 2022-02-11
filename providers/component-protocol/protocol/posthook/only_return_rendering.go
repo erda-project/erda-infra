@@ -20,6 +20,9 @@ import (
 
 // OnlyReturnRenderingComps only return rendering components.
 func OnlyReturnRenderingComps(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
+	if req.Options != nil && req.Options.ReturnAllComponents {
+		return
+	}
 	// init new components map
 	onlyReturnComps := make(map[string]*cptype.Component, len(req.Components))
 	// construct map for easy use
