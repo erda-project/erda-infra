@@ -64,6 +64,11 @@ type result struct {
 func (f *futureResult) Get() (interface{}, error) {
 	select {
 	case <-f.ctx.Done():
+		select {
+		case result := <-f.result:
+			return result.data, result.err
+		default:
+		}
 		return nil, f.ctx.Err()
 	case result := <-f.result:
 		return result.data, result.err
