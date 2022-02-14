@@ -42,7 +42,7 @@ func GoWithContext(ctx context.Context, fn func(ctx context.Context)) {
 			}
 		}
 	}
-	injectcontext.RunWithContext(ctx, fn)
+	go injectcontext.RunWithContext(ctx, fn)
 }
 
 // ContextWithSpan .
