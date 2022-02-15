@@ -41,7 +41,7 @@ type SelectCondition struct {
 	ConditionBase
 	Mode      string         `json:"mode,omitempty"`
 	Options   []SelectOption `json:"options,omitempty"`
-	ItemProps ItemProps      `json:"itemProps"`
+	ItemProps ItemProps      `json:"itemProps,omitempty"`
 }
 
 type ItemProps struct {
