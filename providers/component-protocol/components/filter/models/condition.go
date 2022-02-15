@@ -44,7 +44,7 @@ type SelectCondition struct {
 	ItemProps ItemProps      `json:"itemProps,omitempty"`
 }
 
-// ItemProps
+// ItemProps .
 type ItemProps struct {
 	Mode string `json:"mode"`
 }
@@ -164,7 +164,7 @@ func (o *SelectCondition) WithMode(mode string) *SelectCondition {
 	return o
 }
 
-// WithItemProps
+// WithItemProps .
 func (o *SelectCondition) WithItemProps(mode string) *SelectCondition {
 	var itemProps = ItemProps{
 		Mode: mode,
