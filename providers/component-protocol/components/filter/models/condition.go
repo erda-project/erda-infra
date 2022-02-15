@@ -44,6 +44,7 @@ type SelectCondition struct {
 	ItemProps ItemProps      `json:"itemProps,omitempty"`
 }
 
+// ItemProps
 type ItemProps struct {
 	Mode string `json:"mode"`
 }
