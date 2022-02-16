@@ -44,17 +44,29 @@ func SetUrlQuery(sdk *cptype.SDK, data interface{}) {
 }
 
 // GetUrlQuery get component's url query and parse to `resultStructPtr`.
-func GetUrlQuery(sdk *cptype.SDK, resultStructPtr interface{}) {
+func GetUrlQuery(sdk *cptype.SDK, resultStructPtr interface{}) error {
 	if sdk.InParams == nil {
-		return
+		return nil
+	}
+	if resultStructPtr == nil {
+		return fmt.Errorf("result receiver pointer can't be nil")
 	}
 	encodedUrlQuery := strutil.String(sdk.InParams[MakeCompUrlQueryKey(sdk.Comp.Name)])
 	jsonEncodedUrlQuery, err := base64.URLEncoding.DecodeString(encodedUrlQuery)
 	if err != nil {
-		panic(fmt.Errorf("failed to get url query from inParams, err: %v", err))
+		return fmt.Errorf("failed to get url query from inParams, err: %v", err)
 	}
 	err = json.Unmarshal(jsonEncodedUrlQuery, resultStructPtr)
 	if err != nil {
-		panic(fmt.Errorf("failed to json unmarshal json encoded url query, err: %v", err))
+		return fmt.Errorf("failed to json unmarshal json encoded url query, err: %v", err)
+	}
+	return nil
+}
+
+// MustGetUrlQuery must GetUrlQuery.
+func MustGetUrlQuery(sdk *cptype.SDK, resultStructPtr interface{}) {
+	err := GetUrlQuery(sdk, resultStructPtr)
+	if err != nil {
+		panic(err)
 	}
 }

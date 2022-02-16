@@ -26,5 +26,6 @@ import (
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/paralleldemo"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/table_demo/table"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/top_demo/top"
+	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/urlquery_demo"
 	_ "github.com/erda-project/erda-infra/providers/component-protocol/examples/components/yet_another_demo/demotable"
 )

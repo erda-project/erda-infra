@@ -1,0 +1,8 @@
+scenario: urlquery-demo
+
+hierarchy:
+  root: filter
+
+components:
+  filter:
+    type: ConfigurableFilter
