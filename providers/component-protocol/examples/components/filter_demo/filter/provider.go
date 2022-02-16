@@ -36,7 +36,7 @@ func mockCondition() []interface{} {
 	var opt4 = model.NewSelectChildrenOption("B", "234", []model.SelectOption{*opt2})
 
 	var c1 = model.NewSelectCondition("a", "1", []model.SelectOption{*opt1, *opt3, *opt3Fix}).
-		WithMode("single").WithPlaceHolder("select a")
+		WithMode("single").WithPlaceHolder("select a").WithItemProps(map[string]interface{}{"mode": "single"})
 	var c2 = model.NewSelectConditionWithChildren("b", "2", []model.SelectOptionWithChildren{*opt4})
 	var c3 = model.NewDateRangeCondition("d", "dasd")
 	var c4 = model.NewInputCondition("a-5", "input123")
