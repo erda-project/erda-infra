@@ -92,6 +92,9 @@ type ComponentOptions struct {
 	// extra related
 	FlatExtra            bool `json:"flatExtra,omitempty" yaml:"flatExtra,omitempty"`
 	RemoveExtraAfterFlat bool `json:"removeExtraAfterFlat,omitempty" yaml:"removeExtraAfterFlat,omitempty"`
+
+	// url query
+	UrlQuery string `json:"urlQuery,omitempty" yaml:"urlQuery,omitempty"`
 }
 
 // ContinueRender .
