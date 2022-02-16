@@ -198,6 +198,7 @@ func doSerialCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRe
 func posthookForCompsRendering(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocolRequest) {
 	posthook.HandleContinueRender(renderingItems, req.Protocol)
 	posthook.OnlyReturnRenderingComps(renderingItems, req.Protocol)
+	posthook.SimplifyProtocol(renderingItems, req.Protocol)
 }
 
 func polishComponentRendering(debugOptions *cptype.ComponentProtocolDebugOptions, compRendering []cptype.RendingItem) []cptype.RendingItem {
@@ -376,29 +377,6 @@ func getDefaultHierarchyRenderOrderFromCompExclude(fullOrders []string, startFro
 	return fullOrders[fromIdx+1:]
 }
 
-func simplifyComp(comp *cptype.Component) {
-	if len(comp.Data) == 0 {
-		comp.Data = nil
-	}
-	if len(comp.State) == 0 {
-		comp.State = nil
-	}
-	if len(comp.Operations) == 0 {
-		comp.Operations = nil
-	}
-	if comp.Options != nil {
-		if comp.Options.Visible &&
-			!comp.Options.AsyncAtInit &&
-			!comp.Options.FlatExtra &&
-			!comp.Options.RemoveExtraAfterFlat {
-			comp.Options = nil
-		}
-	}
-	if len(comp.Props) == 0 {
-		comp.Props = nil
-	}
-}
-
 func renderOneComp(ctx context.Context, req *cptype.ComponentProtocolRequest, sr ScenarioRender, v cptype.RendingItem) error {
 	// 组件状态渲染
 	err := protoCompStateRending(ctx, req.Protocol, v)
@@ -429,7 +407,6 @@ func renderOneComp(ctx context.Context, req *cptype.ComponentProtocolRequest, sr
 		logrus.Errorf("render component failed, err: %s, scenario: %+v, component: %s", err.Error(), req.Scenario, cr.CompName)
 		return err
 	}
-	simplifyComp(c)
 	elapsed := time.Since(start)
 	logrus.Infof("[component render time cost] scenario: %s, component: %s, cost: %s", req.Scenario.ScenarioKey, v.Name, elapsed)
 	return nil
