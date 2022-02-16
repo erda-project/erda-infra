@@ -16,36 +16,24 @@ package posthook
 
 import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
-// SimplifyProtocol simplify protocol if could.
-func SimplifyProtocol(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
+// HandleURLQuery .
+func HandleURLQuery(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
 	for _, comp := range req.Components {
-		simplifyComp(comp)
-	}
-}
-
-func simplifyComp(comp *cptype.Component) {
-	if len(comp.Data) == 0 {
-		comp.Data = nil
-	}
-	if len(comp.State) == 0 {
-		comp.State = nil
-	}
-	if len(comp.Operations) == 0 {
-		comp.Operations = nil
-	}
-	if comp.Options != nil {
-		if !comp.Options.Visible &&
-			!comp.Options.AsyncAtInit &&
-			!comp.Options.FlatExtra &&
-			!comp.Options.RemoveExtraAfterFlat &&
-			len(comp.Options.URLQuery) == 0 &&
-			(comp.Options.ContinueRender == nil || len(comp.Options.ContinueRender.OpKey) == 0) {
-			comp.Options = nil
+		if comp.Options == nil {
+			continue
 		}
-	}
-	if len(comp.Props) == 0 {
-		comp.Props = nil
+		urlQuery := comp.Options.URLQuery
+		if len(urlQuery) == 0 {
+			continue
+		}
+
+		// we set urlQuery to comp state currently
+		if comp.State == nil {
+			comp.State = make(cptype.ComponentState)
+		}
+		comp.State[cputil.MakeCompURLQueryKey(comp.Name)] = urlQuery
 	}
 }

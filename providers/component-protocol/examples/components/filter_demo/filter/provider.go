@@ -64,6 +64,7 @@ func mockFilterSet() []filter.SetItem {
 	return []filter.SetItem{i1, i2}
 }
 
+// RegisterInitializeOp .
 func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		p.StdDataPtr = &filter.Data{
@@ -78,10 +79,12 @@ func (p *provider) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	}
 }
 
+// RegisterRenderingOp .
 func (p *provider) RegisterRenderingOp() (opFunc cptype.OperationFunc) {
 	return p.RegisterInitializeOp()
 }
 
+// RegisterFilterOp .
 func (p *provider) RegisterFilterOp(opData filter.OpFilter) (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		fmt.Println("state values", p.StdStatePtr)
@@ -90,6 +93,7 @@ func (p *provider) RegisterFilterOp(opData filter.OpFilter) (opFunc cptype.Opera
 	}
 }
 
+// RegisterFilterItemSaveOp .
 func (p *provider) RegisterFilterItemSaveOp(opData filter.OpFilterItemSave) (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		fmt.Println("op come", opData.ClientData)
@@ -97,6 +101,7 @@ func (p *provider) RegisterFilterItemSaveOp(opData filter.OpFilterItemSave) (opF
 	}
 }
 
+// RegisterFilterItemDeleteOp .
 func (p *provider) RegisterFilterItemDeleteOp(opData filter.OpFilterItemDelete) (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		fmt.Println("op come", opData.ClientData.DataRef)
