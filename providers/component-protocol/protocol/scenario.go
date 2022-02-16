@@ -60,7 +60,7 @@ func getScenarioRenders(scenario string) (*ScenarioRender, error) {
 		}
 		// built-in component renders
 		switch comp.Type {
-		case "Container", "LRContainer", "RowContainer", "SplitPage", "Popover", "Title", "Drawer":
+		case "Container", "LRContainer", "RowContainer", "SplitPage", "Popover", "Title", "Drawer", "Custom":
 			(*renders)[compName] = &CompRenderSpec{RenderC: emptyRenderFunc}
 			continue
 		}
