@@ -39,7 +39,8 @@ func simplifyComp(comp *cptype.Component) {
 		if comp.Options.Visible &&
 			!comp.Options.AsyncAtInit &&
 			!comp.Options.FlatExtra &&
-			!comp.Options.RemoveExtraAfterFlat {
+			!comp.Options.RemoveExtraAfterFlat &&
+			comp.Options.ContinueRender == nil || len(comp.Options.ContinueRender.OpKey) == 0 {
 			comp.Options = nil
 		}
 	}
