@@ -39,9 +39,14 @@ type ConditionBase struct {
 // SelectCondition .
 type SelectCondition struct {
 	ConditionBase
-	Mode      string                 `json:"mode,omitempty"`
-	Options   []SelectOption         `json:"options,omitempty"`
-	ItemProps map[string]interface{} `json:"itemProps,omitempty"`
+	Mode      string         `json:"mode,omitempty"`
+	Options   []SelectOption `json:"options,omitempty"`
+	ItemProps ItemProps      `json:"itemProps"`
+}
+
+//ItemProps .
+type ItemProps struct {
+	Mode string `json:"mode"`
 }
 
 // InputCondition .
@@ -160,7 +165,7 @@ func (o *SelectCondition) WithMode(mode string) *SelectCondition {
 }
 
 // WithItemProps .
-func (o *SelectCondition) WithItemProps(itemProps map[string]interface{}) *SelectCondition {
+func (o *SelectCondition) WithItemProps(itemProps ItemProps) *SelectCondition {
 	o.ItemProps = itemProps
 	return o
 }
