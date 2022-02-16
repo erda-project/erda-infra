@@ -198,7 +198,7 @@ func doSerialCompsRendering(ctx context.Context, req *cptype.ComponentProtocolRe
 func posthookForCompsRendering(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocolRequest) {
 	posthook.HandleContinueRender(renderingItems, req.Protocol)
 	posthook.OnlyReturnRenderingComps(renderingItems, req.Protocol)
-	posthook.HandleUrlQuery(renderingItems, req.Protocol)
+	posthook.HandleURLQuery(renderingItems, req.Protocol)
 	posthook.SimplifyProtocol(renderingItems, req.Protocol)
 }
 

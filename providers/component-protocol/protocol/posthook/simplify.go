@@ -40,7 +40,7 @@ func simplifyComp(comp *cptype.Component) {
 			!comp.Options.AsyncAtInit &&
 			!comp.Options.FlatExtra &&
 			!comp.Options.RemoveExtraAfterFlat &&
-			len(comp.Options.UrlQuery) == 0 &&
+			len(comp.Options.URLQuery) == 0 &&
 			(comp.Options.ContinueRender == nil || len(comp.Options.ContinueRender.OpKey) == 0) {
 			comp.Options = nil
 		}

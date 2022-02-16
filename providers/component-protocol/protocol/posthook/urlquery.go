@@ -19,13 +19,13 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
-// HandleUrlQuery .
-func HandleUrlQuery(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
+// HandleURLQuery .
+func HandleURLQuery(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
 	for _, comp := range req.Components {
 		if comp.Options == nil {
 			continue
 		}
-		urlQuery := comp.Options.UrlQuery
+		urlQuery := comp.Options.URLQuery
 		if len(urlQuery) == 0 {
 			continue
 		}
@@ -34,6 +34,6 @@ func HandleUrlQuery(renderingItems []cptype.RendingItem, req *cptype.ComponentPr
 		if comp.State == nil {
 			comp.State = make(cptype.ComponentState)
 		}
-		comp.State[cputil.MakeCompUrlQueryKey(comp.Name)] = urlQuery
+		comp.State[cputil.MakeCompURLQueryKey(comp.Name)] = urlQuery
 	}
 }

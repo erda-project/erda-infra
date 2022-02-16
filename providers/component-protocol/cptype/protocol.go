@@ -94,7 +94,7 @@ type ComponentOptions struct {
 	RemoveExtraAfterFlat bool `json:"removeExtraAfterFlat,omitempty" yaml:"removeExtraAfterFlat,omitempty"`
 
 	// url query
-	UrlQuery string `json:"urlQuery,omitempty" yaml:"urlQuery,omitempty"`
+	URLQuery string `json:"urlQuery,omitempty" yaml:"urlQuery,omitempty"`
 }
 
 // ContinueRender .

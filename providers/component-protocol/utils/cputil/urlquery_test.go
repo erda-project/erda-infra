@@ -24,8 +24,8 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
-func TestGetUrlQuery(t *testing.T) {
-	type FilterUrlQueryStruct struct {
+func TestGetURLQuery(t *testing.T) {
+	type FilterURLQueryStruct struct {
 		Name string `json:"name,omitempty"`
 		Age  int    `json:"age,omitempty"`
 	}
@@ -51,7 +51,7 @@ func TestGetUrlQuery(t *testing.T) {
 			name: "inParams not nil, but url query is empty",
 			args: args{
 				sdk: &cptype.SDK{
-					InParams: cptype.InParams{MakeCompUrlQueryKey("c1"): ""},
+					InParams: cptype.InParams{MakeCompURLQueryKey("c1"): ""},
 					Comp:     &cptype.Component{Name: "c1"},
 				},
 				resultStructPtr: nil,
@@ -63,24 +63,24 @@ func TestGetUrlQuery(t *testing.T) {
 			args: args{
 				sdk: &cptype.SDK{
 					InParams: cptype.InParams{
-						MakeCompUrlQueryKey("c1"): func() string {
-							q := FilterUrlQueryStruct{Name: "bob", Age: 20}
+						MakeCompURLQueryKey("c1"): func() string {
+							q := FilterURLQueryStruct{Name: "bob", Age: 20}
 							b, err := json.Marshal(&q)
 							assert.NoError(t, err)
-							base64UrlQuery := base64.URLEncoding.EncodeToString(b)
-							return base64UrlQuery
+							base64URLQuery := base64.URLEncoding.EncodeToString(b)
+							return base64URLQuery
 						}(),
 					},
 					Comp: &cptype.Component{Name: "c1"},
 				},
-				resultStructPtr: &FilterUrlQueryStruct{},
+				resultStructPtr: &FilterURLQueryStruct{},
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := GetUrlQuery(tt.args.sdk, tt.args.resultStructPtr)
+			err := GetURLQuery(tt.args.sdk, tt.args.resultStructPtr)
 			if err != nil {
 				t.Log(err)
 			}

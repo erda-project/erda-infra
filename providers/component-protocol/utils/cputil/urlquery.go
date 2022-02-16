@@ -23,14 +23,14 @@ import (
 )
 
 const (
-	compUrlQuerySuffix = "__urlQuery"
+	compURLQuerySuffix = "__urlQuery"
 )
 
-// MakeCompUrlQueryKey make url query key for component.
-func MakeCompUrlQueryKey(compName string) string { return compName + compUrlQuerySuffix }
+// MakeCompURLQueryKey make url query key for component.
+func MakeCompURLQueryKey(compName string) string { return compName + compURLQuerySuffix }
 
-// SetUrlQuery set data to url query.
-func SetUrlQuery(sdk *cptype.SDK, data interface{}) {
+// SetURLQuery set data to url query.
+func SetURLQuery(sdk *cptype.SDK, data interface{}) {
 	b, err := json.Marshal(data)
 	if err != nil {
 		panic(fmt.Errorf("failed to set url query, err: %v", err))
@@ -40,32 +40,32 @@ func SetUrlQuery(sdk *cptype.SDK, data interface{}) {
 	if sdk.Comp.Options == nil {
 		sdk.Comp.Options = &cptype.ComponentOptions{}
 	}
-	sdk.Comp.Options.UrlQuery = urlQueryStr
+	sdk.Comp.Options.URLQuery = urlQueryStr
 }
 
-// GetUrlQuery get component's url query and parse to `resultStructPtr`.
-func GetUrlQuery(sdk *cptype.SDK, resultStructPtr interface{}) error {
+// GetURLQuery get component's url query and parse to `resultStructPtr`.
+func GetURLQuery(sdk *cptype.SDK, resultStructPtr interface{}) error {
 	if sdk.InParams == nil {
 		return nil
 	}
 	if resultStructPtr == nil {
 		return fmt.Errorf("result receiver pointer can't be nil")
 	}
-	encodedUrlQuery := strutil.String(sdk.InParams[MakeCompUrlQueryKey(sdk.Comp.Name)])
-	jsonEncodedUrlQuery, err := base64.URLEncoding.DecodeString(encodedUrlQuery)
+	encodedURLQuery := strutil.String(sdk.InParams[MakeCompURLQueryKey(sdk.Comp.Name)])
+	jsonEncodedURLQuery, err := base64.URLEncoding.DecodeString(encodedURLQuery)
 	if err != nil {
 		return fmt.Errorf("failed to get url query from inParams, err: %v", err)
 	}
-	err = json.Unmarshal(jsonEncodedUrlQuery, resultStructPtr)
+	err = json.Unmarshal(jsonEncodedURLQuery, resultStructPtr)
 	if err != nil {
 		return fmt.Errorf("failed to json unmarshal json encoded url query, err: %v", err)
 	}
 	return nil
 }
 
-// MustGetUrlQuery must GetUrlQuery.
-func MustGetUrlQuery(sdk *cptype.SDK, resultStructPtr interface{}) {
-	err := GetUrlQuery(sdk, resultStructPtr)
+// MustGetURLQuery must GetURLQuery.
+func MustGetURLQuery(sdk *cptype.SDK, resultStructPtr interface{}) {
+	err := GetURLQuery(sdk, resultStructPtr)
 	if err != nil {
 		panic(err)
 	}

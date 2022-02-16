@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package urlquery_demo
+package filter
 
 import (
 	"github.com/sirupsen/logrus"
@@ -24,6 +24,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
+// Filter .
 type Filter struct {
 	impl.DefaultFilter
 }
@@ -32,31 +33,36 @@ func init() {
 	cpregister.RegisterComponent("urlquery-demo", "filter", func() cptype.IComponent { return &Filter{} })
 }
 
-type UrlQueryStruct struct {
+// URLQueryStruct .
+type URLQueryStruct struct {
 	Name string `json:"name,omitempty"`
 	Age  int    `json:"age,omitempty"`
 }
 
+// RegisterInitializeOp .
 func (f *Filter) RegisterInitializeOp() (opFunc cptype.OperationFunc) {
 	return func(sdk *cptype.SDK) cptype.IStdStructuredPtr {
 		// get url query
-		var urlQuery UrlQueryStruct
-		cputil.MustGetUrlQuery(sdk, &urlQuery)
+		var urlQuery URLQueryStruct
+		cputil.MustGetURLQuery(sdk, &urlQuery)
 		logrus.Infof("urlQuery: %+v", urlQuery)
 		// set url query
-		cputil.SetUrlQuery(sdk, &UrlQueryStruct{Name: "bob", Age: 20})
+		cputil.SetURLQuery(sdk, &URLQueryStruct{Name: "bob", Age: 20})
 		return nil
 	}
 }
 
+// RegisterFilterOp .
 func (f *Filter) RegisterFilterOp(opData filter.OpFilter) (opFunc cptype.OperationFunc) {
 	return nil
 }
 
+// RegisterFilterItemSaveOp .
 func (f *Filter) RegisterFilterItemSaveOp(opData filter.OpFilterItemSave) (opFunc cptype.OperationFunc) {
 	return nil
 }
 
+// RegisterFilterItemDeleteOp .
 func (f *Filter) RegisterFilterItemDeleteOp(opData filter.OpFilterItemDelete) (opFunc cptype.OperationFunc) {
 	return nil
 }
