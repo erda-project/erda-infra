@@ -19,6 +19,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/component-protocol/utils/cputil"
 )
 
+// HandleUrlQuery .
 func HandleUrlQuery(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
 	for _, comp := range req.Components {
 		if comp.Options == nil {
