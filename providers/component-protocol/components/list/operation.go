@@ -14,7 +14,10 @@
 
 package list
 
-import "github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+import (
+	"github.com/erda-project/erda-infra/providers/component-protocol/components/commodel"
+	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
+)
 
 const (
 	// OpListChangePageKey list level
@@ -132,7 +135,7 @@ type OpBatchRowsHandleOptionServerData struct {
 	// AllowedRowIDs which rows has this op
 	AllowedRowIDs []string `json:"allowedRowIDs"`
 	// Icon .
-	Icon string `json:"icon"`
+	Icon *commodel.Icon `json:"icon"`
 	// ID of this op.
 	ID string `json:"id"`
 	// Text
