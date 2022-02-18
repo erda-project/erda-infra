@@ -179,7 +179,10 @@ func parseParallelRendering(p *cptype.ComponentProtocol, compRenderingItems []cp
 		}
 		for _, subNodeName := range subCompNames {
 			// set subNode's previous again
-			subNode := nodesMap[subNodeName]
+			subNode, ok := nodesMap[subNodeName]
+			if !ok {
+				continue
+			}
 			node.linkSubSerialNode(subNode)
 		}
 	}
