@@ -51,13 +51,22 @@ func (p *provider) leaderTask(ctx context.Context) {
 }
 
 func (p *provider) Run(ctx context.Context) error {
-	select {
-	case <-time.After(10 * time.Second):
-		p.Log.Info("resign leader")
-		p.Election.ResignLeader()
-	case <-ctx.Done():
+	wait := true
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-time.After(10 * time.Second):
+			p.Log.Info("resign leader")
+			p.Election.ResignLeader()
+		case <-ticker.C:
+			wait = !wait
+			p.Log.Info("reset wait: ", wait)
+			p.Election.ResetWait(wait)
+		case <-ctx.Done():
+			return nil
+		}
 	}
-	return nil
 }
 
 func init() {

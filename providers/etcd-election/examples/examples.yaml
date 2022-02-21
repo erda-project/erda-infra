@@ -4,7 +4,8 @@ etcd:
         cert_file: "etcd-client.pem"
         cert_key_file: "etcd-client-key.pem"
         ca_file: "etcd-ca.pem"
-  
+
 example:
 
 etcd-election:
+    wait: true
