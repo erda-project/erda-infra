@@ -74,11 +74,13 @@ type Interface interface {
 	ResignLeader() error
 	OnLeader(handler func(context.Context))
 	Watch(ctx context.Context, opts ...WatchOption) <-chan Event
+	SetNonVoter(b bool)
 }
 
 type config struct {
-	Prefix string `file:"root_path" default:"etcd-election"`
-	NodeID string `file:"node_id"`
+	Prefix   string `file:"root_path" default:"etcd-election"`
+	NodeID   string `file:"node_id"`
+	NonVoter bool   `file:"non_voter"`
 }
 
 type provider struct {
@@ -93,6 +95,7 @@ type provider struct {
 	election       *concurrency.Election
 	session        *concurrency.Session
 	iAmLeader      bool
+	waitCh         chan struct{}
 }
 
 // Init .
@@ -101,6 +104,9 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	p.prefix = p.Cfg.Prefix + "/"
 	if len(p.Cfg.NodeID) <= 0 {
 		p.Cfg.NodeID = uuid.NewV4().String()
+	}
+	if p.Cfg.NonVoter {
+		p.waitCh = make(chan struct{})
 	}
 	p.Log.Info("my node id: ", p.Cfg.NodeID)
 	return nil
@@ -120,6 +126,20 @@ func (p *provider) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		default:
+		}
+
+		p.lock.Lock()
+		waitCh := p.waitCh
+		p.lock.Unlock()
+		for waitCh != nil {
+			select {
+			case <-ctx.Done():
+				return nil
+			case <-waitCh:
+			}
+			p.lock.Lock()
+			waitCh = p.waitCh
+			p.lock.Unlock()
 		}
 
 		session, err := p.newSession(ctx, 5*time.Second)
@@ -161,10 +181,10 @@ func (p *provider) Run(ctx context.Context) error {
 		p.runHandlers()
 		select {
 		case <-session.Done():
-			p.resignLeader()
+			p.resignLeader(nil)
 			continue
 		case <-ctx.Done():
-			p.resignLeader()
+			p.resignLeader(nil)
 			return nil
 		}
 	}
@@ -234,18 +254,26 @@ func (p *provider) IsLeader() bool {
 }
 
 func (p *provider) ResignLeader() error {
-	err := p.resignLeader()
+	err := p.resignLeader(nil)
 	if err != nil {
 		p.Log.Warnf("fail to resign leader: %s", err)
 	}
 	return err
 }
 
-func (p *provider) resignLeader() error {
+func (p *provider) resignLeader(wait *bool) error {
 	var election *concurrency.Election
 	var session *concurrency.Session
 
 	p.lock.Lock()
+	if wait != nil {
+		if *wait && p.waitCh == nil {
+			p.waitCh = make(chan struct{})
+		} else if !*wait && p.waitCh != nil {
+			close(p.waitCh)
+			p.waitCh = nil
+		}
+	}
 	if !p.iAmLeader {
 		p.lock.Unlock()
 		return nil
@@ -323,6 +351,11 @@ func (p *provider) Watch(ctx context.Context, opts ...WatchOption) <-chan Event 
 		}
 	}()
 	return notify
+}
+
+// SetNonVoter .
+func (p *provider) SetNonVoter(b bool) {
+	p.resignLeader(&b)
 }
 
 func init() {
