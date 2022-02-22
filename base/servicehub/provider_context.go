@@ -262,7 +262,7 @@ func (c *providerContext) Logger() logs.Logger {
 	if c.hub.logger == nil {
 		return nil
 	}
-	return c.hub.logger.Sub(c.name)
+	return c.hub.logger.Sub(c.key)
 }
 
 // Config .
