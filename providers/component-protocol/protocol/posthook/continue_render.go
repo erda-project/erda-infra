@@ -22,7 +22,11 @@ import (
 func HandleContinueRender(renderingItems []cptype.RendingItem, req *cptype.ComponentProtocol) {
 	result := make(map[string]cptype.ContinueRender)
 	for _, comp := range renderingItems {
-		compOptions := req.Components[comp.Name].Options
+		c, ok := req.Components[comp.Name]
+		if !ok {
+			continue
+		}
+		compOptions := c.Options
 		if compOptions == nil || compOptions.ContinueRender == nil || compOptions.ContinueRender.OpKey == "" {
 			continue
 		}
