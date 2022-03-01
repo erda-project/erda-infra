@@ -31,3 +31,10 @@ components:
     props:
       text: ${{ i18n.addBug }}
       type: "primary"
+
+rendering:
+  __DefaultRendering__:
+    - name: page
+    - name: filter
+  filter: 
+    - name: taskButton

@@ -129,8 +129,16 @@ func getProtoComp(ctx context.Context, p *cptype.ComponentProtocol, compName str
 
 	c, ok := p.Components[compName]
 	if !ok {
-		err = fmt.Errorf("empty component [%s] in protocol", compName)
-		return
+		defaultProtocol, err := getDefaultProtocol(ctx, p.Scenario)
+		if err != nil {
+			return c, err
+		}
+		c, ok = defaultProtocol.Components[compName]
+		if !ok {
+			err = fmt.Errorf("empty component [%s] in default protocol", compName)
+		}
+		p.Components[compName] = c
+		return c, err
 	}
 	return
 }
