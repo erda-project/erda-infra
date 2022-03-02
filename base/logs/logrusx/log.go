@@ -15,8 +15,9 @@
 package logrusx
 
 import (
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/sirupsen/logrus"
+
+	"github.com/erda-project/erda-infra/base/logs"
 )
 
 // Logger .
@@ -29,7 +30,7 @@ type Logger struct {
 func New(options ...Option) logs.Logger {
 	log := logrus.New()
 	log.SetFormatter(&logrus.TextFormatter{
-		ForceColors:     false,
+		ForceColors:     true,
 		FullTimestamp:   true,
 		TimestampFormat: "2006-01-02 15:04:05.000",
 	})
