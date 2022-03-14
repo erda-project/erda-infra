@@ -120,6 +120,37 @@ hierarchy:
 	assert.Equal(t, expected, orders)
 }
 
+func Test_slot_calculateDefaultRenderOrderByHierarchy(t *testing.T) {
+	py := `
+hierarchy:
+  root: myPage
+  structure:
+    myPage:
+      - pageHeader
+      - tabsTable
+    pageHeader:
+      slot: slotFilter
+      left: pipelineTabs
+      right: addPipelineBtn
+    tabsTable:
+      slot: filterContainer
+      table: pipelineTable
+    filterContainer:
+      left: customFilter
+`
+	var p cptype.ComponentProtocol
+	assert.NoError(t, yaml.Unmarshal([]byte(py), &p))
+	orders, err := calculateDefaultRenderOrderByHierarchy(&p)
+	assert.NoError(t, err)
+	expected := []string{"myPage",
+		"pageHeader", "slotFilter", "pipelineTabs", "addPipelineBtn",
+		"tabsTable",
+		"filterContainer", "customFilter",
+		"pipelineTable",
+	}
+	assert.Equal(t, expected, orders)
+}
+
 func Test_recursiveWalkCompOrder(t *testing.T) {
 	// recursive walk from root
 	var result []string

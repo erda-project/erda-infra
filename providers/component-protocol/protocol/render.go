@@ -293,13 +293,15 @@ func calculateDefaultRenderOrderByHierarchy(p *cptype.ComponentProtocol) ([]stri
 				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs[i])...)
 			}
 		case map[string]interface{}:
+			allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs["slot"])...)
 			allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs["left"])...)
 			allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, subs["right"])...)
 			childrenComps := *recursiveGetSubComps(nil, subs["children"])
 			footerComps := *recursiveGetSubComps(nil, subs["footer"])
-			// recognized structKey: left, right, children, footer
+			// recognized structKey: left, right, children, footer, slot
 			for structKey, compName := range subs {
-				if structKey == "left" || structKey == "right" || structKey == "children" || structKey == "footer" {
+				if structKey == "left" || structKey == "right" ||
+					structKey == "children" || structKey == "footer" || structKey == "slot" {
 					continue
 				}
 				allCompSubMap[k] = append(allCompSubMap[k], *recursiveGetSubComps(nil, compName)...)
