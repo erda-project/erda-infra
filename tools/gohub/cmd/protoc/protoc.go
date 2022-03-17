@@ -23,9 +23,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 	"github.com/erda-project/erda-infra/tools/gohub/cmd/tools/install"
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -53,8 +54,8 @@ func init() {
 	implementCmd.Flags().StringSlice("include", nil, "include directory")
 	protoCmd.AddCommand(implementCmd)
 
-	pluginCmd.Flags().StringSlice("opt", nil, "options for protoc plugin")
-	pluginCmd.Flags().String("out", ".", "output directory of plugin")
+	pluginCmd.Flags().StringSlice("opt", nil, "options for protoc plugins")
+	pluginCmd.Flags().String("out", ".", "output directory of plugins")
 	pluginCmd.Flags().StringSlice("include", nil, "include directory")
 	protoCmd.AddCommand(pluginCmd)
 
@@ -108,7 +109,7 @@ var implementCmd = &cobra.Command{
 }
 
 var pluginCmd = &cobra.Command{
-	Use:   "exec [plugin]",
+	Use:   "exec [plugins]",
 	Short: "exec",
 	Run: func(command *cobra.Command, args []string) {
 		install.Download(false, cmd.Verbose())
