@@ -23,9 +23,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 	"github.com/erda-project/erda-infra/tools/gohub/cmd/tools/install"
-	"github.com/spf13/cobra"
 )
 
 func init() {
