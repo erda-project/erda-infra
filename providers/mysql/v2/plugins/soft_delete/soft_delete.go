@@ -167,10 +167,26 @@ func (sd SoftDeleteDeleteClause) ModifyStatement(stmt *gorm.Statement) {
 	}
 }
 
-//func (DeletedAt) CreateClauses(f *schema.Field) []clause.Interface {
-//
-//}
+func (DeletedAt) CreateClauses(f *schema.Field) []clause.Interface {
+	return []clause.Interface{SoftDeleteCreateClause{Field: f}}
+}
 
 type SoftDeleteCreateClause struct {
 	Field *schema.Field
+}
+
+func (sd SoftDeleteCreateClause) Name() string {
+	return ""
+}
+
+func (sd SoftDeleteCreateClause) Build(clause.Builder) {
+}
+
+func (sd SoftDeleteCreateClause) MergeClause(*clause.Clause) {
+}
+
+func (sd SoftDeleteCreateClause) ModifyStatement(stmt *gorm.Statement) {
+	if stmt.SQL.Len() == 0 && !stmt.Statement.Unscoped {
+		stmt.SetColumn(sd.Field.Name, time.Unix(0, 0))
+	}
 }
