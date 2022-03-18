@@ -27,7 +27,10 @@ import (
 	"github.com/erda-project/erda-infra/base/servicehub"
 )
 
+// Interface clickhouse client
 type Interface interface {
+
+	// Client .
 	Client() ckdriver.Conn
 }
 
