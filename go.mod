@@ -3,6 +3,7 @@ module github.com/erda-project/erda-infra
 go 1.16
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/Chronokeeper/anyxml v0.0.0-20160530174208-54457d8e98c6 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.0.12
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
