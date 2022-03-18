@@ -6,5 +6,6 @@ mysql:
     database: "${MYSQL_DATABASE:test}"
     debug: "${MYSQL_DEBUG:true}"
     charset: "${MYSQL_CHARSET:utf8mb4}"
+    tls: "${MYSQL_TLS:false}"
 
 example:
