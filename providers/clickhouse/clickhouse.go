@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	clickhouse "github.com/ClickHouse/clickhouse-go/v2"
+	ck "github.com/ClickHouse/clickhouse-go/v2"
 	ckdriver "github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 
 	"github.com/erda-project/erda-infra/base/logs"
@@ -56,9 +56,9 @@ type provider struct {
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
-	options := &clickhouse.Options{
+	options := &ck.Options{
 		Addr: strings.Split(p.Cfg.Addr, ","),
-		Auth: clickhouse.Auth{
+		Auth: ck.Auth{
 			Database: p.Cfg.Database,
 			Username: p.Cfg.Username,
 			Password: p.Cfg.Password,
@@ -67,10 +67,10 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		MaxIdleConns:     p.Cfg.MaxIdleConns,
 		MaxOpenConns:     p.Cfg.MaxOpenConns,
 		ConnMaxLifetime:  p.Cfg.ConnMaxLifeTime,
-		ConnOpenStrategy: clickhouse.ConnOpenStrategy(p.Cfg.ConnOpenStrategy),
+		ConnOpenStrategy: ck.ConnOpenStrategy(p.Cfg.ConnOpenStrategy),
 	}
 
-	conn, err := clickhouse.Open(options)
+	conn, err := ck.Open(options)
 	if err != nil {
 		return fmt.Errorf("fail to connect clickhouse: %s", err)
 	}
