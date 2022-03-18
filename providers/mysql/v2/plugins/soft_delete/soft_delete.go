@@ -187,6 +187,6 @@ func (sd SoftDeleteCreateClause) MergeClause(*clause.Clause) {
 
 func (sd SoftDeleteCreateClause) ModifyStatement(stmt *gorm.Statement) {
 	if stmt.SQL.Len() == 0 && !stmt.Statement.Unscoped {
-		stmt.SetColumn(sd.Field.Name, time.Unix(0, 0))
+		stmt.SetColumn(sd.Field.Name, DeletedAt{Time: time.Unix(0, 0), Valid: true})
 	}
 }
