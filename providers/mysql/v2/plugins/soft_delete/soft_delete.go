@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"reflect"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -86,7 +87,7 @@ func (sd SoftDeleteQueryClause) ModifyStatement(stmt *gorm.Statement) {
 
 		stmt.AddClause(clause.Where{Exprs: []clause.Expression{
 			clause.Or(
-				clause.Eq{Column: clause.Column{Table: clause.CurrentTable, Name: sd.Field.DBName}, Value: "1970-01-01 00:00:00"},
+				clause.Eq{Column: clause.Column{Table: clause.CurrentTable, Name: sd.Field.DBName}, Value: time.Unix(0, 0)},
 				clause.Eq{Column: clause.Column{Table: clause.CurrentTable, Name: sd.Field.DBName}, Value: nil},
 			),
 		}})
@@ -164,4 +165,12 @@ func (sd SoftDeleteDeleteClause) ModifyStatement(stmt *gorm.Statement) {
 		stmt.AddClauseIfNotExists(clause.Update{})
 		stmt.Build(stmt.DB.Callback().Update().Clauses...)
 	}
+}
+
+//func (DeletedAt) CreateClauses(f *schema.Field) []clause.Interface {
+//
+//}
+
+type SoftDeleteCreateClause struct {
+	Field *schema.Field
 }
