@@ -16,6 +16,7 @@ package providers
 
 import (
 	_ "github.com/erda-project/erda-infra/providers/cassandra"             //
+	_ "github.com/erda-project/erda-infra/providers/clickhouse"            //
 	_ "github.com/erda-project/erda-infra/providers/elasticsearch"         //
 	_ "github.com/erda-project/erda-infra/providers/etcd"                  //
 	_ "github.com/erda-project/erda-infra/providers/etcd-election"         //

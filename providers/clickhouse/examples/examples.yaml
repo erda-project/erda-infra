@@ -1,0 +1,6 @@
+clickhouse:
+  addr: chi-erdatest-erda-0-0.default.svc.cluster.local:9000
+  username: fdpuser
+  password: fdpuser
+
+example:
