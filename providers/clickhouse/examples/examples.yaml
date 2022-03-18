@@ -1,6 +1,6 @@
 clickhouse:
-  addr: chi-erdatest-erda-0-0.default.svc.cluster.local:9000
-  username: fdpuser
-  password: fdpuser
+  addr: "${CLICKHOUSE_ADDR:chi-erdatest-erda-0-0.default.svc.cluster.local:9000}"
+  username: "${CLICKHOUSE_USERNAME:fdpuser}"
+  password: "${CLICKHOUSE_PASSWORD:fdpuser}"
 
 example:
