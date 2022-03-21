@@ -28,8 +28,7 @@ import (
 
 var zero = time.Unix(0, 0)
 
-// DeletedAt
-// on delete: the field value will be set to the current datetime.
+// DeletedAt on delete: the field value will be set to the current datetime.
 // on query: the record will be not returned if it is soft-deleted.
 // if you want to find the record which is soft-deleted, or you want
 // to delete the record forever, you can use db.Unscoped().Find(&users),
