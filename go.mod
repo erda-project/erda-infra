@@ -22,13 +22,14 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/go-sql-driver/mysql v1.5.0
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a // indirect
 	github.com/go-zookeeper/zk v1.0.2
 	github.com/gocql/gocql v0.0.0-20210707082121-9a3953d1826d
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493
@@ -74,6 +75,9 @@ require (
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gorm.io/driver/mysql v1.3.2
+	gorm.io/driver/sqlite v1.3.1
+	gorm.io/gorm v1.23.2
 	k8s.io/apimachinery v0.18.3
 	k8s.io/client-go v0.18.3
 )
