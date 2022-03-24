@@ -21,22 +21,27 @@ import (
 	ckdriver "github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 )
 
+// EncodeFunc .
 type EncodeFunc func(data interface{}) (item *WriteItem, err error)
 
+// WriteItem .
 type WriteItem struct {
 	Table string
 	Data  interface{}
 }
 
+// WriterOptions .
 type WriterOptions struct {
 	Encoder EncodeFunc
 }
 
+// Writer .
 type Writer struct {
 	client  ckdriver.Conn
 	Encoder EncodeFunc
 }
 
+// NewWriter .
 func NewWriter(client ckdriver.Conn, encoder EncodeFunc) *Writer {
 	w := &Writer{
 		client:  client,
@@ -45,10 +50,12 @@ func NewWriter(client ckdriver.Conn, encoder EncodeFunc) *Writer {
 	return w
 }
 
+// Close .
 func (w *Writer) Close() error {
 	return nil
 }
 
+// WriteN .
 func (w *Writer) WriteN(list ...interface{}) (int, error) {
 	if len(list) <= 0 {
 		return 0, nil

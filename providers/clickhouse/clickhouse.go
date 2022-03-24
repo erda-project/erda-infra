@@ -33,6 +33,7 @@ type Interface interface {
 	// Client .
 	Client() ckdriver.Conn
 
+	// NewWriter .
 	NewWriter(opts *WriterOptions) *Writer
 }
 
