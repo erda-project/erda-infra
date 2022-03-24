@@ -30,7 +30,7 @@ type config struct {
 type provider struct {
 	Cfg *config
 	Log logs.Logger
-	Dep dependency.Interface `autowired:"example-dependency"`
+	Dep dependency.Interface `autowired:"example-dependency" inherit-label:"preferred"`
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {

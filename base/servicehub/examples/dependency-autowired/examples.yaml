@@ -1,4 +1,4 @@
-hello-provider:
+hello-provider@labelme:
     name: "recallsong"
 
 example-dependency-provider:
