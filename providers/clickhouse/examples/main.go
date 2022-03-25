@@ -30,6 +30,11 @@ type provider struct {
 	Clickhouse clickhouse.Interface
 }
 
+type goco struct {
+	Timestamp time.Time `ch:"timestamp"`
+	Value     string    `ch:"value"`
+}
+
 func (p *provider) Init(ctx servicehub.Context) error {
 	// create table
 	err := p.Clickhouse.Client().Exec(context.Background(),
@@ -54,6 +59,21 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		return err
 	}
 	err = batch.Send()
+	if err != nil {
+		return err
+	}
+
+	writer := p.Clickhouse.NewWriter(&clickhouse.WriterOptions{
+		Encoder: func(data interface{}) (item *clickhouse.WriteItem, err error) {
+			return &clickhouse.WriteItem{
+				Table: "example",
+				Data:  data,
+			}, nil
+		},
+	})
+	_, err = writer.WriteN(
+		&goco{Timestamp: time.Now(), Value: "hi"},
+		&goco{Timestamp: time.Now(), Value: "hi"})
 	if err != nil {
 		return err
 	}
