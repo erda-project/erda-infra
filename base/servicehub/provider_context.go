@@ -31,6 +31,14 @@ import (
 	"github.com/erda-project/erda-infra/base/logs"
 )
 
+type inheritLabelStrategy string
+
+const (
+	inheritLabelTrue      inheritLabelStrategy = "true"
+	inheritLabelFalse     inheritLabelStrategy = "false"
+	inheritLabelPreferred inheritLabelStrategy = "preferred"
+)
+
 type providerContext struct {
 	context.Context
 	hub         *Hub
@@ -111,6 +119,7 @@ func (c *providerContext) Init() (err error) {
 			if service == "-" {
 				continue
 			}
+			service = c.adjustDependServiceLabel(service, &field)
 			dc := newDependencyContext(
 				service,
 				c.name,
@@ -188,6 +197,34 @@ func boolTagValue(tag reflect.StructTag, key string, defval bool) (bool, error) 
 	return defval, nil
 }
 
+func (c *providerContext) adjustDependServiceLabel(service string, field *reflect.StructField) string {
+	if len(c.label) == 0 || strings.Contains(service, "@") {
+		return service
+	}
+	inheritLabel := field.Tag.Get("inherit-label")
+	switch inheritLabelStrategy(inheritLabel) {
+	case inheritLabelTrue:
+		return fmt.Sprintf("%s@%s", service, c.label)
+	case inheritLabelPreferred:
+		pcs := c.hub.servicesMap[service]
+		for _, pc := range pcs {
+			if pc.label == c.label {
+				return fmt.Sprintf("%s@%s", service, c.label)
+			}
+		}
+	case inheritLabelFalse:
+	default:
+	}
+	return service
+}
+
+func (c *providerContext) fullName() string {
+	if len(c.label) == 0 {
+		return c.name
+	}
+	return fmt.Sprintf("%s@%s", c.name, c.label)
+}
+
 // Dependencies .
 func (c *providerContext) Dependencies() (services []string, providers []string) {
 	srvset, provset := make(map[string]bool), make(map[reflect.Type]bool)
@@ -227,6 +264,7 @@ func (c *providerContext) Dependencies() (services []string, providers []string)
 				continue
 			}
 			if len(service) > 0 {
+				service = c.adjustDependServiceLabel(service, &field)
 				opt, _ := boolTagValue(field.Tag, "optional", false)
 				if opt {
 					if len(c.hub.servicesMap[service]) > 0 && !srvset[service] {
