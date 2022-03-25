@@ -202,7 +202,7 @@ func (h *Hub) resolveDependency(providersMap map[string][]*providerContext) (gra
 					continue loop
 				}
 			}
-			return nil, fmt.Errorf("provider %s depends on service %s, but it not found", p[0].name, service)
+			return nil, fmt.Errorf("provider %s depends on service %s, but it not found", p[0].fullName(), service)
 		}
 		node := graph.NewNode(name)
 		for dep := range providers {

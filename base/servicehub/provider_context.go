@@ -203,8 +203,6 @@ func (c *providerContext) adjustDependServiceLabel(service string, field *reflec
 	}
 	inheritLabel := field.Tag.Get("inherit-label")
 	switch inheritLabelStrategy(inheritLabel) {
-	case inheritLabelFalse:
-		return service
 	case inheritLabelTrue:
 		return fmt.Sprintf("%s@%s", service, c.label)
 	case inheritLabelPreferred:
@@ -214,8 +212,17 @@ func (c *providerContext) adjustDependServiceLabel(service string, field *reflec
 				return fmt.Sprintf("%s@%s", service, c.label)
 			}
 		}
+	case inheritLabelFalse:
+	default:
 	}
 	return service
+}
+
+func (c *providerContext) fullName() string {
+	if len(c.label) == 0 {
+		return c.name
+	}
+	return fmt.Sprintf("%s@%s", c.name, c.label)
 }
 
 // Dependencies .
