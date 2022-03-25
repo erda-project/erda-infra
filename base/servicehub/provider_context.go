@@ -34,9 +34,9 @@ import (
 type inheritLabelStrategy string
 
 const (
-	InheritLabelTrue      inheritLabelStrategy = "true"
-	InheritLabelFalse     inheritLabelStrategy = "false"
-	InheritLabelPreferred inheritLabelStrategy = "preferred"
+	inheritLabelTrue      inheritLabelStrategy = "true"
+	inheritLabelFalse     inheritLabelStrategy = "false"
+	inheritLabelPreferred inheritLabelStrategy = "preferred"
 )
 
 type providerContext struct {
@@ -203,11 +203,11 @@ func (c *providerContext) adjustDependServiceLabel(service string, field *reflec
 	}
 	inheritLabel := field.Tag.Get("inherit-label")
 	switch inheritLabelStrategy(inheritLabel) {
-	case InheritLabelFalse:
+	case inheritLabelFalse:
 		return service
-	case InheritLabelTrue:
+	case inheritLabelTrue:
 		return fmt.Sprintf("%s@%s", service, c.label)
-	case InheritLabelPreferred:
+	case inheritLabelPreferred:
 		pcs := c.hub.servicesMap[service]
 		for _, pc := range pcs {
 			if pc.label == c.label {
