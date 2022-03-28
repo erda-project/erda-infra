@@ -312,7 +312,8 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	for _, ch := range closer {
 		go func(ch <-chan os.Signal) {
 			select {
-			case <-ch:
+			case signal := <-ch:
+				h.logger.Errorf("signal received: %s, hub begin quitting ...\n", signal.String())
 			case <-closeCh:
 			}
 			elock.Lock()
