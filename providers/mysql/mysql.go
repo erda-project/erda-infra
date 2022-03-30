@@ -44,8 +44,8 @@ type config struct {
 	MySQLUsername       string        `file:"username" env:"MYSQL_USERNAME" default:"root"`
 	MySQLPassword       string        `file:"password" env:"MYSQL_PASSWORD" default:""`
 	MySQLDatabase       string        `file:"database" env:"MYSQL_DATABASE"`
-	MySQLMaxIdleConns   uint64        `file:"max_idle_conns" env:"MYSQL_MAXIDLECONNS" default:"1"`
-	MySQLMaxOpenConns   uint64        `file:"max_open_conns" env:"MYSQL_MAXOPENCONNS" default:"2"`
+	MySQLMaxIdleConns   uint64        `file:"max_idle_conns" env:"MYSQL_MAXIDLECONNS" default:"10"`
+	MySQLMaxOpenConns   uint64        `file:"max_open_conns" env:"MYSQL_MAXOPENCONNS" default:"20"`
 	MySQLMaxLifeTime    time.Duration `file:"max_lifetime" env:"MYSQL_MAXLIFETIME" default:"30m"`
 	MySQLDebug          bool          `file:"debug" env:"MYSQL_DEBUG" default:"false"`
 	MySQLCharset        string        `file:"charset" env:"MYSQL_CHARSET" default:"utf8mb4"`
