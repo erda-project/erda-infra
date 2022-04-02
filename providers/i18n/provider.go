@@ -23,11 +23,11 @@ import (
 	"regexp"
 	"strings"
 
-	cfg "github.com/recallsong/go-utils/config"
 	"github.com/recallsong/go-utils/reflectx"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
+	cfg "github.com/erda-project/erda-infra/pkg/config"
 )
 
 // Internationalizable .
