@@ -26,10 +26,10 @@ import (
 	"regexp"
 	"strings"
 
-	cfg "github.com/erda-project/erda-infra/pkg/config"
 	"github.com/recallsong/go-utils/reflectx"
 	"github.com/sirupsen/logrus"
 
+	cfg "github.com/erda-project/erda-infra/pkg/config"
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
 

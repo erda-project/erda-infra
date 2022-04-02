@@ -28,7 +28,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/erda-project/erda-infra/pkg/config"
 	"github.com/recallsong/go-utils/errorx"
 	"github.com/recallsong/go-utils/os/signalx"
 	"github.com/sirupsen/logrus"
@@ -37,6 +36,7 @@ import (
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/logs/logrusx"
 	graph "github.com/erda-project/erda-infra/base/servicehub/dependency-graph"
+	"github.com/erda-project/erda-infra/pkg/config"
 )
 
 // Hub .
