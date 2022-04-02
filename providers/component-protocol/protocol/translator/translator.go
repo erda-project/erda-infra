@@ -26,7 +26,7 @@ import (
 	"regexp"
 	"strings"
 
-	cfg "github.com/recallsong/go-utils/config"
+	cfg "github.com/erda-project/erda-infra/pkg/config"
 	"github.com/recallsong/go-utils/reflectx"
 	"github.com/sirupsen/logrus"
 

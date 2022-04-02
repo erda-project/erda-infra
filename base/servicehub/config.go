@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/recallsong/go-utils/config"
+	"github.com/erda-project/erda-infra/pkg/config"
 )
 
 func (h *Hub) loadConfigWithArgs(file string, cfg map[string]interface{}, args ...string) (map[string]interface{}, error) {

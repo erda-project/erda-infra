@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/recallsong/go-utils/config"
+	"github.com/erda-project/erda-infra/pkg/config"
 	"github.com/recallsong/go-utils/encoding/jsonx"
 	"github.com/recallsong/unmarshal"
 	unmarshalflag "github.com/recallsong/unmarshal/unmarshal-flag"

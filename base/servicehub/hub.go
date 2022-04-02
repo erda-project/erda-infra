@@ -28,7 +28,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/recallsong/go-utils/config"
+	"github.com/erda-project/erda-infra/pkg/config"
 	"github.com/recallsong/go-utils/errorx"
 	"github.com/recallsong/go-utils/os/signalx"
 	"github.com/sirupsen/logrus"
