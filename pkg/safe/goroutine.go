@@ -16,6 +16,7 @@ package safe
 
 import (
 	"fmt"
+	"runtime/debug"
 )
 
 // Go run the given function `f` in a new goroutine, recover if `f` panics.
@@ -28,6 +29,7 @@ func Do(f func()) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("recovered from panic: %v\n", r)
+			debug.PrintStack()
 		}
 	}()
 	f()
