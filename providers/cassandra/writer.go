@@ -27,11 +27,12 @@ type StatementBuilder interface {
 }
 
 type batchWriter struct {
-	session       *Session
-	builder       StatementBuilder
-	retry         int
-	retryDuration time.Duration
-	log           logs.Logger
+	session        *Session
+	builder        StatementBuilder
+	retry          int
+	retryDuration  time.Duration
+	log            logs.Logger
+	batchSizeBytes int
 }
 
 func (w *batchWriter) Write(data interface{}) error {
@@ -43,6 +44,9 @@ func (w *batchWriter) WriteN(data ...interface{}) (int, error) {
 	if len(data) <= 0 {
 		return 0, nil
 	}
+	batchs := make([]*gocql.Batch, 0, 1)
+	sizeBytes := 0
+
 	batch := w.session.Session().NewBatch(gocql.LoggedBatch)
 	for _, item := range data {
 		stmt, args, err := w.builder.GetStatement(item)
@@ -50,22 +54,53 @@ func (w *batchWriter) WriteN(data ...interface{}) (int, error) {
 			w.log.Errorf("fail to convert data to statement: %s", err)
 			continue
 		}
+		if w.batchSizeBytes > 0 {
+			sizeBytes += cqlSizeBytes(stmt, args)
+			if sizeBytes >= w.batchSizeBytes {
+				batchs = append(batchs, batch)
+				// reset
+				sizeBytes = 0
+				batch = w.session.Session().NewBatch(gocql.LoggedBatch)
+			}
+
+		}
 		batch.Query(stmt, args...)
 	}
-	for i := 0; ; i++ {
-		err := w.session.Session().ExecuteBatch(batch)
-		if err != nil {
-			if w.retry == -1 || i < w.retry {
-				w.log.Warnf("fail to write batch(%d) to cassandra and retry after %s: %s", batch.Size(), w.retryDuration.String(), err)
-				time.Sleep(w.retryDuration)
-				continue
+
+	if batch.Size() > 0 {
+		batchs = append(batchs, batch)
+	}
+
+	for _, batch := range batchs {
+		for i := 0; ; i++ {
+			err := w.session.Session().ExecuteBatch(batch)
+			if err != nil {
+				if w.retry == -1 || i < w.retry {
+					w.log.Warnf("fail to write batch(%d) to cassandra and retry after %s: %s", batch.Size(), w.retryDuration.String(), err)
+					time.Sleep(w.retryDuration)
+					continue
+				}
+				w.log.Errorf("fail to write batch(%d) to cassandra: %s", batch.Size(), err)
+				break
 			}
-			w.log.Errorf("fail to write batch(%d) to cassandra: %s", batch.Size(), err)
 			break
 		}
-		break
 	}
+
 	return batch.Size(), nil
+}
+
+func cqlSizeBytes(stmt string, args []interface{}) int {
+	size := len(stmt)
+	for _, item := range args {
+		switch v := item.(type) {
+		case string:
+			size += len(v)
+		case []byte:
+			size += len(v)
+		}
+	}
+	return size
 }
 
 func (w *batchWriter) Close() error {
