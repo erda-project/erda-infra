@@ -30,8 +30,9 @@ import (
 type WriterConfig struct {
 	Parallelism uint64 `file:"parallelism" default:"4" desc:"parallelism"`
 	Batch       struct {
-		Size    uint64        `file:"size" default:"100" desc:"batch size"`
-		Timeout time.Duration `file:"timeout" default:"30s" desc:"timeout to flush buffer for batch write"`
+		SizeBytes int           `file:"size_bytes" desc:"cassandra batch failed size bytes"`
+		Size      uint64        `file:"size" default:"100" desc:"batch size"`
+		Timeout   time.Duration `file:"timeout" default:"30s" desc:"timeout to flush buffer for batch write"`
 	} `file:"batch"`
 	Retry int `file:"retry" desc:"retry if fail to write"`
 }
@@ -175,11 +176,12 @@ func (s *service) createKeySpace(session *gocql.Session, kc *KeyspaceConfig) err
 func (s *service) NewBatchWriter(session *Session, c *WriterConfig, builderCreator func() StatementBuilder) writer.Writer {
 	return writer.ParallelBatch(func(uint64) writer.Writer {
 		return &batchWriter{
-			session:       session,
-			builder:       builderCreator(),
-			retry:         c.Retry,
-			retryDuration: 3 * time.Second,
-			log:           s.log,
+			session:        session,
+			builder:        builderCreator(),
+			retry:          c.Retry,
+			retryDuration:  3 * time.Second,
+			log:            s.log,
+			batchSizeBytes: c.Batch.SizeBytes,
 		}
 	}, c.Parallelism, c.Batch.Size, c.Batch.Timeout, s.batchWriteError)
 }
