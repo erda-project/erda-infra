@@ -1,0 +1,4 @@
+kafka-v2:
+  servers: "localhost:9092"
+
+examples:

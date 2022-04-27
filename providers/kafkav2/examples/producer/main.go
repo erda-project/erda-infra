@@ -1,0 +1,73 @@
+// Copyright (c) 2021 Terminus, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package main
+
+import (
+	"context"
+	"os"
+	"time"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/kafkav2"
+)
+
+type config struct {
+	Output kafkav2.ProducerConfig `file:"output"`
+}
+
+type provider struct {
+	Cfg   *config
+	Log   logs.Logger
+	Kafka kafkav2.Interface `autowired:"kafka-v2"`
+}
+
+func (p *provider) Run(ctx context.Context) error {
+	w, err := p.Kafka.NewProducer(p.Cfg.Output)
+	if err != nil {
+		return err
+	}
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			err := w.Write(kafkav2.Message{
+				Topic: "test",
+				Data:  []byte("hello world"),
+			})
+			if err != nil {
+				p.Log.Errorf("write err: %w", err)
+			}
+		}
+	}
+}
+
+func init() {
+	servicehub.Register("examples", &servicehub.Spec{
+		Services:   []string{"hello"},
+		ConfigFunc: func() interface{} { return &config{} },
+		Creator: func() servicehub.Provider {
+			return &provider{}
+		},
+	})
+}
+
+func main() {
+	hub := servicehub.New()
+	hub.Run("examples", "", os.Args...)
+}
