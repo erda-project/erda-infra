@@ -45,9 +45,15 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) (*protogen.Generate
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the ", urlencPackage, " package it is being compiled against.")
 	for _, message := range file.Messages {
+		if strings.Contains(strings.ToUpper(message.Comments.Leading.String()), "+SKIP_GO-FORM") {
+			continue
+		}
 		g.P("var _ ", urlencPackage.Ident("URLValuesUnmarshaler"), " = ", "(*", message.GoIdent.GoName, ")(nil)")
 	}
 	for _, message := range file.Messages {
+		if strings.Contains(strings.ToUpper(message.Comments.Leading.String()), "+SKIP_GO-FORM") {
+			continue
+		}
 		err := genMessage(gen, file, g, message)
 		if err != nil {
 			return g, err
