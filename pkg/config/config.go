@@ -134,7 +134,18 @@ func (pe ParseError) Error() string {
 // UnmarshalToMap .
 func UnmarshalToMap(in io.Reader, typ string, c map[string]interface{}) (err error) {
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(in)
+	_, err = buf.ReadFrom(in)
+	if err != nil {
+		return err
+	}
+	byts := buf.Bytes()
+	byts = TrimBOM(byts)
+	byts = EscapeEnv(byts)
+	buf.Reset()
+	_, err = buf.Write(byts)
+	if err != nil {
+		return err
+	}
 	switch strings.ToLower(typ) {
 	case "yaml", "yml":
 		if err = yaml.Unmarshal(buf.Bytes(), &c); err != nil {
@@ -270,10 +281,6 @@ func ConvertData(input, output interface{}, tag string) error {
 // LoadFile .
 func LoadFile(path string) ([]byte, error) {
 	byts, err := ioutil.ReadFile(path)
-	if err == nil {
-		byts = TrimBOM(byts)
-		byts = EscapeEnv(byts)
-	}
 	return byts, err
 }
 
