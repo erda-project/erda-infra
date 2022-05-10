@@ -16,6 +16,7 @@ package i18n
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -48,6 +49,7 @@ type I18n interface {
 	Text(namespace string, lang LanguageCodes, key string) string
 	Sprintf(namespace string, lang LanguageCodes, key string, args ...interface{}) string
 	Translator(namespace string) Translator
+	RegisterFilesFromFS(fsPrefix string, rootFS embed.FS) error
 }
 
 var (

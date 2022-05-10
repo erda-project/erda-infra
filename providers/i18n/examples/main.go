@@ -15,6 +15,7 @@
 package main
 
 import (
+	"embed"
 	"os"
 
 	"github.com/erda-project/erda-infra/base/logs"
@@ -22,12 +23,19 @@ import (
 	"github.com/erda-project/erda-infra/providers/i18n"
 )
 
+//go:embed i18n
+var i18nFS embed.FS
+
 type provider struct {
 	Log  logs.Logger
+	I18n i18n.I18n       `autowired:"i18n"`
 	Tran i18n.Translator `translator:"hello"`
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
+	if err := p.I18n.RegisterFilesFromFS("i18n", i18nFS); err != nil {
+		return err
+	}
 	langs, err := i18n.ParseLanguageCode("en,zh-CN;q=0.9,zh;q=0.8,en-US;q=0.7,en-GB;q=0.6")
 	if err != nil {
 		return err
@@ -40,6 +48,12 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	p.Log.Info(text)
 
 	text = p.Tran.Text(langs, "other")
+	p.Log.Info(text)
+
+	text = p.Tran.Text(langs, "common name")
+	p.Log.Info(text)
+
+	text = p.Tran.Text(langs, "file name")
 	p.Log.Info(text)
 
 	text = p.Tran.Sprintf(langs, "${Internal Error}: reason ${Reason} %s", "test error")
