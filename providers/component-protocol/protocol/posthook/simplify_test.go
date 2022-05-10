@@ -41,7 +41,7 @@ func Test_simplifyComp(t *testing.T) {
 	simplifyComp(c1)
 	assert.Nil(t, c1.Data)
 	assert.NotNil(t, c1.State)
-	assert.Nil(t, c1.Options)
+	assert.NotNil(t, c1.Options)
 
 	b, err := json.Marshal(c1)
 	assert.NoError(t, err)

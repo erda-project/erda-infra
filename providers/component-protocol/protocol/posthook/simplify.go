@@ -25,6 +25,7 @@ func SimplifyProtocol(renderingItems []cptype.RendingItem, req *cptype.Component
 	}
 }
 
+// not simplify comp options as default value is needed。
 func simplifyComp(comp *cptype.Component) {
 	if len(comp.Data) == 0 {
 		comp.Data = nil
@@ -34,16 +35,6 @@ func simplifyComp(comp *cptype.Component) {
 	}
 	if len(comp.Operations) == 0 {
 		comp.Operations = nil
-	}
-	if comp.Options != nil {
-		if !comp.Options.Visible &&
-			!comp.Options.AsyncAtInit &&
-			!comp.Options.FlatExtra &&
-			!comp.Options.RemoveExtraAfterFlat &&
-			len(comp.Options.URLQuery) == 0 &&
-			(comp.Options.ContinueRender == nil || len(comp.Options.ContinueRender.OpKey) == 0) {
-			comp.Options = nil
-		}
 	}
 	if len(comp.Props) == 0 {
 		comp.Props = nil

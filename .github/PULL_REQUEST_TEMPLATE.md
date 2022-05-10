@@ -4,6 +4,6 @@
 #### Which issue(s) this PR fixes:
 Fixes #
 
-#### Specified Reivewers:
+#### Specified Reviewers:
 /assign @your-reviewer
 
