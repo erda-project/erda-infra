@@ -15,10 +15,12 @@
 package config
 
 import (
+	"bytes"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 func Test_Multi_Non_Bool_Env_Replace(t *testing.T) {
@@ -128,4 +130,82 @@ example:
 	_ = os.Unsetenv("ES")
 	_ = os.Unsetenv("CK")
 
+}
+
+func Test_polishBuffer(t *testing.T) {
+	const envLocale = "LOCALE"
+	content := `
+i18n:
+  LOCALE: "${LOCALE:zh-CN}"
+  num: 1
+`
+
+	// init buf
+	buf := bytes.NewBufferString(content)
+	// polish buf
+	assert.NoError(t, polishBuffer(buf))
+	// unmarshal
+	cfg := map[string]interface{}{}
+	err := yaml.Unmarshal(buf.Bytes(), &cfg)
+	assert.NoError(t, err)
+	i18nCfg, ok := cfg["i18n"]
+	assert.True(t, ok)
+	c, ok := i18nCfg.(map[string]interface{})
+	assert.True(t, ok)
+	assert.True(t, c[envLocale] == "zh-CN")
+	assert.True(t, c["num"] == 1)
+
+	// set env
+	assert.NoError(t, os.Setenv(envLocale, "en-US"))
+	defer func() { _ = os.Unsetenv(envLocale) }()
+	// init buf
+	buf = bytes.NewBufferString(content)
+	// polish buf
+	assert.NoError(t, polishBuffer(buf))
+	// unmarshal
+	cfg = map[string]interface{}{}
+	err = yaml.Unmarshal(buf.Bytes(), &cfg)
+	assert.NoError(t, err)
+	i18nCfg, ok = cfg["i18n"]
+	assert.True(t, ok)
+	c, ok = i18nCfg.(map[string]interface{})
+	assert.True(t, ok)
+	assert.True(t, c[envLocale] == "en-US")
+	assert.True(t, c["num"] == 1)
+}
+
+func TestUnmarshalToMap(t *testing.T) {
+	const envLocale = "LOCALE"
+	content := `
+i18n:
+  LOCALE: "${LOCALE:zh-CN}"
+  num: 1
+`
+
+	// init buf
+	buf := bytes.NewBufferString(content)
+	cfg := make(map[string]interface{})
+	// parse conf
+	assert.NoError(t, UnmarshalToMap(buf, "yaml", cfg))
+	i18nCfg, ok := cfg["i18n"]
+	assert.True(t, ok)
+	c, ok := i18nCfg.(map[string]interface{})
+	assert.True(t, ok)
+	assert.True(t, c[envLocale] == "zh-CN")
+	assert.True(t, c["num"] == 1)
+
+	// set env
+	assert.NoError(t, os.Setenv(envLocale, "en-US"))
+	defer func() { _ = os.Unsetenv(envLocale) }()
+	// init buf
+	buf = bytes.NewBufferString(content)
+	cfg = make(map[string]interface{})
+	// parse conf
+	assert.NoError(t, UnmarshalToMap(buf, "yaml", cfg))
+	i18nCfg, ok = cfg["i18n"]
+	assert.True(t, ok)
+	c, ok = i18nCfg.(map[string]interface{})
+	assert.True(t, ok)
+	assert.True(t, c[envLocale] == "en-US")
+	assert.True(t, c["num"] == 1)
 }
