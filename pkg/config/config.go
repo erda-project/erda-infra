@@ -138,11 +138,7 @@ func UnmarshalToMap(in io.Reader, typ string, c map[string]interface{}) (err err
 	if err != nil {
 		return err
 	}
-	byts := buf.Bytes()
-	byts = TrimBOM(byts)
-	byts = EscapeEnv(byts)
-	buf.Reset()
-	_, err = buf.Write(byts)
+	err = polishBuffer(buf)
 	if err != nil {
 		return err
 	}
@@ -206,6 +202,15 @@ func UnmarshalToMap(in io.Reader, typ string, c map[string]interface{}) (err err
 	}
 	toStringKeyMap(c)
 	return nil
+}
+
+func polishBuffer(buf *bytes.Buffer) error {
+	byts := buf.Bytes()
+	byts = TrimBOM(byts)
+	byts = EscapeEnv(byts)
+	buf.Reset()
+	_, err := buf.Write(byts)
+	return err
 }
 
 func toStringKeyMap(i interface{}) interface{} {
