@@ -173,3 +173,39 @@ i18n:
 	assert.True(t, c[envLocale] == "en-US")
 	assert.True(t, c["num"] == 1)
 }
+
+func TestUnmarshalToMap(t *testing.T) {
+	const envLocale = "LOCALE"
+	content := `
+i18n:
+  LOCALE: "${LOCALE:zh-CN}"
+  num: 1
+`
+
+	// init buf
+	buf := bytes.NewBufferString(content)
+	cfg := make(map[string]interface{})
+	// parse conf
+	assert.NoError(t, UnmarshalToMap(buf, "yaml", cfg))
+	i18nCfg, ok := cfg["i18n"]
+	assert.True(t, ok)
+	c, ok := i18nCfg.(map[string]interface{})
+	assert.True(t, ok)
+	assert.True(t, c[envLocale] == "zh-CN")
+	assert.True(t, c["num"] == 1)
+
+	// set env
+	assert.NoError(t, os.Setenv(envLocale, "en-US"))
+	defer func() { _ = os.Unsetenv(envLocale) }()
+	// init buf
+	buf = bytes.NewBufferString(content)
+	cfg = make(map[string]interface{})
+	// parse conf
+	assert.NoError(t, UnmarshalToMap(buf, "yaml", cfg))
+	i18nCfg, ok = cfg["i18n"]
+	assert.True(t, ok)
+	c, ok = i18nCfg.(map[string]interface{})
+	assert.True(t, ok)
+	assert.True(t, c[envLocale] == "en-US")
+	assert.True(t, c["num"] == 1)
+}
