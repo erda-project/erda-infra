@@ -475,6 +475,7 @@ func (h *Hub) Provider(name string) interface{} {
 type RunOptions struct {
 	Name       string
 	ConfigFile string
+	EnvProfile string
 	Content    interface{}
 	Format     string
 	Args       []string
@@ -486,7 +487,7 @@ func (h *Hub) RunWithOptions(opts *RunOptions) {
 	if len(name) <= 0 {
 		name = getAppName(opts.Args...)
 	}
-	config.LoadEnvFile()
+	config.LoadEnvFile(opts.EnvProfile)
 
 	var err error
 	var start bool

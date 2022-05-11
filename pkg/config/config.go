@@ -343,11 +343,19 @@ func LoadEnvFileWithPath(path string, override bool) {
 }
 
 // LoadEnvFile .
-func LoadEnvFile() {
+func LoadEnvFile(profile string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return
 	}
 	path := filepath.Join(wd, ".env")
 	LoadEnvFileWithPath(path, false)
+	LoadEnvFileByProfile(path, profile)
+}
+
+func LoadEnvFileByProfile(path, profile string) {
+	if profile != "" {
+		path = fmt.Sprintf("%s-%s", path, profile)
+		LoadEnvFileWithPath(path, true)
+	}
 }
