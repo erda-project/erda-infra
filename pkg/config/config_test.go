@@ -19,6 +19,7 @@ import (
 	"os"
 	"testing"
 
+	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -208,4 +209,28 @@ i18n:
 	assert.True(t, ok)
 	assert.True(t, c[envLocale] == "en-US")
 	assert.True(t, c["num"] == 1)
+}
+
+func TestLoadEnvFileByProfile(t *testing.T) {
+	type args struct {
+		path    string
+		profile string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"case1", args{
+			path:    "",
+			profile: "dev",
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			monkey.Patch(LoadEnvFileWithPath, func(path string, override bool) {})
+
+			LoadEnvFileByProfile(tt.args.path, tt.args.profile)
+		})
+	}
 }
