@@ -353,6 +353,7 @@ func LoadEnvFile(profile string) {
 	LoadEnvFileByProfile(path, profile)
 }
 
+// LoadEnvFileByProfile load env variables by profile file
 func LoadEnvFileByProfile(path, profile string) {
 	if profile != "" {
 		path = fmt.Sprintf("%s-%s", path, profile)
