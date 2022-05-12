@@ -15,11 +15,14 @@
 package i18n
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"io/fs"
 	"path/filepath"
+	"strings"
 
+	cfg "github.com/erda-project/erda-infra/pkg/config"
 	"github.com/erda-project/erda-infra/pkg/strutil"
 )
 
@@ -50,7 +53,7 @@ func (p *provider) RegisterFilesFromFS(fsPrefix string, rootFS embed.FS) error {
 		if !strutil.HasSuffixes(file.name, ".yml", ".yaml") {
 			continue
 		}
-		err = p.loadI18nFile(file.fullPath)
+		err = p.loadI18nFileByte(file.fullPath, file.data)
 		if err != nil {
 			return err
 		}
@@ -62,7 +65,7 @@ func (p *provider) RegisterFilesFromFS(fsPrefix string, rootFS embed.FS) error {
 		if !strutil.HasSuffixes(file.name, ".yml", ".yaml") {
 			continue
 		}
-		err = p.loadToDic(file.fullPath, p.common)
+		err = p.loadByteToDic(file.fullPath, file.data, p.common)
 		if err != nil {
 			return err
 		}
@@ -88,4 +91,55 @@ func walkEmbedFS(rootFS embed.FS, fullPath string, files *[]*file) {
 		*files = append(*files, newDir(entryPath))
 		walkEmbedFS(rootFS, entryPath, files)
 	}
+}
+
+func (p *provider) loadByteToDic(path string, byte []byte, dic map[string]map[string]string) error {
+	m := make(map[string]interface{})
+	typ := filepath.Ext(path)
+	if len(typ) <= 0 {
+		return fmt.Errorf("%s unknown file extension", path)
+	}
+	err := cfg.UnmarshalToMap(bytes.NewReader(byte), typ[1:], m)
+	if err != nil {
+		return fmt.Errorf("fail to load i18n file: %s", err)
+	}
+	for lang, v := range m {
+		text := dic[lang]
+		if text == nil {
+			text = make(map[string]string)
+			dic[lang] = text
+		}
+		switch m := v.(type) {
+		case map[string]string:
+			for k, v := range m {
+				text[strings.ToLower(k)] = fmt.Sprint(v)
+			}
+		case map[string]interface{}:
+			for k, v := range m {
+				text[strings.ToLower(k)] = fmt.Sprint(v)
+			}
+		case map[interface{}]interface{}:
+			for k, v := range m {
+				text[strings.ToLower(fmt.Sprint(k))] = fmt.Sprint(v)
+			}
+		default:
+			return fmt.Errorf("invalid i18n file format: %s", path)
+		}
+	}
+	return nil
+}
+
+func (p *provider) loadI18nFileByte(file string, byte []byte) error {
+	base := filepath.Base(file)
+	name := base[0 : len(base)-len(filepath.Ext(base))]
+	dic := p.dic[name]
+	if dic == nil {
+		dic = make(map[string]map[string]string)
+		p.dic[name] = dic
+	}
+	err := p.loadByteToDic(file, byte, dic)
+	if err != nil {
+		return err
+	}
+	return nil
 }
