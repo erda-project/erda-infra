@@ -2,5 +2,6 @@ clickhouse:
   addr: "${CLICKHOUSE_ADDR:chi-erdatest-erda-0-0.default.svc.cluster.local:9000}"
   username: "${CLICKHOUSE_USERNAME:fdpuser}"
   password: "${CLICKHOUSE_PASSWORD:fdpuser}"
+  conn_open_strategy: "round_robin"
 
 example:
