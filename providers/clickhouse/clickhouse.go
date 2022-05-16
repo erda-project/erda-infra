@@ -51,7 +51,7 @@ type config struct {
 	MaxIdleConns     int           `file:"max_idle_conns" default:"5"`
 	MaxOpenConns     int           `file:"max_open_conns" default:"10"`
 	ConnMaxLifeTime  time.Duration `file:"conn_max_lifetime" default:"1h"`
-	ConnOpenStrategy uint8         `file:"conn_open_strategy" default:"0"`
+	ConnOpenStrategy string        `file:"conn_open_strategy" default:"in_order"`
 	Debug            bool          `file:"debug"`
 }
 
@@ -63,6 +63,14 @@ type provider struct {
 }
 
 func (p *provider) Init(ctx servicehub.Context) error {
+	openStrategy := ck.ConnOpenInOrder
+	switch p.Cfg.ConnOpenStrategy {
+	case "0", "in_order":
+		openStrategy = ck.ConnOpenInOrder
+	case "1", "round_robin":
+		openStrategy = ck.ConnOpenRoundRobin
+	}
+
 	options := &ck.Options{
 		Addr: strings.Split(p.Cfg.Addr, ","),
 		Auth: ck.Auth{
@@ -75,7 +83,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		MaxIdleConns:     p.Cfg.MaxIdleConns,
 		MaxOpenConns:     p.Cfg.MaxOpenConns,
 		ConnMaxLifetime:  p.Cfg.ConnMaxLifeTime,
-		ConnOpenStrategy: ck.ConnOpenStrategy(p.Cfg.ConnOpenStrategy),
+		ConnOpenStrategy: openStrategy,
 	}
 
 	conn, err := ck.Open(options)
