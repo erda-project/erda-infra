@@ -120,7 +120,7 @@ func Download(override, verbose bool) {
 			err = os.MkdirAll(tmpdir, os.ModePerm)
 			cmd.CheckError(err)
 			// clone
-			runCommand(dir, "git", "clone", "--depth", "1", wrapGhProxy(p.URL), tmpdir)
+			runCommand(dir, nil, "git", "clone", "--depth", "1", wrapGhProxy(p.URL), tmpdir)
 			// rename
 			err = os.RemoveAll(repodir)
 			cmd.CheckError(err)
@@ -128,14 +128,11 @@ func Download(override, verbose bool) {
 			cmd.CheckError(err)
 			// build
 			fmt.Printf("building %s ...\n", p.Name)
-			command := exec.Command("go", "build", "-o", filepath.Join(dir, p.Name))
-			command.Dir = repodir
-			command.Env = append(command.Env, getGoProxyEnv())
+			buildDir := repodir
 			if len(p.Path) > 0 {
-				command.Dir = filepath.Join(repodir, p.Path)
+				buildDir = filepath.Join(repodir, p.Path)
 			}
-			err = command.Run()
-			cmd.CheckError(err)
+			runCommand(buildDir, nil, "go", "build", "-o", filepath.Join(dir, p.Name))
 			fmt.Printf("build %s successfully !\n", p.Name)
 		}
 	}
@@ -175,7 +172,7 @@ func Download(override, verbose bool) {
 			tmpdir := filepath.Join(dir, repo+".tmp")
 			err := os.RemoveAll(tmpdir)
 			cmd.CheckError(err)
-			runCommand(dir, "git", "clone", "--depth", "1", "https://"+cmd.PackagePath, tmpdir)
+			runCommand(dir, nil, "git", "clone", "--depth", "1", "https://"+cmd.PackagePath, tmpdir)
 			err = os.RemoveAll(repodir)
 			cmd.CheckError(err)
 			err = os.Rename(tmpdir, repodir)
@@ -186,11 +183,8 @@ func Download(override, verbose bool) {
 		for _, plugin := range plugins {
 			if !cmd.IsFileExist(filepath.Join(dir, plugin)) || override {
 				fmt.Printf("building %s ...\n", plugin)
-				command := exec.Command("go", "build", "-o", filepath.Join(dir, plugin))
-				command.Dir = filepath.Join(pkgPath, "protoc", plugin)
-				command.Env = append(command.Env, getGoProxyEnv())
-				err := command.Run()
-				cmd.CheckError(err)
+				buildDir := filepath.Join(pkgPath, "protoc", plugin)
+				runCommand(buildDir, nil, "go", "build", "-o", filepath.Join(dir, plugin))
 				fmt.Printf("build %s successfully !\n", plugin)
 			}
 		}
@@ -228,12 +222,17 @@ func ensureToolsDir() string {
 	return dir
 }
 
-func runCommand(wd string, exe string, params ...string) {
+func runCommand(wd string, envs []string, exe string, params ...string) {
 	command := exec.Command(exe, params...)
+	if cmd.Verbose() {
+		fmt.Fprintf(os.Stdout, "\n>>> run command: %s\n", command.String())
+	}
 	command.Dir = wd
 	command.Stderr = os.Stderr
 	command.Stdout = os.Stdout
 	command.Stdin = os.Stdin
+	command.Env = append(os.Environ(), getGoProxyEnv())
+	command.Env = append(command.Env, envs...)
 	err := command.Run()
 	cmd.CheckError(err)
 }
@@ -333,9 +332,9 @@ func copyDir(src string, dest string) {
 	src, dest = formatPath(src), formatPath(dest)
 	switch runtime.GOOS {
 	case "windows":
-		runCommand("", "xcopy", src, dest, "/I", "/E")
+		runCommand("", nil, "xcopy", src, dest, "/I", "/E")
 	case "darwin", "linux":
-		runCommand("", "cp", "-R", src, dest)
+		runCommand("", nil, "cp", "-R", src, dest)
 	}
 }
 
