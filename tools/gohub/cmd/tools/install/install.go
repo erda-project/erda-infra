@@ -120,7 +120,7 @@ func Download(override, verbose bool) {
 			err = os.MkdirAll(tmpdir, os.ModePerm)
 			cmd.CheckError(err)
 			// clone
-			runCommand(dir, "git", "clone", "--depth", "1", p.URL, tmpdir)
+			runCommand(dir, "git", "clone", "--depth", "1", wrapGhProxy(p.URL), tmpdir)
 			// rename
 			err = os.RemoveAll(repodir)
 			cmd.CheckError(err)
@@ -130,6 +130,7 @@ func Download(override, verbose bool) {
 			fmt.Printf("building %s ...\n", p.Name)
 			command := exec.Command("go", "build", "-o", filepath.Join(dir, p.Name))
 			command.Dir = repodir
+			command.Env = append(command.Env, getGoProxyEnv())
 			if len(p.Path) > 0 {
 				command.Dir = filepath.Join(repodir, p.Path)
 			}
@@ -187,6 +188,7 @@ func Download(override, verbose bool) {
 				fmt.Printf("building %s ...\n", plugin)
 				command := exec.Command("go", "build", "-o", filepath.Join(dir, plugin))
 				command.Dir = filepath.Join(pkgPath, "protoc", plugin)
+				command.Env = append(command.Env, getGoProxyEnv())
 				err := command.Run()
 				cmd.CheckError(err)
 				fmt.Printf("build %s successfully !\n", plugin)

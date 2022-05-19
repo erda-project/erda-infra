@@ -15,16 +15,38 @@
 package install
 
 import (
+	"strings"
+
+	"github.com/spf13/cobra"
+
 	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 	"github.com/erda-project/erda-infra/tools/gohub/cmd/tools"
-	"github.com/spf13/cobra"
 )
 
 var localInstall *bool
+var ghProxy *string
+var goProxy *string
 
 func init() {
 	localInstall = installCmd.Flags().Bool("local", false, "find local package")
+	ghProxy = installCmd.Flags().String("ghproxy", "", "github proxy")
+	goProxy = installCmd.Flags().String("goproxy", "", "go proxy")
 	tools.AddCommand(installCmd)
+}
+
+func wrapGhProxy(url string) string {
+	if ghProxy == nil || len(*ghProxy) == 0 {
+		return url
+	}
+	*ghProxy = strings.TrimRight(*ghProxy, "/") + "/"
+	return *ghProxy + url
+}
+
+func getGoProxyEnv() string {
+	if goProxy == nil {
+		*goProxy = ""
+	}
+	return "GOPROXY=" + *goProxy
 }
 
 var installCmd = &cobra.Command{
