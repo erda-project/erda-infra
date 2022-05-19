@@ -17,8 +17,9 @@ package version
 import (
 	"fmt"
 
-	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 	"github.com/spf13/cobra"
+
+	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 )
 
 func init() {
@@ -26,7 +27,7 @@ func init() {
 }
 
 // Version .
-const Version = "1.0.4"
+const Version = "1.0.5"
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
