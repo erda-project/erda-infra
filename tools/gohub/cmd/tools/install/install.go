@@ -120,7 +120,7 @@ func Download(override, verbose bool) {
 			err = os.MkdirAll(tmpdir, os.ModePerm)
 			cmd.CheckError(err)
 			// clone
-			runCommand(dir, "git", "clone", p.URL, tmpdir)
+			runCommand(dir, "git", "clone", "--depth", "1", p.URL, tmpdir)
 			// rename
 			err = os.RemoveAll(repodir)
 			cmd.CheckError(err)
@@ -174,7 +174,7 @@ func Download(override, verbose bool) {
 			tmpdir := filepath.Join(dir, repo+".tmp")
 			err := os.RemoveAll(tmpdir)
 			cmd.CheckError(err)
-			runCommand(dir, "git", "clone", "https://"+cmd.PackagePath, tmpdir)
+			runCommand(dir, "git", "clone", "--depth", "1", "https://"+cmd.PackagePath, tmpdir)
 			err = os.RemoveAll(repodir)
 			cmd.CheckError(err)
 			err = os.Rename(tmpdir, repodir)
