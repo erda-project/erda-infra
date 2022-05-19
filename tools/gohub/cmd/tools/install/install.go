@@ -28,10 +28,11 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
+
 	"github.com/erda-project/erda-infra/tools/gohub/cmd"
 	"github.com/erda-project/erda-infra/tools/gohub/cmd/pkgpath"
 	"github.com/erda-project/erda-infra/tools/gohub/cmd/version"
-	"github.com/mitchellh/go-homedir"
 )
 
 // IncludeDirs .
@@ -239,11 +240,11 @@ func downloadProtoc(dir string, verbose bool) string {
 	var url string
 	switch {
 	case runtime.GOOS == "darwin" && runtime.GOARCH == "arm64":
-		url = "https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-osx-x86_64.zip"
+		url = "https://erda-project.oss-cn-hangzhou.aliyuncs.com/protobuf/protoc-3.15.8-osx-x86_64.zip"
 	case runtime.GOOS == "darwin" && runtime.GOARCH == "amd64":
-		url = "https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-osx-x86_64.zip"
+		url = "https://erda-project.oss-cn-hangzhou.aliyuncs.com/protobuf/protoc-3.15.8-osx-x86_64.zip"
 	case runtime.GOOS == "linux" && runtime.GOARCH == "amd64":
-		url = "https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-linux-x86_64.zip"
+		url = "https://erda-project.oss-cn-hangzhou.aliyuncs.com/protobuf/protoc-3.15.8-linux-x86_64.zip"
 	default:
 		cmd.CheckError(fmt.Errorf("not support %s-%s environment", runtime.GOARCH, runtime.GOOS))
 	}
