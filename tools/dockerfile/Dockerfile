@@ -1,41 +1,30 @@
-FROM unitedwardrobe/golang-librdkafka:alpine3.12-golang1.15.0-librdkafka1.5.0 as build
+FROM --platform=$TARGETPLATFORM golang:1.17-bullseye as build
 
-RUN apk update \
-&& apk add tzdata \
-&& cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-&& echo "Asia/Shanghai" > /etc/timezone \
-&& apk add bash git
+ENV PROJ_ROOT="/go/src/github.com/erda-project/erda-infra"
+COPY . "${PROJ_ROOT}"
+WORKDIR "${PROJ_ROOT}"
 
-RUN mkdir -p "$GOPATH/src/github.com/erda-project/erda-infra/"
-COPY . "$GOPATH/src/github.com/erda-project/erda-infra/"
-WORKDIR "$GOPATH/src/github.com/erda-project/erda-infra/"
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends unzip && \
+    rm -fr /var/lib/apt/lists/*
 
-RUN cd ./tools && \
-    go install ./protoc/protoc-gen-go-grpc && \
-    go install ./protoc/protoc-gen-go-http && \
-    go install ./protoc/protoc-gen-go-form && \
-    go install ./protoc/protoc-gen-go-client && \
-    go install ./protoc/protoc-gen-go-provider && \
-    go install ./protoc/protoc-gen-go-register && \
-    go install ./gohub
+ARG GOPROXY=https://goproxy.cn,direct
+RUN go env -w GO111MODULE=on && go env -w GOPROXY="${GOPROXY}"
+RUN go install golang.org/x/tools/cmd/goimports@latest
 
-RUN mkdir -p /root/.gohub/ && \
-    cd /root/.gohub/ && \
-    wget -O protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.15.6/protoc-3.15.6-linux-x86_64.zip && \
-    mkdir protoc.tmp && \
-    unzip protoc.zip -q -d protoc.tmp && \
-    rm -f protoc.zip
+RUN --mount=type=cache,target=/root/.cache/go-build\
+    --mount=type=cache,target=/go/pkg/mod \
+    cd ./tools && \
+    go install ./gohub && \
+    gohub tools install --verbose --local
 
-FROM unitedwardrobe/golang-librdkafka:alpine3.12-golang1.15.0-librdkafka1.5.0
 
-RUN apk update \
-&& apk add tzdata \
-&& cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-&& echo "Asia/Shanghai" > /etc/timezone \
-&& apk add curl \
-&& apk add bash make git 
+FROM --platform=$TARGETPLATFORM golang:1.17-bullseye
 
-COPY --from=build "$GOPATH/src/github.com/erda-project/erda-infra/tools/protoc/include/" "/usr/local/include/"
-COPY --from=build "$GOPATH/bin/protoc-*" "/root/.gohub/"
-COPY --from=build "$GOPATH/bin/gohub" "/bin/gohub"
-COPY --from=build "/root/.gohub/protoc.tmp/bin/protoc" "/root/.gohub/protoc"
+RUN go install golang.org/x/tools/cmd/goimports@latest
+COPY --from=build /root/.gohub /root/.gohub
+COPY --from=build /go/bin/* /go/bin/
+
+WORKDIR /go
+
+CMD gohub

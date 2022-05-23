@@ -246,6 +246,8 @@ func downloadProtoc(dir string, verbose bool) string {
 		url = "https://erda-project.oss-cn-hangzhou.aliyuncs.com/protobuf/protoc-3.15.8-osx-x86_64.zip"
 	case runtime.GOOS == "linux" && runtime.GOARCH == "amd64":
 		url = "https://erda-project.oss-cn-hangzhou.aliyuncs.com/protobuf/protoc-3.15.8-linux-x86_64.zip"
+	case runtime.GOOS == "linux" && runtime.GOARCH == "arm64":
+		url = "https://erda-project.oss-cn-hangzhou.aliyuncs.com/protobuf/protoc-3.15.8-linux-aarch_64.zip"
 	default:
 		cmd.CheckError(fmt.Errorf("not support %s-%s environment", runtime.GOARCH, runtime.GOOS))
 	}
