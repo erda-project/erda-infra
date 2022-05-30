@@ -98,9 +98,16 @@ func (r *kafkaBatchReader) ReadN(buf []interface{}, timeout time.Duration) (int,
 	}
 	size := len(buf)
 	var offset int
+	maxWaitTimer := time.NewTimer(timeout * 3)
+	defer maxWaitTimer.Stop()
 	for {
 		if offset >= size {
 			break
+		}
+		select {
+		case <-maxWaitTimer.C:
+			break
+		default:
 		}
 		msg, err := r.consumer.ReadMessage(timeout)
 		if err != nil {
