@@ -42,6 +42,7 @@ func IncludeDirs() []string {
 	return []string{
 		filepath.Join(home, "."+cmd.Name, repo, "tools/protoc/include"),
 		filepath.Join(home, "."+cmd.Name),
+		filepath.Join(home, "."+cmd.Name, "github.com/envoyproxy/protoc-gen-validate"),
 	}
 }
 
@@ -100,9 +101,9 @@ func Download(override, verbose bool) {
 			Path: "protoc-gen-go",
 		},
 		{
-			Name: "protoc-gen-govalidators",
-			URL:  "https://github.com/mwitkow/go-proto-validators",
-			Path: "protoc-gen-govalidators",
+			Name: "protoc-gen-validate",
+			URL:  "https://github.com/envoyproxy/protoc-gen-validate",
+			Path: "protoc-gen-validate",
 		},
 	} {
 		if !cmd.IsFileExist(filepath.Join(dir, p.Name)) || (!*localInstall && override) {
@@ -129,10 +130,15 @@ func Download(override, verbose bool) {
 			// build
 			fmt.Printf("building %s ...\n", p.Name)
 			buildDir := repodir
-			if len(p.Path) > 0 {
-				buildDir = filepath.Join(repodir, p.Path)
+
+			if p.Name == "protoc-gen-validate" {
+				runCommand(buildDir, []string{fmt.Sprintf("GOBIN=%s", dir)}, "make", "build")
+			} else {
+				if len(p.Path) > 0 {
+					buildDir = filepath.Join(repodir, p.Path)
+				}
+				runCommand(buildDir, nil, "go", "build", "-o", filepath.Join(dir, p.Name))
 			}
-			runCommand(buildDir, nil, "go", "build", "-o", filepath.Join(dir, p.Name))
 			fmt.Printf("build %s successfully !\n", p.Name)
 		}
 	}

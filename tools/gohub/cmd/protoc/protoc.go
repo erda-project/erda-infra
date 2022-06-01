@@ -218,7 +218,7 @@ func createMessage(command *cobra.Command, args, files, dirs []string) {
 	cmd.CheckError(err)
 	if valid {
 		execProtoc(files, dirs, includes,
-			fmt.Sprintf("--govalidators_out=%s", output), "--govalidators_opt=paths=source_relative",
+			fmt.Sprintf("--validate_out=paths=source_relative,lang=go:%s", output),
 		)
 	}
 	json, err := command.Flags().GetBool("json")
