@@ -42,7 +42,6 @@ func IncludeDirs() []string {
 	return []string{
 		filepath.Join(home, "."+cmd.Name, repo, "tools/protoc/include"),
 		filepath.Join(home, "."+cmd.Name),
-		filepath.Join(home, "."+cmd.Name, "github.com/envoyproxy/protoc-gen-validate"),
 	}
 }
 
