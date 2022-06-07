@@ -81,6 +81,9 @@ func Download(override, verbose bool) {
 			if f.Name == "bin/protoc" {
 				return filepath.Join(dir, "protoc"), true
 			}
+			if strings.HasPrefix(f.Name, "include") {
+				return filepath.Join(dir, f.Name), true
+			}
 			return "", false
 		})
 		cmd.CheckError(err)
@@ -129,14 +132,25 @@ func Download(override, verbose bool) {
 			// build
 			fmt.Printf("building %s ...\n", p.Name)
 			buildDir := repodir
-
+			goPath := os.Getenv("GOPATH")
 			if p.Name == "protoc-gen-validate" {
+				paths := []string{dir}
+				if len(goPath) > 0 {
+					for _, p := range strings.Split(goPath, string(os.PathListSeparator)) {
+						paths = append(paths, filepath.Join(p, "bin"))
+					}
+				}
+				joinPathList(paths...)
 				runCommand(buildDir, []string{fmt.Sprintf("GOBIN=%s", dir)}, "make", "build")
+				err = os.RemoveAll(filepath.Join(dir, "include"))
+				cmd.CheckError(err)
 			} else {
 				if len(p.Path) > 0 {
 					buildDir = filepath.Join(repodir, p.Path)
 				}
-				runCommand(buildDir, nil, "go", "build", "-o", filepath.Join(dir, p.Name))
+				src := filepath.Join(dir, p.Name)
+				runCommand(buildDir, nil, "go", "build", "-o", src)
+				runCommand(buildDir, nil, "cp", src, filepath.Join(goPath, "bin"))
 			}
 			fmt.Printf("build %s successfully !\n", p.Name)
 		}
