@@ -134,13 +134,7 @@ func Download(override, verbose bool) {
 			buildDir := repodir
 			goPath := os.Getenv("GOPATH")
 			if p.Name == "protoc-gen-validate" {
-				paths := []string{dir}
-				if len(goPath) > 0 {
-					for _, p := range strings.Split(goPath, string(os.PathListSeparator)) {
-						paths = append(paths, filepath.Join(p, "bin"))
-					}
-				}
-				joinPathList(paths...)
+				setEnvPathWithDir(dir)
 				runCommand(buildDir, []string{fmt.Sprintf("GOBIN=%s", dir)}, "make", "build")
 				err = os.RemoveAll(filepath.Join(dir, "include"))
 				cmd.CheckError(err)
@@ -213,14 +207,7 @@ func Download(override, verbose bool) {
 		updateVersion()
 	}
 
-	paths := []string{dir}
-	goPath := os.Getenv("GOPATH")
-	if len(goPath) > 0 {
-		for _, p := range strings.Split(goPath, string(os.PathListSeparator)) {
-			paths = append(paths, filepath.Join(p, "bin"))
-		}
-	}
-	joinPathList(paths...)
+	setEnvPathWithDir(dir)
 }
 
 func ensureToolsDir() string {
@@ -374,4 +361,15 @@ func joinPathList(list ...string) {
 		}
 	}
 	os.Setenv("PATH", paths)
+}
+
+func setEnvPathWithDir(dir string) {
+	paths := []string{dir}
+	goPath := os.Getenv("GOPATH")
+	if len(goPath) > 0 {
+		for _, p := range strings.Split(goPath, string(os.PathListSeparator)) {
+			paths = append(paths, filepath.Join(p, "bin"))
+		}
+	}
+	joinPathList(paths...)
 }
