@@ -81,6 +81,9 @@ func Download(override, verbose bool) {
 			if f.Name == "bin/protoc" {
 				return filepath.Join(dir, "protoc"), true
 			}
+			if strings.HasPrefix(f.Name, "include") {
+				return filepath.Join(dir, f.Name), true
+			}
 			return "", false
 		})
 		cmd.CheckError(err)
@@ -100,9 +103,9 @@ func Download(override, verbose bool) {
 			Path: "protoc-gen-go",
 		},
 		{
-			Name: "protoc-gen-govalidators",
-			URL:  "https://github.com/mwitkow/go-proto-validators",
-			Path: "protoc-gen-govalidators",
+			Name: "protoc-gen-validate",
+			URL:  "https://github.com/envoyproxy/protoc-gen-validate",
+			Path: "protoc-gen-validate",
 		},
 	} {
 		if !cmd.IsFileExist(filepath.Join(dir, p.Name)) || (!*localInstall && override) {
@@ -129,10 +132,20 @@ func Download(override, verbose bool) {
 			// build
 			fmt.Printf("building %s ...\n", p.Name)
 			buildDir := repodir
-			if len(p.Path) > 0 {
-				buildDir = filepath.Join(repodir, p.Path)
+			goPath := os.Getenv("GOPATH")
+			if p.Name == "protoc-gen-validate" {
+				setEnvPathWithDir(dir)
+				runCommand(buildDir, []string{fmt.Sprintf("GOBIN=%s", dir)}, "make", "build")
+				err = os.RemoveAll(filepath.Join(dir, "include"))
+				cmd.CheckError(err)
+			} else {
+				if len(p.Path) > 0 {
+					buildDir = filepath.Join(repodir, p.Path)
+				}
+				src := filepath.Join(dir, p.Name)
+				runCommand(buildDir, nil, "go", "build", "-o", src)
+				runCommand(buildDir, nil, "cp", "-f", src, filepath.Join(goPath, "bin"))
 			}
-			runCommand(buildDir, nil, "go", "build", "-o", filepath.Join(dir, p.Name))
 			fmt.Printf("build %s successfully !\n", p.Name)
 		}
 	}
@@ -194,14 +207,7 @@ func Download(override, verbose bool) {
 		updateVersion()
 	}
 
-	paths := []string{dir}
-	goPath := os.Getenv("GOPATH")
-	if len(goPath) > 0 {
-		for _, p := range strings.Split(goPath, string(os.PathListSeparator)) {
-			paths = append(paths, filepath.Join(p, "bin"))
-		}
-	}
-	joinPathList(paths...)
+	setEnvPathWithDir(dir)
 }
 
 func ensureToolsDir() string {
@@ -355,4 +361,15 @@ func joinPathList(list ...string) {
 		}
 	}
 	os.Setenv("PATH", paths)
+}
+
+func setEnvPathWithDir(dir string) {
+	paths := []string{dir}
+	goPath := os.Getenv("GOPATH")
+	if len(goPath) > 0 {
+		for _, p := range strings.Split(goPath, string(os.PathListSeparator)) {
+			paths = append(paths, filepath.Join(p, "bin"))
+		}
+	}
+	joinPathList(paths...)
 }
