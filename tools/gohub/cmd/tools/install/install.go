@@ -144,7 +144,7 @@ func Download(override, verbose bool) {
 				}
 				src := filepath.Join(dir, p.Name)
 				runCommand(buildDir, nil, "go", "build", "-o", src)
-				runCommand(buildDir, nil, "cp", src, filepath.Join(goPath, "bin"))
+				runCommand(buildDir, nil, "cp", "-f", src, filepath.Join(goPath, "bin"))
 			}
 			fmt.Printf("build %s successfully !\n", p.Name)
 		}
