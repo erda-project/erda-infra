@@ -3,7 +3,7 @@ module github.com/erda-project/erda-infra/tools
 go 1.16
 
 require (
-	github.com/erda-project/erda-infra v0.0.0-20220519164949-99329806a18c
+	github.com/erda-project/erda-infra v1.0.6-beta.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.1.3
 	google.golang.org/genproto v0.0.0-20210820002220-43fce44e7af1
@@ -11,7 +11,8 @@ require (
 )
 
 replace (
-	github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.5
+	github.com/coreos/bbolt v1.3.5 => go.etcd.io/bbolt v1.3.5
+	go.etcd.io/bbolt v1.3.5 => github.com/coreos/bbolt v1.3.5
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => github.com/kubernetes/api v0.18.3
 	k8s.io/apiextensions-apiserver => github.com/kubernetes/apiextensions-apiserver v0.18.3
