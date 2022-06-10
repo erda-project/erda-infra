@@ -15,7 +15,7 @@ require (
 	github.com/brahma-adshonor/gohook v1.1.9
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/confluentinc/confluent-kafka-go v1.5.2
-	github.com/coreos/bbolt v0.0.0-00010101000000-000000000000 // indirect
+	github.com/coreos/bbolt v1.3.5 // indirect
 	github.com/coreos/etcd v3.3.25+incompatible
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
@@ -87,7 +87,8 @@ require (
 )
 
 replace (
-	github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.5
+	github.com/coreos/bbolt v1.3.5 => go.etcd.io/bbolt v1.3.5
+	go.etcd.io/bbolt v1.3.5 => github.com/coreos/bbolt v1.3.5
 	go.opentelemetry.io/otel => go.opentelemetry.io/otel v1.2.0
 	go.opentelemetry.io/otel/trace => go.opentelemetry.io/otel/trace v1.2.0
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
