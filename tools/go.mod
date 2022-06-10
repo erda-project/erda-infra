@@ -3,7 +3,7 @@ module github.com/erda-project/erda-infra/tools
 go 1.16
 
 require (
-	github.com/erda-project/erda-infra v1.0.6-beta.1
+	github.com/erda-project/erda-infra v1.0.7-alpha.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.1.3
 	google.golang.org/genproto v0.0.0-20210820002220-43fce44e7af1
