@@ -62,6 +62,7 @@ require (
 	github.com/xormplus/core v0.0.0-20181016121923-6bfce2eb8867
 	github.com/xormplus/xorm v0.0.0-20181212020813-da46657160ff
 	github.com/ziutek/mymysql v1.5.4 // indirect
+	go.etcd.io/bbolt v1.3.5 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.27.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.27.0
 	go.opentelemetry.io/otel v1.4.1
