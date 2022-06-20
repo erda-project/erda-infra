@@ -116,6 +116,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	if p.Cfg.MySQLDebug {
 		p.db = p.db.Debug()
 	}
+
+	Init(p.db)
 	return nil
 }
 
