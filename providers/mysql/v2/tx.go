@@ -19,8 +19,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// InvalidTransactionError means the transaction is alread committed or roll backed
 var InvalidTransactionError = errors.New("invalid transaction, it is already committed or roll backed")
 
+// TX contains the CRUS APIs
 type TX struct {
 	Error error
 
@@ -29,10 +31,12 @@ type TX struct {
 	valid bool
 }
 
+// NewTx returns a *TX
 func NewTx(db *gorm.DB) *TX {
 	return &TX{db: db, valid: true}
 }
 
+// Create inserts a row
 func (tx *TX) Create(i interface{}) error {
 	if tx.inTx && !tx.valid {
 		return InvalidTransactionError
@@ -41,6 +45,7 @@ func (tx *TX) Create(i interface{}) error {
 	return tx.Error
 }
 
+// CreateInBatches inserts multi rows
 func (tx *TX) CreateInBatches(i interface{}, size int) error {
 	if tx.inTx && !tx.valid {
 		return InvalidTransactionError
@@ -49,6 +54,7 @@ func (tx *TX) CreateInBatches(i interface{}, size int) error {
 	return tx.Error
 }
 
+// Delete deletes rows with conditions
 func (tx *TX) Delete(i interface{}, options ...Option) (int64, error) {
 	if tx.inTx && !tx.valid {
 		return 0, InvalidTransactionError
@@ -61,6 +67,8 @@ func (tx *TX) Delete(i interface{}, options ...Option) (int64, error) {
 	return db.RowsAffected, db.Error
 }
 
+// Updates updates the model i with the given value. v can be a map or a model struct.
+// options is conditions.
 func (tx *TX) Updates(i, v interface{}, options ...Option) error {
 	if tx.inTx && !tx.valid {
 		return InvalidTransactionError
@@ -72,6 +80,8 @@ func (tx *TX) Updates(i, v interface{}, options ...Option) error {
 	return db.Model(i).Updates(v).Error
 }
 
+// SetColumns is used to set columns.
+// At least one SetColumn Option in the options.
 func (tx *TX) SetColumns(i interface{}, options ...Option) error {
 	if tx.inTx && !tx.valid {
 		return InvalidTransactionError
@@ -84,6 +94,7 @@ func (tx *TX) SetColumns(i interface{}, options ...Option) error {
 	return db.Error
 }
 
+// List lists records.
 func (tx *TX) List(i interface{}, options ...Option) (int64, error) {
 	var total int64
 	var db = tx.DB()
@@ -101,6 +112,7 @@ func (tx *TX) List(i interface{}, options ...Option) (int64, error) {
 	return 0, err
 }
 
+// Get gets the first record.
 func (tx *TX) Get(i interface{}, options ...Option) (bool, error) {
 	var db = tx.DB()
 	for _, opt := range options {
@@ -117,6 +129,7 @@ func (tx *TX) Get(i interface{}, options ...Option) (bool, error) {
 	return false, err
 }
 
+// Commit commits the transaction.
 func (tx *TX) Commit() error {
 	if !tx.inTx {
 		return errors.New("not in transaction")
@@ -132,6 +145,7 @@ func (tx *TX) Commit() error {
 	return nil
 }
 
+// Rollback rollbacks the transaction.
 func (tx *TX) Rollback() error {
 	if !tx.inTx {
 		return errors.New("not in transaction")
@@ -144,6 +158,8 @@ func (tx *TX) Rollback() error {
 	return nil
 }
 
+// CommitOrRollback commits the transaction if db.Error is nil,
+// or rollbacks if the db.Error is not nil.
 func (tx *TX) CommitOrRollback() {
 	if tx.inTx && !tx.valid {
 		return
@@ -156,6 +172,7 @@ func (tx *TX) CommitOrRollback() {
 	tx.valid = false
 }
 
+// DB returns the raw *gorm.DB
 func (tx *TX) DB() *gorm.DB {
 	return tx.db
 }

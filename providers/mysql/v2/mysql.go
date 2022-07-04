@@ -51,8 +51,11 @@ func init() {
 
 // Interface .
 type Interface interface {
+	// DB returns the raw *gorm.DB.
 	DB() *gorm.DB
+	// Q returns the CRUD APIs without a transaction.
 	Q() *TX
+	// Begin returns the CRUD APIs with a transaction.
 	Begin() *TX
 }
 
@@ -94,7 +97,7 @@ type provider struct {
 	tx  *TX
 }
 
-// Init .
+// Init implements servicehub.ProviderInitializer
 func (p *provider) Init(ctx servicehub.Context) error {
 	err := mysqldriver.OpenTLS(p.Cfg.MySQLTLS, p.Cfg.MySQLCaCertPath, p.Cfg.MySQLClientCertPath, p.Cfg.MySQLClientKeyPath)
 	if err != nil {
@@ -124,9 +127,10 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	return nil
 }
 
-// DB .
+// DB implements Interface.DB
 func (p *provider) DB() *gorm.DB { return p.db }
 
+// Q implements Interface.Q
 func (p *provider) Q() *TX {
 	return &TX{
 		db:    p.db,
@@ -134,6 +138,7 @@ func (p *provider) Q() *TX {
 	}
 }
 
+// Begin implements Interface.Begin
 func (p *provider) Begin() *TX {
 	return &TX{
 		db:    p.db,
@@ -142,7 +147,7 @@ func (p *provider) Begin() *TX {
 	}
 }
 
-// Provide .
+// Provide implements servicehub.DependencyProvider
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	if ctx.Service() == "mysql-gorm.v2-client" || ctx.Type() == gormType {
 		return p.db

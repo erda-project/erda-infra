@@ -22,18 +22,23 @@ import (
 )
 
 var (
+	// DESC means select by DESC
 	DESC Order = "DESC"
-	ASC  Order = "ASC"
+	// ASC means select by ASC
+	ASC Order = "ASC"
 )
 
+// Option is the function processes *gorm.DB
 type Option func(db *gorm.DB) *gorm.DB
 
+// Column is an interface for shortcut of WhereColumn, OrderColumn, SetColumn
 type Column interface {
 	WhereColumn
 	OrderColumn
 	SetColumn
 }
 
+// WhereColumn contains options for conditions
 type WhereColumn interface {
 	Is(value interface{}) Option
 	In(values []interface{}) Option
@@ -45,27 +50,33 @@ type WhereColumn interface {
 	EqLessThan(value interface{}) Option
 }
 
+// OrderColumn contains order by options
 type OrderColumn interface {
 	DESC() Option
 	ASC() Option
 }
 
+// SetColumn is used in update statements
 type SetColumn interface {
 	Set(value interface{}) Option
 }
 
+// Where is the option for conditions
 func Where(format string, args ...interface{}) Option {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Where(format, args...)
 	}
 }
 
+// Wheres is the option for conditions.
+// the m can be a map or a struct.
 func Wheres(m interface{}) Option {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.Where(m)
 	}
 }
 
+// Col returns a Column interface
 func Col(col string) Column {
 	return column{col: col}
 }
@@ -148,11 +159,12 @@ func (c column) Set(value interface{}) Option {
 	}
 }
 
+// WhereValue contains the option presents where the value in
 type WhereValue interface {
 	In(cols ...string) Option
 }
 
-func Value(value interface{}) whereValue {
+func Value(value interface{}) WhereValue {
 	return whereValue{value: value}
 }
 
@@ -166,6 +178,7 @@ func (w whereValue) In(cols ...string) Option {
 	}
 }
 
+// Paging returns an Option for selecting by paging
 func Paging(size, no int) Option {
 	if size < 0 {
 		size = 0
@@ -178,8 +191,10 @@ func Paging(size, no int) Option {
 	}
 }
 
+// Order .
 type Order string
 
+// OrderBy returns an Option for selecting order by some column
 func OrderBy(col string, order Order) Option {
 	if !strings.EqualFold(string(order), string(DESC)) &&
 		!strings.EqualFold(string(order), string(ASC)) {

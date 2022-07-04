@@ -26,16 +26,21 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+// DeletedAtStamp is the field type for soft deleting with BIGINT type.
+// 0 or null presents not deleted, an UnixMilli timestamp presents deleted.
 type DeletedAtStamp sql.NullInt64
 
+// Scan .
 func (n *DeletedAtStamp) Scan(value interface{}) error {
 	return (*sql.NullInt64)(n).Scan(value)
 }
 
+// Value .
 func (n DeletedAtStamp) Value() (driver.Value, error) {
 	return (sql.NullInt64)(n).Value()
 }
 
+// MarshalJSON .
 func (n DeletedAtStamp) MarshalJSON() ([]byte, error) {
 	if n.Valid {
 		return json.Marshal(n.Int64)
@@ -43,6 +48,7 @@ func (n DeletedAtStamp) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nil)
 }
 
+// UnmarshalJSON .
 func (n *DeletedAtStamp) UnmarshalJSON(b []byte) error {
 	bs := string(b)
 	if strings.EqualFold(bs, "null") {
@@ -55,22 +61,27 @@ func (n *DeletedAtStamp) UnmarshalJSON(b []byte) error {
 
 }
 
+// GormDataType .
 func (DeletedAtStamp) GormDataType() string {
 	return "BIGINT(20)"
 }
 
+// QueryClauses .
 func (DeletedAtStamp) QueryClauses(f *schema.Field) []clause.Interface {
 	return []clause.Interface{DeletedatstampQueryclause{Field: f}}
 }
 
+// UpdateClauses .
 func (DeletedAtStamp) UpdateClauses(f *schema.Field) []clause.Interface {
 	return []clause.Interface{DeletedAtStampUpdateClause{Field: f}}
 }
 
+// DeleteClauses .
 func (DeletedAtStamp) DeleteClauses(f *schema.Field) []clause.Interface {
 	return []clause.Interface{DeletedAtStampDeleteClause{Field: f}}
 }
 
+// CreateClauses .
 func (DeletedAtStamp) CreateClauses(f *schema.Field) []clause.Interface {
 	return []clause.Interface{DeletedAtStampCreateClause{Field: f}}
 }
@@ -79,20 +90,25 @@ type baseClause struct {
 	softDeletedMode string
 }
 
+// Name .
 func (baseClause) Name() string {
 	return ""
 }
 
+// Build .
 func (baseClause) Build(_ clause.Builder) {}
 
+// MergeClause .
 func (baseClause) MergeClause(_ *clause.Clause) {}
 
+// DeletedatstampQueryclause .
 type DeletedatstampQueryclause struct {
 	baseClause
 
 	Field *schema.Field
 }
 
+// ModifyStatement .
 func (qc DeletedatstampQueryclause) ModifyStatement(stmt *gorm.Statement) {
 	if _, ok := stmt.Clauses["soft_delete_enabled"]; !ok && !stmt.Statement.Unscoped {
 		if c, ok := stmt.Clauses["WHERE"]; ok {
@@ -118,18 +134,21 @@ func (qc DeletedatstampQueryclause) ModifyStatement(stmt *gorm.Statement) {
 	}
 }
 
+// DeletedAtStampUpdateClause .
 type DeletedAtStampUpdateClause struct {
 	baseClause
 
 	Field *schema.Field
 }
 
+// ModifyStatement .
 func (qc DeletedAtStampUpdateClause) ModifyStatement(stmt *gorm.Statement) {
 	if stmt.SQL.Len() == 0 && !stmt.Statement.Unscoped {
 		DeletedatstampQueryclause(qc).ModifyStatement(stmt)
 	}
 }
 
+// DeletedAtStampDeleteClause .
 type DeletedAtStampDeleteClause struct {
 	baseClause
 
@@ -167,12 +186,14 @@ func (sd DeletedAtStampDeleteClause) ModifyStatement(stmt *gorm.Statement) {
 	}
 }
 
+// DeletedAtStampCreateClause .
 type DeletedAtStampCreateClause struct {
 	baseClause
 
 	Field *schema.Field
 }
 
+// ModifyStatement .
 func (c DeletedAtStampCreateClause) ModifyStatement(stmt *gorm.Statement) {
 	if stmt.SQL.Len() == 0 && !stmt.Statement.Unscoped {
 		stmt.SetColumn(c.Field.Name, sql.NullInt64{Int64: 0, Valid: true})
