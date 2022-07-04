@@ -30,6 +30,7 @@ import (
 var (
 	interfaceType = reflect.TypeOf((*Interface)(nil)).Elem()
 	gormType      = reflect.TypeOf((*gorm.DB)(nil))
+	txType        = reflect.TypeOf((*TX)(nil))
 	name          = "gorm.v2"
 	spec          = servicehub.Spec{
 		Services: []string{"mysql-gorm.v2", "mysql-gorm.v2-client"},
@@ -51,6 +52,8 @@ func init() {
 // Interface .
 type Interface interface {
 	DB() *gorm.DB
+	Q() *TX
+	Begin() *TX
 }
 
 type config struct {
@@ -88,6 +91,7 @@ func (c *config) url() string {
 type provider struct {
 	Cfg *config
 	db  *gorm.DB
+	tx  *TX
 }
 
 // Init .
@@ -117,12 +121,26 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		p.db = p.db.Debug()
 	}
 
-	Init(p.db)
 	return nil
 }
 
 // DB .
 func (p *provider) DB() *gorm.DB { return p.db }
+
+func (p *provider) Q() *TX {
+	return &TX{
+		db:    p.db,
+		valid: true,
+	}
+}
+
+func (p *provider) Begin() *TX {
+	return &TX{
+		db:    p.db,
+		valid: true,
+		inTx:  true,
+	}
+}
 
 // Provide .
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {

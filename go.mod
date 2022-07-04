@@ -48,6 +48,7 @@ require (
 	github.com/mwitkow/go-proto-validators v0.3.2
 	github.com/olivere/elastic v6.2.35+incompatible
 	github.com/pelletier/go-toml v1.9.4
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.10.0
 	github.com/recallsong/go-utils v1.1.2-0.20210826100715-fce05eefa294
 	github.com/recallsong/unmarshal v1.0.0

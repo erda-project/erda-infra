@@ -15,146 +15,177 @@
 package v2
 
 import (
+	"fmt"
 	"strings"
 
 	"gorm.io/gorm"
 )
 
-type Option interface {
-	With(db *gorm.DB) *gorm.DB
+var (
+	DESC Order = "DESC"
+	ASC  Order = "ASC"
+)
+
+type Option func(db *gorm.DB) *gorm.DB
+
+type Column interface {
+	WhereColumn
+	OrderColumn
+	SetColumn
 }
 
-func WhereOption(format string, args ...interface{}) Option {
-	return whereOption{format: format, args: args}
+type WhereColumn interface {
+	Is(value interface{}) Option
+	In(values []interface{}) Option
+	InMap(values map[interface{}]struct{}) Option
+	Like(value interface{}) Option
+	GreaterThan(value interface{}) Option
+	EqGreaterThan(value interface{}) Option
+	LessThan(value interface{}) Option
+	EqLessThan(value interface{}) Option
 }
 
-func MapOption(m map[string]interface{}) Option {
-	return mapOption{m: m}
+type OrderColumn interface {
+	DESC() Option
+	ASC() Option
 }
 
-func ByIDOption(id interface{}) Option {
-	return byIDOption{id: id}
+type SetColumn interface {
+	Set(value interface{}) Option
 }
 
-func InOption(col string, values map[interface{}]struct{}) Option {
-	return inOption{col: col, values: values}
-}
-
-func PageOption(pageSize, pageNo int) Option {
-	if pageSize < 0 {
-		pageSize = 0
-	}
-	if pageNo < 1 {
-		pageNo = 1
-	}
-	return pageOption{
-		pageNo:   pageNo,
-		pageSize: pageSize,
-	}
-}
-
-func OrderByOption(col string, order string) Option {
-	if !strings.EqualFold(order, "desc") && !strings.EqualFold(order, "acs") {
-		order = "desc"
-	}
-	return orderByOption{
-		col:   col,
-		order: order,
+func Where(format string, args ...interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(format, args...)
 	}
 }
 
-type whereOption struct {
-	format string
-	args   []interface{}
-}
-
-func (o whereOption) With(db *gorm.DB) *gorm.DB {
-	return db.Where(o.format, o.args...)
-}
-
-type mapOption struct {
-	m map[string]interface{}
-}
-
-func (o mapOption) With(db *gorm.DB) *gorm.DB {
-	return db.Where(o.m)
-}
-
-type byIDOption struct {
-	id interface{}
-}
-
-func (o byIDOption) With(db *gorm.DB) *gorm.DB {
-	return db.Where("id = ?", o.id)
-}
-
-type inOption struct {
-	col    string
-	values map[interface{}]struct{}
-}
-
-func (o inOption) With(db *gorm.DB) *gorm.DB {
-	var keys []interface{}
-	for k := range o.values {
-		keys = append(keys, k)
+func Wheres(m interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(m)
 	}
-	return db.Where(o.col+" IN (?)", keys)
 }
 
-type pageOption struct {
-	pageNo, pageSize int
+func Col(col string) Column {
+	return column{col: col}
 }
 
-func (o pageOption) With(db *gorm.DB) *gorm.DB {
-	return db.Limit(o.pageSize).Offset((o.pageNo - 1) * o.pageSize)
+type column struct {
+	col string
 }
 
-func (o pageOption) PageOption() {}
-
-type orderByOption struct {
-	col, order string
-}
-
-func (o orderByOption) With(db *gorm.DB) *gorm.DB {
-	return db.Order(o.col + " " + strings.ToUpper(o.order))
-}
-
-type deleteOption struct {
-	i interface{}
-}
-
-func (o deleteOption) With(db *gorm.DB) *gorm.DB {
-	return db.Delete(o.i)
-}
-
-type updatesOption struct {
-	i interface{}
-	v interface{}
-}
-
-func (o updatesOption) With(db *gorm.DB) *gorm.DB {
-	return db.Model(o.i).Updates(o.v)
-}
-
-type listOption struct {
-	i        interface{}
-	total    *int64
-	pageSize int
-	pageNo   int
-}
-
-func (o listOption) With(db *gorm.DB) *gorm.DB {
-	db.Statement.Dest = o.i
-	if o.pageNo > 0 && o.pageSize > 0 {
-		return db.Count(o.total).Limit(o.pageSize).Offset((o.pageNo - 1) * o.pageSize).Find(o.i)
+func (c column) Is(value interface{}) Option {
+	if value == nil {
+		return func(db *gorm.DB) *gorm.DB {
+			return db.Where(c.col + " IS NULL")
+		}
 	}
-	return db.Count(o.total).Find(o.i)
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(c.col+" = ?", value)
+	}
 }
 
-type firstOption struct {
-	i interface{}
+func (c column) In(values []interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(c.col+" IN ?", values)
+	}
 }
 
-func (o firstOption) With(db *gorm.DB) *gorm.DB {
-	return db.First(o.i)
+func (c column) InMap(values map[interface{}]struct{}) Option {
+	var values_ []interface{}
+	for key := range values {
+		values_ = append(values_, key)
+	}
+	fmt.Printf("values_: %v", values_)
+	return c.In(values_)
+}
+
+func (c column) Like(value interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(c.col+" LIKE ?", value)
+	}
+}
+
+func (c column) GreaterThan(value interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(c.col+" > ?", value)
+	}
+}
+
+func (c column) EqGreaterThan(value interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(c.col+" >= ?", value)
+	}
+}
+
+func (c column) LessThan(value interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(c.col+" < ?", value)
+	}
+}
+
+func (c column) EqLessThan(value interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(c.col+" <= ?", value)
+	}
+}
+
+func (c column) DESC() Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Order(c.col + " DESC")
+	}
+}
+
+func (c column) ASC() Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Order(c.col + " ASC")
+	}
+}
+
+func (c column) Set(value interface{}) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Update(c.col, value)
+	}
+}
+
+type WhereValue interface {
+	In(cols ...string) Option
+}
+
+func Value(value interface{}) whereValue {
+	return whereValue{value: value}
+}
+
+type whereValue struct {
+	value interface{}
+}
+
+func (w whereValue) In(cols ...string) Option {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(fmt.Sprintf("? IN (%s)", strings.Join(cols, ",")), w.value)
+	}
+}
+
+func Paging(size, no int) Option {
+	if size < 0 {
+		size = 0
+	}
+	if no < 1 {
+		no = 1
+	}
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Limit(size).Offset((no - 1) * size)
+	}
+}
+
+type Order string
+
+func OrderBy(col string, order Order) Option {
+	if !strings.EqualFold(string(order), string(DESC)) &&
+		!strings.EqualFold(string(order), string(ASC)) {
+		order = "DESC"
+	}
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Order(col + " " + strings.ToUpper(string(order)))
+	}
 }
