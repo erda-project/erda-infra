@@ -103,12 +103,11 @@ func (c column) In(values []interface{}) Option {
 }
 
 func (c column) InMap(values map[interface{}]struct{}) Option {
-	var values_ []interface{}
+	var list []interface{}
 	for key := range values {
-		values_ = append(values_, key)
+		list = append(list, key)
 	}
-	fmt.Printf("values_: %v", values_)
-	return c.In(values_)
+	return c.In(list)
 }
 
 func (c column) Like(value interface{}) Option {
@@ -164,6 +163,7 @@ type WhereValue interface {
 	In(cols ...string) Option
 }
 
+// Value .
 func Value(value interface{}) WhereValue {
 	return whereValue{value: value}
 }

@@ -19,8 +19,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// InvalidTransactionError means the transaction is alread committed or roll backed
-var InvalidTransactionError = errors.New("invalid transaction, it is already committed or roll backed")
+// ErrInvalidTransaction means the transaction is alread committed or roll backed
+var ErrInvalidTransaction = errors.New("invalid transaction, it is already committed or roll backed")
 
 // TX contains the CRUS APIs
 type TX struct {
@@ -39,7 +39,7 @@ func NewTx(db *gorm.DB) *TX {
 // Create inserts a row
 func (tx *TX) Create(i interface{}) error {
 	if tx.inTx && !tx.valid {
-		return InvalidTransactionError
+		return ErrInvalidTransaction
 	}
 	tx.Error = tx.db.Create(i).Error
 	return tx.Error
@@ -48,7 +48,7 @@ func (tx *TX) Create(i interface{}) error {
 // CreateInBatches inserts multi rows
 func (tx *TX) CreateInBatches(i interface{}, size int) error {
 	if tx.inTx && !tx.valid {
-		return InvalidTransactionError
+		return ErrInvalidTransaction
 	}
 	tx.Error = tx.db.CreateInBatches(i, size).Error
 	return tx.Error
@@ -57,7 +57,7 @@ func (tx *TX) CreateInBatches(i interface{}, size int) error {
 // Delete deletes rows with conditions
 func (tx *TX) Delete(i interface{}, options ...Option) (int64, error) {
 	if tx.inTx && !tx.valid {
-		return 0, InvalidTransactionError
+		return 0, ErrInvalidTransaction
 	}
 	var db = tx.DB()
 	for _, opt := range options {
@@ -71,7 +71,7 @@ func (tx *TX) Delete(i interface{}, options ...Option) (int64, error) {
 // options is conditions.
 func (tx *TX) Updates(i, v interface{}, options ...Option) error {
 	if tx.inTx && !tx.valid {
-		return InvalidTransactionError
+		return ErrInvalidTransaction
 	}
 	var db = tx.DB()
 	for _, opt := range options {
@@ -84,7 +84,7 @@ func (tx *TX) Updates(i, v interface{}, options ...Option) error {
 // At least one SetColumn Option in the options.
 func (tx *TX) SetColumns(i interface{}, options ...Option) error {
 	if tx.inTx && !tx.valid {
-		return InvalidTransactionError
+		return ErrInvalidTransaction
 	}
 	var db = tx.DB()
 	db = db.Model(i)
@@ -135,7 +135,7 @@ func (tx *TX) Commit() error {
 		return errors.New("not in transaction")
 	}
 	if !tx.valid {
-		return InvalidTransactionError
+		return ErrInvalidTransaction
 	}
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "can not commit with error")
@@ -151,7 +151,7 @@ func (tx *TX) Rollback() error {
 		return errors.New("not in transaction")
 	}
 	if !tx.valid {
-		return InvalidTransactionError
+		return ErrInvalidTransaction
 	}
 	tx.db.Rollback()
 	tx.valid = false
