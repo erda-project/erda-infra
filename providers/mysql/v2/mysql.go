@@ -30,6 +30,7 @@ import (
 var (
 	interfaceType = reflect.TypeOf((*Interface)(nil)).Elem()
 	gormType      = reflect.TypeOf((*gorm.DB)(nil))
+	txType        = reflect.TypeOf((*TX)(nil))
 	name          = "gorm.v2"
 	spec          = servicehub.Spec{
 		Services: []string{"mysql-gorm.v2", "mysql-gorm.v2-client"},
@@ -50,7 +51,12 @@ func init() {
 
 // Interface .
 type Interface interface {
+	// DB returns the raw *gorm.DB.
 	DB() *gorm.DB
+	// Q returns the CRUD APIs without a transaction.
+	Q() *TX
+	// Begin returns the CRUD APIs with a transaction.
+	Begin() *TX
 }
 
 type config struct {
@@ -88,9 +94,10 @@ func (c *config) url() string {
 type provider struct {
 	Cfg *config
 	db  *gorm.DB
+	tx  *TX
 }
 
-// Init .
+// Init implements servicehub.ProviderInitializer
 func (p *provider) Init(ctx servicehub.Context) error {
 	err := mysqldriver.OpenTLS(p.Cfg.MySQLTLS, p.Cfg.MySQLCaCertPath, p.Cfg.MySQLClientCertPath, p.Cfg.MySQLClientKeyPath)
 	if err != nil {
@@ -116,13 +123,31 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	if p.Cfg.MySQLDebug {
 		p.db = p.db.Debug()
 	}
+
 	return nil
 }
 
-// DB .
+// DB implements Interface.DB
 func (p *provider) DB() *gorm.DB { return p.db }
 
-// Provide .
+// Q implements Interface.Q
+func (p *provider) Q() *TX {
+	return &TX{
+		db:    p.db,
+		valid: true,
+	}
+}
+
+// Begin implements Interface.Begin
+func (p *provider) Begin() *TX {
+	return &TX{
+		db:    p.db,
+		valid: true,
+		inTx:  true,
+	}
+}
+
+// Provide implements servicehub.DependencyProvider
 func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}) interface{} {
 	if ctx.Service() == "mysql-gorm.v2-client" || ctx.Type() == gormType {
 		return p.db

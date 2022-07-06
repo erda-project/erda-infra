@@ -19,6 +19,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"reflect"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -68,14 +69,13 @@ func (n DeletedAt) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON .
 func (n *DeletedAt) UnmarshalJSON(b []byte) error {
-	if string(b) == "null" {
+	bs := string(b)
+	if strings.EqualFold(bs, "null") {
 		n.Valid = false
 		return nil
 	}
 	err := json.Unmarshal(b, &n.Time)
-	if err == nil {
-		n.Valid = true
-	}
+	n.Valid = err == nil
 	return err
 }
 
