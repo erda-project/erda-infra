@@ -115,14 +115,15 @@ func (p *provider) createRestConfig() (*rest.Config, error) {
 					p.Cfg.ConfigPath = filepath.Join(home, ".kube", "config")
 				}
 			}
-			if _, err := os.Stat(p.Cfg.ConfigPath); err == nil {
-				// use the current context in kubeconfig
-				cfg, err := clientcmd.BuildConfigFromFlags(p.Cfg.MasterURL, p.Cfg.ConfigPath)
-				if err != nil {
-					return nil, fmt.Errorf("fail to build kube config: %s", err)
-				}
-				config = cfg
+			if _, err := os.Stat(p.Cfg.ConfigPath); err != nil {
+				return nil, fmt.Errorf("cannot get path: %w", err)
 			}
+			// use the current context in kubeconfig
+			cfg, err := clientcmd.BuildConfigFromFlags(p.Cfg.MasterURL, p.Cfg.ConfigPath)
+			if err != nil {
+				return nil, fmt.Errorf("fail to build kube config: %s", err)
+			}
+			config = cfg
 		}
 	} else {
 		cfg, err := rest.InClusterConfig()
