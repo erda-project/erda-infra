@@ -114,6 +114,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Execute chain
 	if err := h(c); err != nil {
+		c.Logger().Errorf("url method: %s, path: %s, matcherPath: %s, ip: %s, header: %v", c.Request().Method, c.Request().URL.Path, c.Path(), c.RealIP(), c.Request().Header)
 		s.e.HTTPErrorHandler(err, c)
 	}
 }
