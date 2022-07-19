@@ -158,7 +158,7 @@ type DeletedAtStampDeleteClause struct {
 // ModifyStatement .
 func (sd DeletedAtStampDeleteClause) ModifyStatement(stmt *gorm.Statement) {
 	if stmt.SQL.Len() == 0 && !stmt.Statement.Unscoped {
-		curTime := stmt.DB.NowFunc().UnixMilli()
+		curTime := stmt.DB.NowFunc().UnixNano() / 1e6
 		stmt.AddClause(clause.Set{{Column: clause.Column{Name: sd.Field.DBName}, Value: curTime}})
 		stmt.SetColumn(sd.Field.DBName, curTime, true)
 

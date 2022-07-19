@@ -19,10 +19,11 @@ import (
 	"strconv"
 	"strings"
 
-	protocutils "github.com/erda-project/erda-infra/tools/pkg/protoc-utils"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
+
+	protocutils "github.com/erda-project/erda-infra/tools/pkg/protoc-utils"
 )
 
 const (

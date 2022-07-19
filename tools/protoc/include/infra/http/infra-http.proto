@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package infra.http;
+
+option go_package = "github.com/erda-project/erda-infra/proto-go/http";
+
+message Void {}
+
+message HttpInfo {
+  uint32 status = 1;
+  repeated HttpHeader headers = 2;
+}
+
+message HttpHeader {
+  string key = 1;
+  repeated string values = 2;
+}

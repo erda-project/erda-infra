@@ -23,9 +23,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/erda-project/erda-infra/pkg/urlenc"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/erda-project/erda-infra/pkg/urlenc"
+	http1 "github.com/erda-project/erda-infra/proto-go/http"
 )
 
 type notSupportMediaTypeErr struct {
@@ -166,6 +168,7 @@ func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out in
 				return false, err
 			}
 			w.Header().Set("Content-Type", "application/protobuf")
+			setHttpInfo(w, out)
 			_, err = w.Write(byts)
 			return true, err
 		}
@@ -173,6 +176,7 @@ func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out in
 		if m, ok := out.(urlenc.URLValuesMarshaler); ok {
 			vals := make(url.Values)
 			w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+			setHttpInfo(w, out)
 			return true, m.MarshalURLValues("", vals)
 		}
 	default:
@@ -187,8 +191,28 @@ func encodeResponse(mtype string, w http.ResponseWriter, r *http.Request, out in
 				return true, err
 			}
 			w.Header().Set("Content-Type", "application/json")
+			setHttpInfo(w, out)
 			return true, json.NewEncoder(w).Encode(out)
 		}
 	}
 	return false, nil
+}
+
+func setHttpInfo(w http.ResponseWriter, out interface{}) {
+	var data interface{}
+	if dataGetter, ok := out.(interface{ GetData() interface{} }); ok {
+		data = dataGetter.GetData()
+	} else {
+		data = out
+	}
+	if httpInfoGetter, ok := data.(interface{ GetHttpInfo() *http1.HttpInfo }); ok {
+		if httpInfo := httpInfoGetter.GetHttpInfo(); httpInfo != nil {
+			for _, header := range httpInfo.Headers {
+				for _, value := range header.Values {
+					w.Header().Add(header.GetKey(), value)
+				}
+			}
+			w.WriteHeader(int(httpInfo.GetStatus()))
+		}
+	}
 }
