@@ -18,11 +18,13 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/erda-project/erda-infra/base/logs"
-	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/erda-project/erda-infra/providers/httpserver/server"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/middleware"
+
+	"github.com/erda-project/erda-infra/base/logs"
+	"github.com/erda-project/erda-infra/base/servicehub"
+	"github.com/erda-project/erda-infra/providers/httpserver/interceptors"
+	"github.com/erda-project/erda-infra/providers/httpserver/server"
 )
 
 // config .
@@ -31,6 +33,14 @@ type config struct {
 	PrintRoutes bool   `file:"print_routes" default:"true" desc:"print http routes"`
 	AllowCORS   bool   `file:"allow_cors" default:"false" desc:"allow cors"`
 	Reloadable  bool   `file:"reloadable" default:"false" desc:"routes reloadable"`
+
+	Debug bool      `file:"debug" default:"false"`
+	Log   LogConfig `file:"log"`
+}
+
+// LogConfig .
+type LogConfig struct {
+	MaxBodySizeBytes int `file:"max_body_size_bytes" default:"1024" desc:"max body size in bytes"`
 }
 
 type provider struct {
@@ -49,12 +59,19 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	if p.Cfg.AllowCORS {
 		p.server.Use(middleware.CORS())
 	}
+
+	p.server.Use(interceptors.InjectRequestID())
+	p.server.Use(interceptors.SimpleRecord(p.Log))
+	p.server.Use(interceptors.DetailLog(p.Cfg.Debug))
+	p.server.Use(interceptors.BodyDump(p.Cfg.Debug, p.Cfg.Log.MaxBodySizeBytes))
+
 	p.server.Use(func(fn server.HandlerFunc) server.HandlerFunc {
-		return func(ctx server.Context) error {
-			ctx = &context{Context: ctx}
-			err := fn(ctx)
+		return func(c server.Context) error {
+			c = &context{Context: c}
+			err := fn(c)
 			if err != nil {
-				p.Log.Error(err)
+				p.Log.Errorf("(%s) err: %s, url method: %s, path: %s, matcherPath: %s, ip: %s, header: %v",
+					interceptors.GetRequestID(c), err, c.Request().Method, c.Request().URL.Path, c.Path(), c.RealIP(), c.Request().Header)
 				return err
 			}
 			return nil
