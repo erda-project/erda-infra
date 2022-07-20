@@ -238,10 +238,8 @@ func (w *jsonWriter) marshalMessage(m protoreflect.Message, indent, typeURL stri
 		} else {
 			i++
 		}
-		fmt.Printf("%s.JSONName(): %s\n", fd.Name(), fd.JSONName())
+
 		if fd.JSONName() == "-" {
-			fmt.Printf("fd.Name(): %s, fd.JSONName(): %s, fd.HasJSONName(): %s, fd.FullName(): %s, fd.TextName(): %s\n",
-				fd.Name(), fd.JSONName(), fd.HasJSONName(), fd.FullName(), fd.TextName())
 			continue
 		}
 
