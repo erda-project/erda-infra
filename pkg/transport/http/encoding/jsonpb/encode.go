@@ -238,6 +238,7 @@ func (w *jsonWriter) marshalMessage(m protoreflect.Message, indent, typeURL stri
 		} else {
 			i++
 		}
+		fmt.Printf("fd.JSONName(): %s", fd.JSONName())
 
 		v := m.Get(fd)
 
