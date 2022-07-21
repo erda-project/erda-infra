@@ -17,20 +17,18 @@ package interceptors
 import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-
-	"github.com/erda-project/erda-infra/base/logs"
 )
 
 // SimpleRecord record begin and end for http request.
-func SimpleRecord(enable bool, log logs.Logger) echo.MiddlewareFunc {
+func SimpleRecord(option Option) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if !enable {
+			if !judgeAnyEnable(c, option.EnableFetchFuncs) {
 				return next(c)
 			}
 			reqID, url := GetRequestID(c), c.Request().URL
-			log.Infof("(%s) begin handle request: %s\n", reqID, url)
-			defer log.Infof("(%s) end handle request: %s\n", reqID, url)
+			option.Log.Infof("(%s) begin handle request: %s\n", reqID, url)
+			defer option.Log.Infof("(%s) end handle request: %s\n", reqID, url)
 			return next(c)
 		}
 	}
@@ -38,8 +36,8 @@ func SimpleRecord(enable bool, log logs.Logger) echo.MiddlewareFunc {
 
 // DetailLog print detail log for http request.
 // Like: {"time":"2022-07-19T16:03:44.525493+08:00","id":"eSRLySVRiUAXs0VRu0AC0ETteIRKtAHg","remote_ip":"127.0.0.1","host":"localhost:9529","method":"GET","uri":"/test","user_agent":"curl/7.79.1","status":401,"error":"","latency":273532041,"latency_human":"273.532041ms","bytes_in":0,"bytes_out":25}
-func DetailLog(enable bool) echo.MiddlewareFunc {
+func DetailLog(option Option) echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Skipper: func(c echo.Context) bool { return !enable },
+		Skipper: func(c echo.Context) bool { return !judgeAnyEnable(c, option.EnableFetchFuncs) },
 	})
 }

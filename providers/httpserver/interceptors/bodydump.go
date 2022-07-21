@@ -23,9 +23,9 @@ import (
 )
 
 // BodyDump dump body for http request.
-func BodyDump(enable bool, maxBodySizeBytes int) echo.MiddlewareFunc {
+func BodyDump(option Option, maxBodySizeBytes int) echo.MiddlewareFunc {
 	return middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c echo.Context) bool { return !enable },
+		Skipper: func(c echo.Context) bool { return !judgeAnyEnable(c, option.EnableFetchFuncs) },
 		Handler: func(c echo.Context, reqBody []byte, respBody []byte) {
 			// request
 			reqBase, err := httputil.DumpRequest(c.Request(), false)
