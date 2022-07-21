@@ -22,11 +22,15 @@ import (
 )
 
 // SimpleRecord record begin and end for http request.
-func SimpleRecord(log logs.Logger) echo.MiddlewareFunc {
+func SimpleRecord(enable bool, log logs.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			log.Infof("(%s) begin handle request: %s\n", GetRequestID(c), c.Request().URL)
-			defer log.Infof("(%s) end handle request: %s\n", GetRequestID(c), c.Request().URL)
+			if !enable {
+				return next(c)
+			}
+			reqID, url := GetRequestID(c), c.Request().URL
+			log.Infof("(%s) begin handle request: %s\n", reqID, url)
+			defer log.Infof("(%s) end handle request: %s\n", reqID, url)
 			return next(c)
 		}
 	}

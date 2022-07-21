@@ -33,13 +33,13 @@ func BodyDump(enable bool, maxBodySizeBytes int) echo.MiddlewareFunc {
 				fmt.Printf("(%s) Request:\n%s", GetRequestID(c), reqBase)
 			}
 			if len(reqBody) <= maxBodySizeBytes {
-				fmt.Printf("(%s) Request Body:\n%s-END-\n", GetRequestID(c), string(reqBody))
+				fmt.Printf("(%s) Request Body: (star from the next line, end with '-END-')\n%s-END-\n", GetRequestID(c), string(reqBody))
 			} else {
 				fmt.Printf("(%s) Request Body: (Ignored, Body too long)\n", GetRequestID(c))
 			}
 			// response
 			if len(respBody) <= maxBodySizeBytes {
-				fmt.Printf("(%s) Response Body:\n%s-END-\n", GetRequestID(c), string(respBody))
+				fmt.Printf("(%s) Response Body: (star from the next line, end with '-END-')\n%s-END-\n", GetRequestID(c), string(respBody))
 			} else {
 				fmt.Printf("(%s) Response Body: (Ignored, Body too long)\n", GetRequestID(c))
 			}
