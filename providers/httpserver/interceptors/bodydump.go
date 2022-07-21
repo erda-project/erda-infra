@@ -23,9 +23,9 @@ import (
 )
 
 // BodyDump dump body for http request.
-func BodyDump(enable bool, maxBodySizeBytes int) echo.MiddlewareFunc {
+func BodyDump(option Option, maxBodySizeBytes int) echo.MiddlewareFunc {
 	return middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c echo.Context) bool { return !enable },
+		Skipper: func(c echo.Context) bool { return !judgeAnyEnable(c, option.EnableFetchFuncs) },
 		Handler: func(c echo.Context, reqBody []byte, respBody []byte) {
 			// request
 			reqBase, err := httputil.DumpRequest(c.Request(), false)
@@ -33,13 +33,13 @@ func BodyDump(enable bool, maxBodySizeBytes int) echo.MiddlewareFunc {
 				fmt.Printf("(%s) Request:\n%s", GetRequestID(c), reqBase)
 			}
 			if len(reqBody) <= maxBodySizeBytes {
-				fmt.Printf("(%s) Request Body:\n%s\n-END-\n", GetRequestID(c), string(reqBody))
+				fmt.Printf("(%s) Request Body: (star from the next line, end with '-END-')\n%s-END-\n", GetRequestID(c), string(reqBody))
 			} else {
 				fmt.Printf("(%s) Request Body: (Ignored, Body too long)\n", GetRequestID(c))
 			}
 			// response
 			if len(respBody) <= maxBodySizeBytes {
-				fmt.Printf("(%s) Response Body:\n%s-END-\n", GetRequestID(c), string(respBody))
+				fmt.Printf("(%s) Response Body: (star from the next line, end with '-END-')\n%s-END-\n", GetRequestID(c), string(respBody))
 			} else {
 				fmt.Printf("(%s) Response Body: (Ignored, Body too long)\n", GetRequestID(c))
 			}

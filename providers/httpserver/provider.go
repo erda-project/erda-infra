@@ -19,7 +19,7 @@ import (
 	"sync"
 
 	"github.com/go-playground/validator"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -56,28 +56,43 @@ type provider struct {
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.server = server.New(p.Cfg.Reloadable, &dataBinder{}, &structValidator{validator: validator.New()})
-	if p.Cfg.AllowCORS {
-		p.server.Use(middleware.CORS())
-	}
 
+	p.server.Use(interceptors.Recover(p.Log).(func(echo.HandlerFunc) echo.HandlerFunc))
+	p.server.Use(interceptors.SimpleRecord(p.getInterceptorOption()))
+	p.server.Use(interceptors.CORS(p.Cfg.AllowCORS))
 	p.server.Use(interceptors.InjectRequestID())
-	p.server.Use(interceptors.SimpleRecord(p.Log))
-	p.server.Use(interceptors.DetailLog(p.Cfg.Debug))
-	p.server.Use(interceptors.BodyDump(p.Cfg.Debug, p.Cfg.Log.MaxBodySizeBytes))
+	p.server.Use(interceptors.DetailLog(p.getInterceptorOption()))
+	p.server.Use(interceptors.BodyDump(p.getInterceptorOption(), p.Cfg.Log.MaxBodySizeBytes))
+	p.server.Use(p.wrapContext())
 
-	p.server.Use(func(fn server.HandlerFunc) server.HandlerFunc {
-		return func(c server.Context) error {
-			c = &context{Context: c}
-			err := fn(c)
-			if err != nil {
-				p.Log.Errorf("(%s) err: %s, url method: %s, path: %s, matcherPath: %s, ip: %s, header: %v",
-					interceptors.GetRequestID(c), err, c.Request().Method, c.Request().URL.Path, c.Path(), c.RealIP(), c.Request().Header)
-				return err
-			}
-			return nil
-		}
-	})
 	return nil
+}
+
+func (p *provider) wrapContext() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			ctx := &context{Context: c}
+			err := next(ctx)
+			p.logFailure(c, err)
+			return err
+		}
+	}
+}
+
+func (p *provider) getInterceptorOption() interceptors.Option {
+	funcs := []interceptors.EnableFetchFunc{
+		func(c echo.Context) bool {
+			return p.Cfg.Debug
+		},
+	}
+	return interceptors.NewOption(funcs, p.Log)
+}
+
+func (p *provider) logFailure(c server.Context, err error) {
+	if err != nil || c.Response().Status/100 != 2 {
+		p.Log.Errorf("(%s) err: %v, status: %d, url method: %s, path: %s, matcherPath: %s, ip: %s, header: %v",
+			interceptors.GetRequestID(c), err, c.Response().Status, c.Request().Method, c.Request().URL.Path, c.Path(), c.RealIP(), c.Request().Header)
+	}
 }
 
 // Start .

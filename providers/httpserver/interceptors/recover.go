@@ -18,15 +18,10 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-)
 
-// CORS .
-func CORS() interface{} {
-	return middleware.CORS()
-}
+	"github.com/erda-project/erda-infra/base/logs"
+)
 
 // Recover .
 func Recover(log logs.Logger) interface{} {

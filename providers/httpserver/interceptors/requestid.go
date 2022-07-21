@@ -15,13 +15,27 @@
 package interceptors
 
 import (
+	"github.com/google/uuid"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
 // InjectRequestID inject request id for http request.
 func InjectRequestID() echo.MiddlewareFunc {
-	return middleware.RequestID()
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			req := c.Request()
+			res := c.Response()
+			rid := req.Header.Get(echo.HeaderXRequestID)
+			if rid == "" {
+				rid = uuid.NewString()
+				// set rid to request headers for proxy use, otherwise the forwarded target httpserver will inject a new X-Request-ID
+				req.Header.Set(echo.HeaderXRequestID, rid)
+			}
+			res.Header().Set(echo.HeaderXRequestID, rid)
+
+			return next(c)
+		}
+	}
 }
 
 // GetRequestID get request id from context.

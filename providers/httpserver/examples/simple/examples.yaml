@@ -1,5 +1,7 @@
 http-server:
     addr: ":8080"
+    allow_cors: true
+    debug: true
 
 hello:
     message: "hello world"
