@@ -24,11 +24,13 @@ const (
 	defaultEnableFlag = "__debug__"
 )
 
+// Option .
 type Option struct {
 	EnableFetchFuncs []EnableFetchFunc
 	Log              logs.Logger
 }
 
+// NewOption .
 func NewOption(funcs []EnableFetchFunc, log logs.Logger) Option {
 	return Option{
 		EnableFetchFuncs: funcs,
@@ -36,6 +38,7 @@ func NewOption(funcs []EnableFetchFunc, log logs.Logger) Option {
 	}
 }
 
+// EnableFetchFunc is a func used by middleware invoker to define how to get enable switch.
 type EnableFetchFunc func(c echo.Context) bool
 
 var defaultEnableFetchFunc EnableFetchFunc = func(c echo.Context) bool {
