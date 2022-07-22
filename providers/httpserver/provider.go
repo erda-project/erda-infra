@@ -63,6 +63,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	p.server.Use(interceptors.InjectRequestID())
 	p.server.Use(interceptors.DetailLog(p.getInterceptorOption()))
 	p.server.Use(interceptors.BodyDump(p.getInterceptorOption(), p.Cfg.Log.MaxBodySizeBytes))
+	p.server.Use(interceptors.PassThroughDebugFlag())
 	p.server.Use(p.wrapContext())
 
 	return nil
