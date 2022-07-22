@@ -15,13 +15,15 @@
 package interceptors
 
 import (
+	"strconv"
+
 	"github.com/labstack/echo"
 
 	"github.com/erda-project/erda-infra/base/logs"
 )
 
 const (
-	defaultEnableFlag = "__debug__"
+	defaultDebugFlag = "__debug__"
 )
 
 // Option .
@@ -42,10 +44,10 @@ func NewOption(funcs []EnableFetchFunc, log logs.Logger) Option {
 type EnableFetchFunc func(c echo.Context) bool
 
 var defaultEnableFetchFunc EnableFetchFunc = func(c echo.Context) bool {
-	if c.Request().URL.Query().Has(defaultEnableFlag) {
+	if c.Request().URL.Query().Has(defaultDebugFlag) {
 		return true
 	}
-	if _, ok := c.Request().Header[defaultEnableFlag]; ok {
+	if _, ok := c.Request().Header[defaultDebugFlag]; ok {
 		return true
 	}
 	return false
@@ -59,4 +61,16 @@ func judgeAnyEnable(c echo.Context, enableFetchFuncs []EnableFetchFunc) bool {
 		}
 	}
 	return defaultEnableFetchFunc(c)
+}
+
+// PassThroughDebugFlag is the middleware to pass through the debug flag.
+func PassThroughDebugFlag() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if defaultEnableFetchFunc(c) {
+				c.Response().Header().Set(defaultDebugFlag, strconv.FormatBool(true))
+			}
+			return next(c)
+		}
+	}
 }

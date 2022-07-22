@@ -20,19 +20,25 @@ import (
 	"testing"
 
 	"github.com/labstack/echo"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/erda-project/erda-infra/providers/httpserver/mock"
 )
 
-func Test_judgeAnyEnable(t *testing.T) {
-	getC := func(url string, header http.Header) echo.Context {
-		e := echo.New()
-		r, err := http.NewRequest(http.MethodGet, url, nil)
-		if err != nil {
-			panic(err)
-		}
-		r.Header = header
-		c := e.NewContext(r, nil)
-		return c
+func mustGetC(url string, header http.Header) echo.Context {
+	e := echo.New()
+	r, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		panic(err)
 	}
+	r.Header = header
+	c := e.NewContext(r, nil)
+	resp := echo.NewResponse(mock.NewHTTPResponseWriter(), e)
+	*c.Response() = *resp
+	return c
+}
+
+func Test_judgeAnyEnable(t *testing.T) {
 
 	type args struct {
 		c                echo.Context
@@ -46,7 +52,7 @@ func Test_judgeAnyEnable(t *testing.T) {
 		{
 			name: "all and default is disabled",
 			args: args{
-				c:                getC("localhost", nil),
+				c:                mustGetC("localhost", nil),
 				enableFetchFuncs: nil,
 			},
 			want: false,
@@ -54,7 +60,7 @@ func Test_judgeAnyEnable(t *testing.T) {
 		{
 			name: "first one is enabled",
 			args: args{
-				c: getC("localhost", nil),
+				c: mustGetC("localhost", nil),
 				enableFetchFuncs: []EnableFetchFunc{
 					func(c echo.Context) bool { return true },
 				},
@@ -64,7 +70,7 @@ func Test_judgeAnyEnable(t *testing.T) {
 		{
 			name: "the last one is enabled",
 			args: args{
-				c: getC("localhost", nil),
+				c: mustGetC("localhost", nil),
 				enableFetchFuncs: []EnableFetchFunc{
 					func(c echo.Context) bool { return false },
 					func(c echo.Context) bool { return false },
@@ -76,7 +82,7 @@ func Test_judgeAnyEnable(t *testing.T) {
 		{
 			name: "all disabled, but defined at url query",
 			args: args{
-				c:                getC(fmt.Sprintf("localhost?%s", defaultEnableFlag), nil),
+				c:                mustGetC(fmt.Sprintf("localhost?%s", defaultDebugFlag), nil),
 				enableFetchFuncs: nil,
 			},
 			want: true,
@@ -84,7 +90,7 @@ func Test_judgeAnyEnable(t *testing.T) {
 		{
 			name: "all disabled, but defined at header",
 			args: args{
-				c:                getC("localhost", http.Header{defaultEnableFlag: []string{}}),
+				c:                mustGetC("localhost", http.Header{defaultDebugFlag: []string{}}),
 				enableFetchFuncs: nil,
 			},
 			want: true,
@@ -97,4 +103,37 @@ func Test_judgeAnyEnable(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPassThroughEnableFlag(t *testing.T) {
+	middlewareFunc := PassThroughDebugFlag()
+	// get handler func
+	handlerFunc := middlewareFunc(func(c echo.Context) error { return nil })
+
+	// invoke handler func without flag
+	c := mustGetC("localhost", nil)
+	_, ok := c.Response().Header()[defaultDebugFlag]
+	assert.False(t, ok)
+	err := handlerFunc(c)
+	assert.NoError(t, err)
+	_, ok = c.Response().Header()[defaultDebugFlag]
+	assert.False(t, ok)
+
+	// invoke handler func with flag in url query
+	c = mustGetC(fmt.Sprintf("localhost?%s", defaultDebugFlag), nil)
+	_, ok = c.Response().Header()[defaultDebugFlag]
+	assert.False(t, ok)
+	err = handlerFunc(c)
+	assert.NoError(t, err)
+	_, ok = c.Response().Header()[defaultDebugFlag]
+	assert.True(t, ok)
+
+	// invoke handler func with flag in header
+	c = mustGetC("localhost", http.Header{defaultDebugFlag: []string{}})
+	_, ok = c.Response().Header()[defaultDebugFlag]
+	assert.False(t, ok)
+	err = handlerFunc(c)
+	assert.NoError(t, err)
+	_, ok = c.Response().Header()[defaultDebugFlag]
+	assert.True(t, ok)
 }
