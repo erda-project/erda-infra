@@ -19,24 +19,28 @@ import (
 	"net/http"
 )
 
-type MockHTTPResponseWriter struct {
+// HTTPResponseWriter .
+type HTTPResponseWriter struct {
 	Status     int
 	MockHeader http.Header
 	Bytes      *bytes.Buffer
 }
 
-func NewHTTPResponseWriter() *MockHTTPResponseWriter {
-	return &MockHTTPResponseWriter{
+// NewHTTPResponseWriter .
+func NewHTTPResponseWriter() *HTTPResponseWriter {
+	return &HTTPResponseWriter{
 		MockHeader: make(http.Header),
 		Bytes:      new(bytes.Buffer),
 	}
 }
 
-func (rw *MockHTTPResponseWriter) Header() http.Header {
+// Header .
+func (rw *HTTPResponseWriter) Header() http.Header {
 	return rw.MockHeader
 }
 
-func (rw *MockHTTPResponseWriter) Write(byts []byte) (int, error) {
+// Write .
+func (rw *HTTPResponseWriter) Write(byts []byte) (int, error) {
 	if rw.Bytes == nil {
 		rw.Bytes = new(bytes.Buffer)
 	}
@@ -44,6 +48,7 @@ func (rw *MockHTTPResponseWriter) Write(byts []byte) (int, error) {
 	return len(byts), nil
 }
 
-func (rw *MockHTTPResponseWriter) WriteHeader(statusCode int) {
+// WriteHeader .
+func (rw *HTTPResponseWriter) WriteHeader(statusCode int) {
 	rw.Status = statusCode
 }
