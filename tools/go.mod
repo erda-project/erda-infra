@@ -10,6 +10,12 @@ require (
 	google.golang.org/protobuf v1.27.1
 )
 
+require (
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	google.golang.org/grpc v1.42.0 // indirect
+)
+
 replace (
 	github.com/coreos/bbolt v1.3.5 => go.etcd.io/bbolt v1.3.5
 	go.etcd.io/bbolt v1.3.5 => github.com/coreos/bbolt v1.3.5
