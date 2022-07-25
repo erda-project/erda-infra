@@ -1,6 +1,6 @@
 module github.com/erda-project/erda-infra/tools
 
-go 1.16
+go 1.17
 
 require (
 	github.com/erda-project/erda-infra v1.0.7
@@ -8,6 +8,12 @@ require (
 	github.com/spf13/cobra v1.1.3
 	google.golang.org/genproto v0.0.0-20210820002220-43fce44e7af1
 	google.golang.org/protobuf v1.27.1
+)
+
+require (
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	google.golang.org/grpc v1.42.0 // indirect
 )
 
 replace (
