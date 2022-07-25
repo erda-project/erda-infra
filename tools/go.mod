@@ -1,6 +1,6 @@
 module github.com/erda-project/erda-infra/tools
 
-go 1.16
+go 1.17
 
 require (
 	github.com/erda-project/erda-infra v1.0.7

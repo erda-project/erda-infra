@@ -1,6 +1,6 @@
 module github.com/erda-project/erda-infra
 
-go 1.16
+go 1.17
 
 require (
 	bou.ke/monkey v1.0.2
