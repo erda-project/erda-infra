@@ -15,7 +15,10 @@
 package httpserver
 
 import (
+	libcontext "context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -332,6 +335,38 @@ func TestWithPathFormat(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got, ok := WithPathFormat(tt.format).(*pathFormater); !ok || fmt.Sprint(*got) != fmt.Sprint(*tt.want) {
 				t.Errorf("WithPathFormat() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAddVarsToRequest(t *testing.T) {
+	type args struct {
+		req  *http.Request
+		vars map[string]string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "add vars",
+			args: args{
+				req: &http.Request{
+					URL: &url.URL{
+						Path: "/abc/def",
+					},
+				},
+				vars: map[string]string{"def": "123"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := libcontext.Background()
+			ctxWithVars := makeCtxWithVars(ctx, tt.args.vars)
+			if !reflect.DeepEqual(tt.args.vars, ctxWithVars.Value(varsKey).(map[string]string)) {
+				t.Errorf("makeCtxWithVars() = %v, want %v", ctxWithVars.Value(varsKey).(map[string]string), tt.args.vars)
 			}
 		})
 	}
