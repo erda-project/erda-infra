@@ -15,6 +15,8 @@
 package httpserver
 
 import (
+	libcontext "context"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -29,6 +31,12 @@ type PathFormat int32
 const (
 	PathFormatEcho       = 0
 	PathFormatGoogleAPIs = 1
+)
+
+type contextKey int
+
+const (
+	varsKey contextKey = iota
 )
 
 // WithPathFormat .
@@ -157,7 +165,30 @@ func googleAPIsPathParamsInterceptor(path string) func(server.HandlerFunc) serve
 			c := ctx.(*context)
 			c.vars = vars
 			ctx = c
+			ctx.SetRequest(ctx.Request().WithContext(makeCtxWithVars(ctx.Request().Context(), vars)))
 			return handler(ctx)
 		}
 	}
+}
+
+func makeCtxWithVars(ctx libcontext.Context, vars map[string]string) libcontext.Context {
+	return libcontext.WithValue(ctx, varsKey, vars)
+}
+
+// Vars returns the route variables for the current request, if any.
+func Vars(r *http.Request) map[string]string {
+	if rv := r.Context().Value(varsKey); rv != nil {
+		return rv.(map[string]string)
+	}
+	return nil
+}
+
+// Var return the specified variable value and exist from the current request, if any.
+func Var(r *http.Request, key string) (string, bool) {
+	vars := Vars(r)
+	if vars == nil {
+		return "", false
+	}
+	val, ok := vars[key]
+	return val, ok
 }
