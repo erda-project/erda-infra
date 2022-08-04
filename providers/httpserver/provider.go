@@ -57,7 +57,7 @@ type provider struct {
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.server = server.New(p.Cfg.Reloadable, &dataBinder{}, &structValidator{validator: validator.New()})
 
-	p.server.Use(interceptors.Recover(p.Log).(func(echo.HandlerFunc) echo.HandlerFunc))
+	//p.server.Use(interceptors.Recover(p.Log).(func(echo.HandlerFunc) echo.HandlerFunc))
 	p.server.Use(interceptors.SimpleRecord(p.getInterceptorOption()))
 	p.server.Use(interceptors.CORS(p.Cfg.AllowCORS))
 	p.server.Use(interceptors.InjectRequestID())
