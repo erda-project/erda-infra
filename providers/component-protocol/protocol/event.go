@@ -21,7 +21,8 @@ import (
 // eventConvert .
 // 前端触发的事件转换，如果是组件自身的事件，则透传；
 // 否则, (1) 组件名为空，界面刷新：InitializeOperation
-// 		(2) 通过协议定义的Rending触发的事件：RenderingOperation
+//
+//	(2) 通过协议定义的Rending触发的事件：RenderingOperation
 func eventConvert(receiver string, event cptype.ComponentEvent) cptype.ComponentEvent {
 	if receiver == event.Component {
 		return event

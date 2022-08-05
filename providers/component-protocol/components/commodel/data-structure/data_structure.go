@@ -14,7 +14,7 @@
 
 package structure
 
-//Type defined
+// Type defined
 const (
 	String      Type = "string"
 	Number      Type = "number"
@@ -25,7 +25,7 @@ const (
 	Time        Type = "time"
 )
 
-//Precision defined
+// Precision defined
 const (
 	K           Precision = "K"
 	M           Precision = "M"

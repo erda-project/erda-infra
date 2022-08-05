@@ -34,6 +34,7 @@ import (
 )
 
 // InternalI18nConfigs contains all protocl internal i18n configs.
+//
 //go:embed i18n-cp-internal.yaml
 var InternalI18nConfigs string
 
