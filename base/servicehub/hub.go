@@ -54,6 +54,10 @@ type Hub struct {
 	wg      sync.WaitGroup
 
 	listeners []Listener
+
+	// problematic providers
+	problematicProviderNames []string
+	problemLock              sync.Mutex
 }
 
 // New .
@@ -254,6 +258,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				err := provider.Start()
 				if err != nil {
 					h.logger.Errorf("failed to start provider %s: %s", key, err)
+					h.addProblematicProvider(key)
 				} else {
 					h.logger.Infof("provider %s closed", key)
 				}
@@ -268,6 +273,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				h.logger.Infof("provider %s running ...", key)
 				err := provider.Run(ctx)
 				if err != nil {
+					h.addProblematicProvider(key)
 					h.logger.Errorf("failed to run provider %s: %s", key, err)
 				} else {
 					h.logger.Infof("provider %s Run exit", key)
@@ -287,6 +293,7 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				h.logger.Infof("provider %s task(%s) running ...", key, tname)
 				err := t.fn(ctx)
 				if err != nil {
+					h.addProblematicProvider(key)
 					h.logger.Errorf("failed to run provider %s task(%s): %s", key, tname, err)
 				} else {
 					h.logger.Infof("provider %s task(%s) exit", key, tname)
@@ -325,8 +332,10 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 			select {
 			case <-time.After(30 * time.Second):
 				h.logger.Errorf("exit service manager timeout !")
+				h.printProblematicProviders()
 				os.Exit(1)
 			case err := <-wait:
+				h.printProblematicProviders()
 				if err != nil {
 					h.logger.Errorf("fail to exit: %s", err)
 					os.Exit(1)
@@ -352,7 +361,20 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	for i, l := 0, len(h.listeners); i < l; i++ {
 		err = h.listeners[i].BeforeExit(h, err)
 	}
+	h.printProblematicProviders()
 	return err
+}
+
+func (h *Hub) addProblematicProvider(name string) {
+	h.problemLock.Lock()
+	defer h.problemLock.Unlock()
+	h.problematicProviderNames = append(h.problematicProviderNames, name)
+}
+func (h *Hub) printProblematicProviders() {
+	if len(h.problematicProviderNames) == 0 {
+		return
+	}
+	h.logger.Errorf("problematic providers: %v", h.problematicProviderNames)
 }
 
 // Close .
