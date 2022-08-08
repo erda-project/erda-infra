@@ -240,6 +240,8 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	h.lock.Lock()
 	ctx := h.ctx
 	ch := make(chan error, len(h.providers))
+	problematicProvidersName := make([]string, 0, len(h.providers))
+	var failedLock sync.Mutex
 	var num int
 	for _, item := range h.providers {
 		key := item.key
@@ -254,6 +256,9 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				err := provider.Start()
 				if err != nil {
 					h.logger.Errorf("failed to start provider %s: %s", key, err)
+					failedLock.Lock()
+					problematicProvidersName = append(problematicProvidersName, key)
+					failedLock.Unlock()
 				} else {
 					h.logger.Infof("provider %s closed", key)
 				}
@@ -268,6 +273,9 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				h.logger.Infof("provider %s running ...", key)
 				err := provider.Run(ctx)
 				if err != nil {
+					failedLock.Lock()
+					problematicProvidersName = append(problematicProvidersName, key)
+					failedLock.Unlock()
 					h.logger.Errorf("failed to run provider %s: %s", key, err)
 				} else {
 					h.logger.Infof("provider %s Run exit", key)
@@ -287,6 +295,9 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 				h.logger.Infof("provider %s task(%s) running ...", key, tname)
 				err := t.fn(ctx)
 				if err != nil {
+					failedLock.Lock()
+					problematicProvidersName = append(problematicProvidersName, key)
+					failedLock.Unlock()
 					h.logger.Errorf("failed to run provider %s task(%s): %s", key, tname, err)
 				} else {
 					h.logger.Infof("provider %s task(%s) exit", key, tname)
@@ -325,8 +336,10 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 			select {
 			case <-time.After(30 * time.Second):
 				h.logger.Errorf("exit service manager timeout !")
+				h.printProblematicProviders(problematicProvidersName)
 				os.Exit(1)
 			case err := <-wait:
+				h.printProblematicProviders(problematicProvidersName)
 				if err != nil {
 					h.logger.Errorf("fail to exit: %s", err)
 					os.Exit(1)
@@ -352,7 +365,14 @@ func (h *Hub) Start(closer ...<-chan os.Signal) (err error) {
 	for i, l := 0, len(h.listeners); i < l; i++ {
 		err = h.listeners[i].BeforeExit(h, err)
 	}
+	h.printProblematicProviders(problematicProvidersName)
 	return err
+}
+func (h *Hub) printProblematicProviders(names []string) {
+	if len(names) == 0 {
+		return
+	}
+	h.logger.Errorf("problematic providers: %v", names)
 }
 
 // Close .
