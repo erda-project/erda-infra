@@ -18,9 +18,12 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/erda-project/erda-infra/base/logs"
 )
@@ -554,4 +557,22 @@ func Test_boolTagValue(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHub_addProblematicProvider(t *testing.T) {
+	h := Hub{}
+	assert.Equal(t, 0, len(h.problematicProviderNames))
+	someProviders := []string{"p2", "p1", "p3"}
+	var wg sync.WaitGroup
+	for _, p := range someProviders {
+		wg.Add(1)
+		go func(p string) {
+			defer wg.Done()
+			h.addProblematicProvider(p)
+		}(p)
+	}
+	wg.Wait()
+	assert.Equal(t, 3, len(h.problematicProviderNames))
+	sort.Strings(h.problematicProviderNames)
+	assert.Equal(t, []string{"p1", "p2", "p3"}, h.problematicProviderNames)
 }
