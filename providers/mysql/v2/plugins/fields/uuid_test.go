@@ -14,33 +14,33 @@
 
 package fields_test
 
-import (
-	"os"
-	"path/filepath"
-	"testing"
-
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-
-	"github.com/erda-project/erda-infra/providers/mysql/v2/plugins/fields"
-)
-
-type UUIDUser struct {
-	ID   fields.UUID
-	Name string
-}
-
-func TestCreateClause_ModifyStatement(t *testing.T) {
-	DB, err := gorm.Open(sqlite.Open(filepath.Join(os.TempDir(), "gorm.db")), &gorm.Config{})
-	DB = DB.Debug()
-	if err != nil {
-		t.Errorf("failed to connect database")
-	}
-
-	user := UUIDUser{Name: "dspo"}
-	DB.Migrator().DropTable(&UUIDUser{})
-	DB.AutoMigrate(&UUIDUser{})
-	DB.Save(&user)
-	sql := DB.Session(&gorm.Session{DryRun: true}).Save(&user).Statement.SQL.String()
-	t.Log(sql)
-}
+//import (
+//	"os"
+//	"path/filepath"
+//	"testing"
+//
+//	"gorm.io/driver/sqlite"
+//	"gorm.io/gorm"
+//
+//	"github.com/erda-project/erda-infra/providers/mysql/v2/plugins/fields"
+//)
+//
+//type UUIDUser struct {
+//	ID   fields.UUID
+//	Name string
+//}
+//
+//func TestCreateClause_ModifyStatement(t *testing.T) {
+//	DB, err := gorm.Open(sqlite.Open(filepath.Join(os.TempDir(), "gorm.db")), &gorm.Config{})
+//	DB = DB.Debug()
+//	if err != nil {
+//		t.Errorf("failed to connect database")
+//	}
+//
+//	user := UUIDUser{Name: "dspo"}
+//	DB.Migrator().DropTable(&UUIDUser{})
+//	DB.AutoMigrate(&UUIDUser{})
+//	DB.Save(&user)
+//	sql := DB.Session(&gorm.Session{DryRun: true}).Save(&user).Statement.SQL.String()
+//	t.Log(sql)
+//}
