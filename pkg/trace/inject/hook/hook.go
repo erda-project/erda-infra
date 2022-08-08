@@ -16,8 +16,10 @@ package hook
 
 import (
 	"log"
+	"os"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/brahma-adshonor/gohook"
@@ -30,6 +32,9 @@ func Hook(target, replacement, trampoline interface{}) error {
 			log.Printf("[ERROR] failed to hook %T : %v\n", target, err)
 		}
 	}()
+	if enabled, _ := strconv.ParseBool(os.Getenv("TRACE_HOOK_ENABLE")); !enabled {
+		return nil
+	}
 	err := gohook.Hook(target, replacement, trampoline)
 	if err == nil {
 		funcDecl := reflect.TypeOf(target).String()
