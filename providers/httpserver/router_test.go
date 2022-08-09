@@ -14,7 +14,15 @@
 
 package httpserver
 
-import "testing"
+import (
+	"testing"
+	"time"
+
+	"github.com/go-playground/validator"
+
+	"github.com/erda-project/erda-infra/base/logs/logrusx"
+	"github.com/erda-project/erda-infra/providers/httpserver/server"
+)
 
 func Test_removeParamName(t *testing.T) {
 	tests := []struct {
@@ -49,5 +57,22 @@ func Test_removeParamName(t *testing.T) {
 				t.Errorf("removeParamName() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func Test_routerManager_Started(t *testing.T) {
+	srv := server.New(false, &dataBinder{}, &structValidator{validator: validator.New()})
+	p := &provider{server: srv, Cfg: &config{PrintRoutes: false}, Log: logrusx.New(), startedChan: make(chan struct{})}
+	rm := &routerManager{p: p}
+	go func() {
+		// blocking http server start
+		_ = p.Start()
+	}()
+	time.Sleep(time.Second)
+	select {
+	case <-rm.Started():
+		// started
+	default:
+		t.Fatalf("should started")
 	}
 }

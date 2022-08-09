@@ -25,9 +25,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/erda-project/erda-infra/providers/httpserver/server"
 	"github.com/labstack/echo"
 	"github.com/recallsong/go-utils/net/httpx/filesystem"
+
+	"github.com/erda-project/erda-infra/providers/httpserver/server"
 )
 
 type (
@@ -53,6 +54,7 @@ type (
 	RouterManager interface {
 		NewRouter(opts ...interface{}) RouterTx
 		Reloadable() bool
+		Started() <-chan struct{}
 	}
 	// RouterTx .
 	RouterTx interface {
@@ -411,6 +413,10 @@ func (rm *routerManager) NewRouter(opts ...interface{}) RouterTx {
 }
 
 func (rm *routerManager) Reloadable() bool { return rm.p.Cfg.Reloadable }
+
+func (rm *routerManager) Started() <-chan struct{} {
+	return rm.p.startedChan
+}
 
 type autoCommitRouter struct {
 	tx     RouterManager
