@@ -51,11 +51,14 @@ type provider struct {
 	lock   sync.Mutex
 	routes map[routeKey]*route
 	err    error
+
+	startedChan chan struct{}
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.server = server.New(p.Cfg.Reloadable, &dataBinder{}, &structValidator{validator: validator.New()})
+	p.startedChan = make(chan struct{})
 
 	//p.server.Use(interceptors.Recover(p.Log).(func(echo.HandlerFunc) echo.HandlerFunc))
 	p.server.Use(interceptors.SimpleRecord(p.getInterceptorOption()))
@@ -111,6 +114,7 @@ func (p *provider) Start() error {
 		}
 	}
 	p.Log.Infof("starting http server at %s", p.Cfg.Addr)
+	close(p.startedChan)
 	return p.server.Start(p.Cfg.Addr)
 }
 
