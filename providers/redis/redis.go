@@ -21,9 +21,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-redis/redis"
+
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"github.com/go-redis/redis"
 )
 
 // Interface .
@@ -42,7 +43,7 @@ type config struct {
 	MasterName    string `file:"master_name" env:"REDIS_MASTER_NAME"`
 	SentinelsAddr string `file:"sentinels_addr" env:"REDIS_SENTINELS_ADDR"`
 	Password      string `file:"password" env:"REDIS_PASSWORD"`
-	DB            int    `file:"db" env:"REDIS_DB"`
+	DB            int    `file:"db" env:"REDIS_DB" default:"0"`
 
 	MaxRetries int `file:"max_retries" env:"REDIS_MAX_RETRIES"`
 
@@ -67,9 +68,6 @@ type provider struct {
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	if p.Cfg.DB <= 0 {
-		return nil
-	}
 	c, err := p.Open(p.Cfg.DB)
 	if err != nil {
 		return err
@@ -79,11 +77,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 }
 
 func (p *provider) DB() *redis.Client {
-	if p.client != nil {
-		return p.client
-	}
-	c, _ := p.Open(p.Cfg.DB)
-	return c
+	// already initialized at provider.Init
+	return p.client
 }
 
 func (p *provider) Open(db int) (*redis.Client, error) {
