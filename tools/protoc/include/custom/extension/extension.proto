@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package extension;
+import "google/protobuf/descriptor.proto";
+option go_package = "github.com/erda-project/erda-infra/tools/protoc/include/custom/extension";
+
+extend google.protobuf.MethodOptions {
+    HttpMethodOption http = 1001;
+}
+
+message HttpMethodOption {
+    // if true, means is pure http method, do not generate grpc code, and force register http handler.
+    // default is false, will generate both grpc and http code.
+    bool pure = 1;
+}

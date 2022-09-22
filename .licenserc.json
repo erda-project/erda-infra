@@ -6,6 +6,7 @@
   "ignore": [
     "vendor/",
     "examples/service/protocol/",
-    "proto-go/"
+    "proto-go/",
+    "tools/protoc/include/"
   ]
 }
