@@ -7,6 +7,6 @@
     "vendor/",
     "examples/service/protocol/",
     "proto-go/",
-    "**/*.pb.go"
+    "tools/protoc/include/"
   ]
 }
