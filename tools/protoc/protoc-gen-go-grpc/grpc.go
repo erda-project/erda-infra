@@ -20,7 +20,10 @@ import (
 	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
+
+	"github.com/erda-project/erda-infra/tools/protoc/include/custom/extension"
 )
 
 const (
@@ -77,7 +80,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	}
 	g.Annotate(clientName, service.Location)
 	g.P("type ", clientName, " interface {")
-	for _, method := range service.Methods {
+	for _, method := range getGrpcMethods(service) {
 		g.Annotate(clientName+"."+method.GoName, method.Location)
 		if method.Desc.Options().(*descriptorpb.MethodOptions).GetDeprecated() {
 			g.P(deprecationComment)
@@ -105,13 +108,12 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	var methodIndex, streamIndex int
 	// Client method implementations.
-	for _, method := range service.Methods {
+	for _, method := range getGrpcMethods(service) {
 		if !method.Desc.IsStreamingServer() && !method.Desc.IsStreamingClient() {
 			// Unary RPC method
 			genClientMethod(gen, file, g, method, methodIndex)
 			methodIndex++
 		} else {
-			// Streaming RPC method
 			genClientMethod(gen, file, g, method, streamIndex)
 			streamIndex++
 		}
@@ -133,7 +135,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	}
 	g.Annotate(serverType, service.Location)
 	g.P("type ", serverType, " interface {")
-	for _, method := range service.Methods {
+	for _, method := range getGrpcMethods(service) {
 		g.Annotate(serverType+"."+method.GoName, method.Location)
 		if method.Desc.Options().(*descriptorpb.MethodOptions).GetDeprecated() {
 			g.P(deprecationComment)
@@ -152,7 +154,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("type Unimplemented", serverType, " struct {")
 	g.P("}")
 	g.P()
-	for _, method := range service.Methods {
+	for _, method := range getGrpcMethods(service) {
 		nilArg := ""
 		if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
 			nilArg = "nil,"
@@ -178,7 +180,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	// check server client stream
 	var hasStream bool
-	for _, method := range service.Methods {
+	for _, method := range getGrpcMethods(service) {
 		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
 			hasStream = true
 			break
@@ -187,7 +189,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 	// Server handler implementations.
 	var handlerNames []string
-	for _, method := range service.Methods {
+	for _, method := range getGrpcMethods(service) {
 		hname := genServerMethod(gen, file, g, method, hasStream)
 		handlerNames = append(handlerNames, hname)
 	}
@@ -199,7 +201,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("HandlerType: (*", serverType, ")(nil),")
 	g.P("Methods: []", grpcPackage.Ident("MethodDesc"), "{")
 	if hasStream {
-		for i, method := range service.Methods {
+		for i, method := range getGrpcMethods(service) {
 			if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
 				continue
 			}
@@ -211,7 +213,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	}
 	g.P("},")
 	g.P("Streams: []", grpcPackage.Ident("StreamDesc"), "{")
-	for i, method := range service.Methods {
+	for i, method := range getGrpcMethods(service) {
 		if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
 			continue
 		}
@@ -236,7 +238,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	g.P("		op(h)")
 	g.P("	}")
 	g.P()
-	for i, method := range service.Methods {
+	for i, method := range getGrpcMethods(service) {
 		if method.Desc.IsStreamingServer() {
 			continue
 		}
@@ -254,7 +256,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	}
 	g.P("	var serviceDesc = ", serviceDescVar)
 	g.P("	serviceDesc.Methods = []", grpcPackage.Ident("MethodDesc"), "{")
-	for i, method := range service.Methods {
+	for i, method := range getGrpcMethods(service) {
 		if method.Desc.IsStreamingServer() {
 			continue
 		}
@@ -481,3 +483,17 @@ func genServerMethod(gen *protogen.Plugin, file *protogen.File, g *protogen.Gene
 const deprecationComment = "// Deprecated: Do not use."
 
 func unexport(s string) string { return strings.ToLower(s[:1]) + s[1:] }
+
+func methodShouldBeGrpcSkipped(method *protogen.Method) bool {
+	pureHttp := proto.GetExtension(method.Desc.Options(), extension.E_Http).(*extension.HttpMethodOption).GetPure()
+	return pureHttp
+}
+
+func getGrpcMethods(service *protogen.Service) (grpcMethods []*protogen.Method) {
+	for _, method := range service.Methods {
+		if !methodShouldBeGrpcSkipped(method) {
+			grpcMethods = append(grpcMethods, method)
+		}
+	}
+	return
+}
