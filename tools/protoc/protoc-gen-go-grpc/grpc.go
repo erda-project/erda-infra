@@ -485,8 +485,8 @@ const deprecationComment = "// Deprecated: Do not use."
 func unexport(s string) string { return strings.ToLower(s[:1]) + s[1:] }
 
 func methodShouldBeGrpcSkipped(method *protogen.Method) bool {
-	pureHttp := proto.GetExtension(method.Desc.Options(), extension.E_Http).(*extension.HttpMethodOption).GetPure()
-	return pureHttp
+	pureHTTP := proto.GetExtension(method.Desc.Options(), extension.E_Http).(*extension.HttpMethodOption).GetPure()
+	return pureHTTP
 }
 
 func getGrpcMethods(service *protogen.Service) (grpcMethods []*protogen.Method) {
