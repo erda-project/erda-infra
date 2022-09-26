@@ -21,6 +21,8 @@ import (
 	"unicode"
 
 	"google.golang.org/protobuf/compiler/protogen"
+
+	"github.com/erda-project/erda-infra/tools/protoc/include/custom/extension"
 )
 
 const (
@@ -119,7 +121,7 @@ func genClient(gen *protogen.Plugin, files []*protogen.File, root *protogen.File
 			g.P("	opts   []", grpcPackage.Ident("CallOption"))
 			g.P("}")
 			g.P()
-			for _, m := range ser.Methods {
+			for _, m := range extension.GetGrpcMethods(ser.Methods) {
 				if m.Desc.IsStreamingServer() || m.Desc.IsStreamingClient() {
 					g.P("// ", m.GoName, " This method has no implements, do not use it directly")
 					g.P("func (s *", typeName, ") ", m.GoName, "(req *", m.Input.GoIdent, ", stream ", file.GoImportPath.Ident(fmt.Sprintf("%v_%vServer", ser.GoName, m.GoName)), ") error {")

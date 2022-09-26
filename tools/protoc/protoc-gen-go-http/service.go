@@ -19,10 +19,12 @@ import (
 	"strconv"
 	"strings"
 
-	protocutils "github.com/erda-project/erda-infra/tools/pkg/protoc-utils"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
+
+	protocutils "github.com/erda-project/erda-infra/tools/pkg/protoc-utils"
+	"github.com/erda-project/erda-infra/tools/protoc/include/custom/extension"
 )
 
 const (
@@ -63,6 +65,7 @@ type methodDesc struct {
 func (s *serviceDesc) execute(g *protogen.GeneratedFile) error {
 	g.P("// ", s.ServiceType, "Handler is the server API for ", s.ServiceType, " service.")
 	g.P("type ", s.ServiceType, "Handler interface {")
+	s.Methods = getGrpcMethods(s.Methods)
 	for _, m := range s.Methods {
 		if len(m.Comment) > 0 {
 			g.P("	", strings.TrimSpace(m.Comment))
@@ -418,4 +421,13 @@ func genSetVarValue(g *protogen.GeneratedFile, path string, field *protogen.Fiel
 		return fmt.Errorf("not support type %q for query string", field.Desc.Kind())
 	}
 	return nil
+}
+
+func getGrpcMethods(methods []*methodDesc) (grpcMethods []*methodDesc) {
+	for _, method := range methods {
+		if !extension.MethodShouldBeGrpcSkipped(method.Meta) {
+			grpcMethods = append(grpcMethods, method)
+		}
+	}
+	return
 }
