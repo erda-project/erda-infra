@@ -8,7 +8,7 @@ set -o errexit -o pipefail
 cd $(git rev-parse --show-toplevel)
 
 # setup base image
-DOCKER_IMAGE=gohub:1.0.7
+DOCKER_IMAGE=gohub:1.0.8
 
 if [ -n "${DOCKER_REGISTRY}" ]; then
     DOCKER_IMAGE=${DOCKER_REGISTRY}/${DOCKER_IMAGE}
