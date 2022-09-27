@@ -1,6 +1,6 @@
 module github.com/erda-project/erda-infra
 
-go 1.17
+go 1.19
 
 require (
 	bou.ke/monkey v1.0.2
@@ -9,7 +9,7 @@ require (
 	github.com/brahma-adshonor/gohook v1.1.9
 	github.com/confluentinc/confluent-kafka-go v1.5.2
 	github.com/coreos/etcd v3.3.25+incompatible
-	github.com/go-eden/routine v0.0.1
+	github.com/go-eden/routine v1.0.1
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
@@ -139,7 +139,7 @@ require (
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210917221730-978cfadd31cf // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
-	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
+	golang.org/x/sys v0.0.0-20220926163933-8cfa568d3c25 // indirect
 	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect

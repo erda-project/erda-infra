@@ -25,7 +25,6 @@ import (
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
 
-//go:linkname serverHandler net/http.serverHandler
 type serverHandler struct {
 	srv *http.Server
 }
