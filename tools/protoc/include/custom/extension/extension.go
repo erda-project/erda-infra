@@ -19,15 +19,18 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// MethodShouldBeGrpcSkipped .
 func MethodShouldBeGrpcSkipped(method *protogen.Method) bool {
 	pureHTTP := proto.GetExtension(method.Desc.Options(), E_Http).(*HttpMethodOption).GetPure()
 	return pureHTTP
 }
 
+// GetServiceGrpcMethods .
 func GetServiceGrpcMethods(service *protogen.Service) (grpcMethods []*protogen.Method) {
 	return GetGrpcMethods(service.Methods)
 }
 
+// GetGrpcMethods .
 func GetGrpcMethods(methods []*protogen.Method) (grpcMethods []*protogen.Method) {
 	for _, method := range methods {
 		if !MethodShouldBeGrpcSkipped(method) {
