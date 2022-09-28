@@ -1,4 +1,4 @@
-FROM --platform=$TARGETPLATFORM golang:1.17-bullseye as build
+FROM --platform=$TARGETPLATFORM golang:1.19-bullseye as build
 
 ENV PROJ_ROOT="/go/src/github.com/erda-project/erda-infra"
 COPY . "${PROJ_ROOT}"
@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build\
     gohub tools install --verbose --local
 
 
-FROM --platform=$TARGETPLATFORM golang:1.17-bullseye
+FROM --platform=$TARGETPLATFORM golang:1.19-bullseye
 
 RUN go install golang.org/x/tools/cmd/goimports@latest
 COPY --from=build /root/.gohub /root/.gohub
