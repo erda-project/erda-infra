@@ -47,7 +47,7 @@ type config struct {
 	Username         string        `file:"username" default:"default"`
 	Password         string        `file:"password"`
 	Database         string        `file:"database"`
-	DailTimeout      time.Duration `file:"dail_timeout" default:"1s"`
+	DialTimeout      time.Duration `file:"dial_timeout" default:"1s"`
 	MaxIdleConns     int           `file:"max_idle_conns" default:"5"`
 	MaxOpenConns     int           `file:"max_open_conns" default:"10"`
 	ConnMaxLifeTime  time.Duration `file:"conn_max_lifetime" default:"1h"`
@@ -78,7 +78,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 			Username: p.Cfg.Username,
 			Password: p.Cfg.Password,
 		},
-		DialTimeout:      p.Cfg.DailTimeout,
+		DialTimeout:      p.Cfg.DialTimeout,
 		Debug:            p.Cfg.Debug,
 		MaxIdleConns:     p.Cfg.MaxIdleConns,
 		MaxOpenConns:     p.Cfg.MaxOpenConns,
