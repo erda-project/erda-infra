@@ -117,6 +117,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.18.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/pyroscope-io/client v0.7.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/soheilhy/cmux v0.1.4 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect
