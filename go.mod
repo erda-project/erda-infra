@@ -22,7 +22,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0
 	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493
 	github.com/jinzhu/gorm v1.9.16
-	github.com/json-iterator/go v1.1.10
+	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0
 	github.com/magiconair/properties v1.8.6
@@ -113,7 +113,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.9 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/paulmach/orb v0.9.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -131,6 +131,7 @@ require (
 	github.com/xormplus/builder v0.0.0-20181220055446-b12ceebee76f // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect
+	go.opentelemetry.io/otel/internal/metric v0.26.0 // indirect
 	go.opentelemetry.io/otel/metric v0.36.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
@@ -159,6 +160,7 @@ replace (
 	github.com/coreos/bbolt v1.3.5 => go.etcd.io/bbolt v1.3.5
 	go.etcd.io/bbolt v1.3.5 => github.com/coreos/bbolt v1.3.5
 	go.opentelemetry.io/otel => go.opentelemetry.io/otel v1.2.0
+	go.opentelemetry.io/otel/metric => go.opentelemetry.io/otel/metric v0.26.0
 	go.opentelemetry.io/otel/sdk => go.opentelemetry.io/otel/sdk v1.2.0
 	go.opentelemetry.io/otel/trace => go.opentelemetry.io/otel/trace v1.2.0
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
