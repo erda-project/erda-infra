@@ -204,6 +204,7 @@ func execProtoc(files, dirs, include []string, params ...string) {
 	proc.Stderr = os.Stderr
 	proc.Stdout = os.Stdout
 	proc.Stdin = os.Stdin
+	proc.Env = os.Environ()
 	err := proc.Run()
 	cmd.CheckError(err)
 }
