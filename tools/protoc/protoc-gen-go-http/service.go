@@ -417,6 +417,17 @@ func genSetVarValue(g *protogen.GeneratedFile, path string, field *protogen.Fiel
 			g.P("}")
 			g.P(path, " = val")
 		}
+	case protoreflect.EnumKind:
+		if field.Desc.IsList() {
+			g.P("list := make([]", field.Enum.GoIdent, ", 0, len(", listname, "))")
+			g.P("for _, text := range ", listname, " {")
+			g.P("	val := ", field.Enum.GoIdent, "(", field.Enum.GoIdent, "_value[", varname, "]]")
+			g.P("	list = append(list, val)")
+			g.P("}")
+			g.P(path, " = list")
+		} else {
+			g.P(path, " = ", field.Enum.GoIdent, "(", field.Enum.GoIdent, "_value[", varname, "]", ")")
+		}
 	default:
 		return fmt.Errorf("not support type %q for query string", field.Desc.Kind())
 	}
