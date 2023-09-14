@@ -421,12 +421,19 @@ func genSetVarValue(g *protogen.GeneratedFile, path string, field *protogen.Fiel
 		if field.Desc.IsList() {
 			g.P("list := make([]", field.Enum.GoIdent, ", 0, len(", listname, "))")
 			g.P("for _, text := range ", listname, " {")
-			g.P("	val := ", field.Enum.GoIdent, "(", field.Enum.GoIdent, "_value[", varname, "]]")
-			g.P("	list = append(list, val)")
+			g.P("	_inType, ok := ", field.Enum.GoIdent, "_value[text]")
+			g.P("	if !ok {")
+			g.P("		return nil, ", fmtPackage.Ident("Errorf"), `("invalid enum value '%s' for %s", `, varname, `, "`, field.Enum.GoIdent.GoName, `")`)
+			g.P("	}")
+			g.P("	list = append(list, ", field.Enum.GoIdent, "(_inType))")
 			g.P("}")
 			g.P(path, " = list")
 		} else {
-			g.P(path, " = ", field.Enum.GoIdent, "(", field.Enum.GoIdent, "_value[", varname, "]", ")")
+			g.P("_inType, ok := ", field.Enum.GoIdent, "_value[", varname, "]")
+			g.P("if !ok {")
+			g.P("	return nil, ", fmtPackage.Ident("Errorf"), `("invalid enum value '%s' for %s", `, varname, `, "`, field.Enum.GoIdent.GoName, `")`)
+			g.P("}")
+			g.P(path, " = ", field.Enum.GoIdent, "(_inType)")
 		}
 	default:
 		return fmt.Errorf("not support type %q for query string", field.Desc.Kind())
