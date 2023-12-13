@@ -16,15 +16,17 @@ package grpcclient
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"reflect"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	grpccontext "github.com/erda-project/erda-infra/pkg/trace/inject/context/grpc"
 	transgrpc "github.com/erda-project/erda-infra/pkg/transport/grpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 // Interface .
@@ -44,6 +46,7 @@ type config struct {
 	TLS  struct {
 		ServerNameOverride string `file:"cert_file" desc:"the server name used to verify the hostname returned by the TLS handshake"`
 		CAFile             string `file:"ca_file" desc:"the file containing the CA root cert file"`
+		InsecureSkipVerify bool   `file:"insecure_skip_verify" desc:"skip verify"`
 	} `file:"tls"`
 	Singleton   bool `file:"singleton" default:"true" desc:"one client instance"`
 	Block       bool `file:"block" default:"true" desc:"block until the connection is up"`
@@ -66,7 +69,17 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		}
 		opts = append(opts, grpc.WithTransportCredentials(creds))
 	} else {
-		opts = append(opts, grpc.WithInsecure())
+		// distinguish `no tls` or `tls: insecure skip verify`
+		notls := true // default no tls, compatible with old config
+		if p.Cfg.TLS.InsecureSkipVerify {
+			notls = false
+		}
+		if notls {
+			opts = append(opts, grpc.WithInsecure())
+		} else {
+			insecureSkipVerifyTLS := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
+			opts = append(opts, grpc.WithTransportCredentials(insecureSkipVerifyTLS))
+		}
 	}
 	if p.Cfg.TraceEnable {
 		opts = append(opts,
