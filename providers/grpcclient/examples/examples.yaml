@@ -1,0 +1,11 @@
+examples:
+
+# insecure_skip_verify: true
+grpc-client:
+  addr: ai-proxy-grpc.erda.cloud:443
+  tls:
+    insecure_skip_verify: true
+
+# notls (default)
+#grpc-client:
+#  addr: localhost:8082
