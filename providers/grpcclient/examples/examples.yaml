@@ -9,3 +9,9 @@ grpc-client:
 # notls (default)
 #grpc-client:
 #  addr: localhost:8082
+
+# with tls
+#grpc-client:
+#  addr: ai-proxy-grpc.erda.cloud:443
+#  tls:
+#    ca: ./erda-cloud.pem
