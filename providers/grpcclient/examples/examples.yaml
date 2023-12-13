@@ -14,4 +14,4 @@ grpc-client:
 #grpc-client:
 #  addr: ai-proxy-grpc.erda.cloud:443
 #  tls:
-#    ca: ./erda-cloud.pem
+#    ca_file: ./erda-cloud.pem
