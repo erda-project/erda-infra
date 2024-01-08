@@ -1,0 +1,4 @@
+sqlite3-xorm:
+  dbSourceName: "${DB_SOURCE_NAME:test.sqlite3}"
+
+example:

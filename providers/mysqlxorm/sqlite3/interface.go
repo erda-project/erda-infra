@@ -12,45 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mysqlxorm
+package sqlite3
 
 import (
+	"errors"
+
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/xormplus/xorm"
+
+	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
 
-type (
-	Session struct {
-		*xorm.Session
-		needAutoClose bool
-	}
-	// SessionOption .
-	SessionOption func(s *Session)
-)
-
-// WithSession .
-func WithSession(passedInSession *Session) SessionOption {
-	return func(s *Session) {
-		s.Session = passedInSession.Session
-	}
+type Sqlite struct {
+	db *xorm.Engine
 }
 
-func (p *provider) NewSession(opts ...SessionOption) *Session {
-	tx := &Session{}
-	for _, opt := range opts {
+func (s *Sqlite) DB() *xorm.Engine {
+	return s.db
+}
+
+func (s *Sqlite) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session {
+	tx := &mysqlxorm.Session{}
+	for _, opt := range ops {
 		opt(tx)
 	}
 
-	// set default session
 	if tx.Session == nil {
-		tx.Session = p.db.NewSession()
-		tx.needAutoClose = true
+		tx.Session = s.db.NewSession()
 	}
 
 	return tx
 }
 
-func (tx *Session) Close() {
-	if tx.needAutoClose {
-		tx.Session.Close()
+// NewSqlite3 Use for unit-test
+func NewSqlite3(dbSourceName string) (*Sqlite, error) {
+	if dbSourceName == "" {
+		return nil, errors.New("empty dbSourceName")
 	}
+
+	sqlite3, err := xorm.NewSqlite3(dbSourceName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	sqlite3Engine := &Sqlite{db: sqlite3}
+
+	return sqlite3Engine, nil
 }
