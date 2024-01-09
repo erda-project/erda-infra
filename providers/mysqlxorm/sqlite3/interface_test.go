@@ -15,13 +15,12 @@
 package sqlite3
 
 import (
+	"errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/xormplus/core"
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/xormplus/core"
 
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
@@ -33,10 +32,8 @@ type Server struct {
 }
 
 type User struct {
-	ID          uint64     `json:"id" xorm:"pk autoincr"`
-	Name        string     `json:"name"`
-	TimeCreated *time.Time `json:"timeCreated,omitempty" xorm:"created"`
-	TimeUpdated *time.Time `json:"timeUpdated,omitempty" xorm:"updated"`
+	ID   uint64 `json:"id" xorm:"pk autoincr"`
+	Name string `json:"name"`
 }
 
 func (u *User) TableName() string {
@@ -48,7 +45,7 @@ func (s *Server) GetUserByID(id uint64, ops ...mysqlxorm.SessionOption) (*User, 
 	defer session.Close()
 
 	var user User
-	_, err := s.mysql.DB().Id(id).Get(&user)
+	_, err := session.ID(id).Get(&user)
 
 	return &user, err
 }
@@ -57,7 +54,13 @@ func (s *Server) CreateUser(user *User, ops ...mysqlxorm.SessionOption) (err err
 	session := s.mysql.NewSession(ops...)
 	defer session.Close()
 
-	_, err = s.mysql.DB().Insert(user)
+	_, err = session.Insert(user)
+	return err
+}
+
+func (s *Server) TestTx(err error, ops ...mysqlxorm.SessionOption) error {
+	session := s.mysql.NewSession(ops...)
+	defer session.Close()
 	return err
 }
 
@@ -81,8 +84,19 @@ func TestNewSqlite3(t *testing.T) {
 	testCase := []struct {
 		name       string
 		insertUser []User
+		txErr      error
 		want       []User
 	}{
+		{
+			name:  "test tx",
+			txErr: errors.New("tx error"),
+			insertUser: []User{
+				{ID: 4, Name: "Alice"},
+				{ID: 5, Name: "Bob"},
+				{ID: 6, Name: "Cat"},
+			},
+			want: []User{},
+		},
 		{
 			name: "sqlite3 use for xorm",
 			insertUser: []User{
@@ -90,6 +104,7 @@ func TestNewSqlite3(t *testing.T) {
 				{ID: 2, Name: "Bob"},
 				{ID: 3, Name: "Cat"},
 			},
+			txErr: nil,
 			want: []User{
 				{ID: 1, Name: "Alice"},
 				{ID: 2, Name: "Bob"},
@@ -100,12 +115,38 @@ func TestNewSqlite3(t *testing.T) {
 
 	for _, test := range testCase {
 		t.Run(test.name, func(t *testing.T) {
+			tx := server.mysql.NewSession()
+			defer tx.Close()
+			if err = tx.Begin(); err != nil {
+				t.Fatalf("tx begin err : %s", err)
+			}
+
+			ops := mysqlxorm.WithSession(tx)
 			// insert sql
 			for _, user := range test.insertUser {
-				err = server.CreateUser(&user)
+				err = server.CreateUser(&user, ops)
 				if err != nil {
+					tx.Rollback()
 					t.Fatalf("create user err : %s", err)
 				}
+			}
+
+			err = server.TestTx(test.txErr, ops)
+			if err != nil {
+				tx.Rollback()
+			} else {
+				tx.Commit()
+			}
+
+			if len(test.want) <= 0 {
+				for _, user := range test.insertUser {
+					u, err := server.GetUserByID(user.ID)
+					if err != nil {
+						t.Fatalf("get user err : %s", err)
+					}
+					assert.Equal(t, &User{}, u)
+				}
+				return
 			}
 
 			for _, user := range test.want {
