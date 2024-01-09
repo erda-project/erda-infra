@@ -23,15 +23,15 @@ import (
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
 
-type Sqlite struct {
+type Sqlite3 struct {
 	db *xorm.Engine
 }
 
-func (s *Sqlite) DB() *xorm.Engine {
+func (s *Sqlite3) DB() *xorm.Engine {
 	return s.db
 }
 
-func (s *Sqlite) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session {
+func (s *Sqlite3) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session {
 	tx := &mysqlxorm.Session{}
 	for _, opt := range ops {
 		opt(tx)
@@ -45,7 +45,7 @@ func (s *Sqlite) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session {
 }
 
 // NewSqlite3 Use for unit-test
-func NewSqlite3(dbSourceName string) (*Sqlite, error) {
+func NewSqlite3(dbSourceName string) (*Sqlite3, error) {
 	if dbSourceName == "" {
 		return nil, errors.New("empty dbSourceName")
 	}
@@ -55,7 +55,7 @@ func NewSqlite3(dbSourceName string) (*Sqlite, error) {
 		return nil, err
 	}
 
-	sqlite3Engine := &Sqlite{db: engine}
+	sqlite3Engine := &Sqlite3{db: engine}
 
 	return sqlite3Engine, nil
 }

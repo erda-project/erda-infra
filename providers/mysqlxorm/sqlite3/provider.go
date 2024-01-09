@@ -32,19 +32,19 @@ type config struct {
 type provider struct {
 	Cfg *config
 	Log logs.Logger
-	*Sqlite
+	*Sqlite3
 }
 
 var _ servicehub.ProviderInitializer = (*provider)(nil)
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	server, err := xorm.NewSqlite3(p.Cfg.DbSourceName)
+	engine, err := xorm.NewSqlite3(p.Cfg.DbSourceName)
 	if err != nil {
-		return fmt.Errorf("failed to connect to sqlite3 server,err : %s", err)
+		return fmt.Errorf("failed to connect to sqlite3 engine,err : %s", err)
 	}
 
-	p.Sqlite = &Sqlite{db: server}
+	p.Sqlite3 = &Sqlite3{db: engine}
 
 	return nil
 }
