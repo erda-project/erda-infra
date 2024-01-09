@@ -38,6 +38,7 @@ func (p *provider) Run(ctx context.Context) error {
 	err := p.Sqlite3.DB().Ping()
 	if err != nil {
 		fmt.Printf("connect sqlite3 error : %s \n", err)
+		return err
 	}
 	return nil
 }

@@ -50,13 +50,12 @@ func NewSqlite3(dbSourceName string) (*Sqlite, error) {
 		return nil, errors.New("empty dbSourceName")
 	}
 
-	sqlite3, err := xorm.NewSqlite3(dbSourceName)
-
+	engine, err := xorm.NewSqlite3(dbSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	sqlite3Engine := &Sqlite{db: sqlite3}
+	sqlite3Engine := &Sqlite{db: engine}
 
 	return sqlite3Engine, nil
 }

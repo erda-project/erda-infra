@@ -29,26 +29,22 @@ type config struct {
 	DbSourceName string `file:"dbSourceName" env:"DB_SOURCE_NAME" default:"test.sqlite3"`
 }
 
-var (
-	interfaceType = reflect.TypeOf((*mysqlxorm.Interface)(nil)).Elem()
-)
-
 type provider struct {
 	Cfg *config
 	Log logs.Logger
-	Sqlite
+	*Sqlite
 }
 
 var _ servicehub.ProviderInitializer = (*provider)(nil)
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	sqlite3, err := xorm.NewSqlite3(p.Cfg.DbSourceName)
+	server, err := xorm.NewSqlite3(p.Cfg.DbSourceName)
 	if err != nil {
 		return fmt.Errorf("failed to connect to sqlite3 server,err : %s", err)
 	}
 
-	p.db = sqlite3
+	p.Sqlite = &Sqlite{db: server}
 
 	return nil
 }
@@ -57,7 +53,6 @@ func init() {
 	servicehub.Register("sqlite3-xorm", &servicehub.Spec{
 		Services: []string{"sqlite3-xorm"},
 		Types: []reflect.Type{
-			//interfaceType,
 			reflect.TypeOf((*mysqlxorm.Interface)(nil)).Elem(),
 		},
 		Description: "sqlite3-xorm",
