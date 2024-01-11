@@ -14,6 +14,12 @@
 
 package logs
 
+import (
+	"io"
+
+	"github.com/sirupsen/logrus"
+)
+
 // Logger .
 type Logger interface {
 	Sub(name string) Logger
@@ -32,4 +38,9 @@ type Logger interface {
 	Fatalf(template string, args ...interface{})
 
 	SetLevel(lvl string) error
+	SetOutput(output io.Writer)
+	AddHook(hook logrus.Hook)
+	SetReportCaller(reportCaller bool)
+	SetFormatter(formatter logrus.Formatter)
+	SetNoLock()
 }
