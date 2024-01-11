@@ -65,22 +65,6 @@ func (l *Logger) SetOutput(output io.Writer) {
 	l.Logger.SetOutput(output)
 }
 
-func (l *Logger) AddHook(hook logrus.Hook) {
-	l.Logger.AddHook(hook)
-}
-
-func (l *Logger) SetReportCaller(reportCaller bool) {
-	l.Logger.SetReportCaller(reportCaller)
-}
-
-func (l *Logger) SetFormatter(formatter logrus.Formatter) {
-	l.Logger.SetFormatter(formatter)
-}
-
-func (l *Logger) SetNoLock() {
-	l.Logger.SetNoLock()
-}
-
 func processOptions(logr *logrus.Logger, logger *Logger, opt interface{}) {
 	switch val := opt.(type) {
 	case setNameOption:

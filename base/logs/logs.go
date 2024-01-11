@@ -16,8 +16,6 @@ package logs
 
 import (
 	"io"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Logger .
@@ -39,8 +37,4 @@ type Logger interface {
 
 	SetLevel(lvl string) error
 	SetOutput(output io.Writer)
-	AddHook(hook logrus.Hook)
-	SetReportCaller(reportCaller bool)
-	SetFormatter(formatter logrus.Formatter)
-	SetNoLock()
 }
