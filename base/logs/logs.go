@@ -14,6 +14,10 @@
 
 package logs
 
+import (
+	"io"
+)
+
 // Logger .
 type Logger interface {
 	Sub(name string) Logger
@@ -32,4 +36,5 @@ type Logger interface {
 	Fatalf(template string, args ...interface{})
 
 	SetLevel(lvl string) error
+	SetOutput(output io.Writer)
 }

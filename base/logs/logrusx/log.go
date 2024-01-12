@@ -15,6 +15,8 @@
 package logrusx
 
 import (
+	"io"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/erda-project/erda-infra/base/logs"
@@ -57,6 +59,10 @@ func (l *Logger) SetLevel(lvl string) error {
 	}
 	l.Logger.SetLevel(level)
 	return nil
+}
+
+func (l *Logger) SetOutput(output io.Writer) {
+	l.Logger.SetOutput(output)
 }
 
 func processOptions(logr *logrus.Logger, logger *Logger, opt interface{}) {
