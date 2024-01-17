@@ -16,6 +16,7 @@ package traceinject
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	_ "unsafe" //nolint
 
@@ -34,7 +35,16 @@ type serverHandler struct {
 func serveHTTP(s *serverHandler, rw http.ResponseWriter, req *http.Request)
 
 //go:noinline
-func originalServeHTTP(s *serverHandler, rw http.ResponseWriter, req *http.Request) {}
+func originalServeHTTP(s *serverHandler, rw http.ResponseWriter, req *http.Request) {
+	// a dummy function to make room for a shadow copy of the original function.
+	// it doesn't matter what we do here, just to create an addressable function with adequate size.
+	originalServeHTTP(s, rw, req)
+	originalServeHTTP(s, rw, req)
+	originalServeHTTP(s, rw, req)
+	for {
+		fmt.Printf("hello")
+	}
+}
 
 var tracedServerHandler = otelhttp.NewHandler(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 	injectcontext.SetContext(r.Context())
