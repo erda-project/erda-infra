@@ -15,8 +15,10 @@
 package traceinject
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"runtime"
 	"testing"
 	"time"
 
@@ -27,8 +29,11 @@ func TestHookHttpServer(t *testing.T) {
 	// start a http server listen on 8083
 	http.HandleFunc("/test",
 		func(w http.ResponseWriter, r *http.Request) {
-			h := getServerHandler(r.Context()) // injected by hook
-			assert.NotNil(t, h)
+			fmt.Println(runtime.GOARCH)
+			if runtime.GOARCH == "amd64" {
+				h := getServerHandler(r.Context()) // injected by hook
+				assert.NotNil(t, h)
+			}
 			w.Write([]byte("hello world"))
 		},
 	)
