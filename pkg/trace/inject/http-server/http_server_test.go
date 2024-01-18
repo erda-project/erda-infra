@@ -18,12 +18,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"runtime"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
+
+func init() {
+	os.Setenv(hook.EnvTraceHookEnable, "true")
+	hook.Hook(serveHTTP, wrappedHTTPHandler, originalServeHTTP)
+}
 
 func TestHookHttpServer(t *testing.T) {
 	// start a http server listen on 8083

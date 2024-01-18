@@ -25,6 +25,8 @@ import (
 	"github.com/brahma-adshonor/gohook"
 )
 
+const EnvTraceHookEnable = "TRACE_HOOK_ENABLE"
+
 // Hook .
 func Hook(target, replacement, trampoline interface{}) error {
 	defer func() {
@@ -32,7 +34,7 @@ func Hook(target, replacement, trampoline interface{}) error {
 			log.Printf("[ERROR] failed to hook %T : %v\n", target, err)
 		}
 	}()
-	if enabled, _ := strconv.ParseBool(os.Getenv("TRACE_HOOK_ENABLE")); !enabled {
+	if enabled, _ := strconv.ParseBool(os.Getenv(EnvTraceHookEnable)); !enabled {
 		return nil
 	}
 	err := gohook.Hook(target, replacement, trampoline)
