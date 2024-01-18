@@ -27,6 +27,8 @@ func TestHookHttpServer(t *testing.T) {
 	// start a http server listen on 8083
 	http.HandleFunc("/test",
 		func(w http.ResponseWriter, r *http.Request) {
+			h := getServerHandler(r.Context()) // injected by hook
+			assert.NotNil(t, h)
 			w.Write([]byte("hello world"))
 		},
 	)
@@ -48,5 +50,5 @@ func TestHookHttpServer(t *testing.T) {
 	// print body
 	b, _ := io.ReadAll(resp.Body)
 	t.Log(string(b))
-	assert.Equal(t, "hello world", string(b))
+	assert.Equal(t, "hello world", string(b)) // check original response
 }
