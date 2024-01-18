@@ -21,6 +21,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
       - name: Run Test
         run: |
+          echo $GOARCH
           go test -cpu=2 -timeout 10s -race -coverprofile=coverage.txt -covermode=atomic ./...
           bash <(curl -s https://codecov.io/bash)
   CODE-CHECK:
