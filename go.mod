@@ -26,6 +26,7 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0
 	github.com/magiconair/properties v1.8.6
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/mwitkow/go-proto-validators v0.3.2
@@ -40,8 +41,8 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.2
-	github.com/xormplus/core v0.0.0-20181016121923-6bfce2eb8867
-	github.com/xormplus/xorm v0.0.0-20181212020813-da46657160ff
+	github.com/xormplus/core v0.0.0-20200308074340-f3bce19d5f31
+	github.com/xormplus/xorm v0.0.0-20210822100304-4e1d4fcc1e67
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.27.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.27.0
 	go.opentelemetry.io/otel v1.13.0
@@ -87,7 +88,6 @@ require (
 	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -100,7 +100,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.9.5 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/imdario/mergo v0.3.5 // indirect
-	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jonboulle/clockwork v0.1.0 // indirect
@@ -111,7 +110,6 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
-	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -124,13 +122,13 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/soheilhy/cmux v0.1.4 // indirect
+	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 // indirect
-	github.com/xormplus/builder v0.0.0-20181220055446-b12ceebee76f // indirect
-	github.com/ziutek/mymysql v1.5.4 // indirect
+	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect
 	go.opentelemetry.io/otel/internal/metric v0.26.0 // indirect
 	go.opentelemetry.io/otel/metric v0.36.0 // indirect
