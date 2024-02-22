@@ -23,6 +23,7 @@ import (
 	_ "github.com/go-sql-driver/mysql" // mysql client driver package
 	"github.com/xormplus/core"
 	"github.com/xormplus/xorm"
+	xormlog "github.com/xormplus/xorm/log"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -96,8 +97,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	db.SetMapper(core.GonicMapper{})
 	if p.Cfg.MySQLShowSQL {
 		db.ShowSQL(true)
-		db.ShowExecTime(true)
-		db.SetLogLevel(core.LOG_DEBUG)
+		db.SetLogLevel(xormlog.LOG_DEBUG)
 	}
 
 	// connection pool
