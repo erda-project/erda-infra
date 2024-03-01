@@ -16,11 +16,12 @@ package sqlite3
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/xormplus/core"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"xorm.io/xorm/names"
 
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
@@ -78,7 +79,7 @@ func TestNewSqlite3(t *testing.T) {
 		mysql: engine,
 	}
 
-	server.mysql.DB().SetMapper(core.GonicMapper{})
+	server.mysql.DB().SetMapper(names.GonicMapper{})
 	server.mysql.DB().Sync2(&User{})
 
 	testCase := []struct {

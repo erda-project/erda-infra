@@ -21,9 +21,9 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql" // mysql client driver package
-	"github.com/xormplus/core"
-	"github.com/xormplus/xorm"
-	xormlog "github.com/xormplus/xorm/log"
+	"xorm.io/xorm"
+	xormlog "xorm.io/xorm/log"
+	"xorm.io/xorm/names"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -94,7 +94,7 @@ func (p *provider) Init(ctx servicehub.Context) error {
 		return fmt.Errorf("failed to connect to mysql server, err: %v", err)
 	}
 
-	db.SetMapper(core.GonicMapper{})
+	db.SetMapper(names.GonicMapper{})
 	if p.Cfg.MySQLShowSQL {
 		db.ShowSQL(true)
 		db.SetLogLevel(xormlog.LOG_DEBUG)
