@@ -18,10 +18,12 @@ import (
 	"fmt"
 	"reflect"
 
+	"xorm.io/xorm"
+	"xorm.io/xorm/names"
+
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
-	"xorm.io/xorm"
 )
 
 type config struct {
@@ -42,6 +44,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to connect to sqlite3 engine,err : %s", err)
 	}
+
+	engine.SetMapper(names.GonicMapper{})
 
 	p.Sqlite3 = &Sqlite3{db: engine}
 
