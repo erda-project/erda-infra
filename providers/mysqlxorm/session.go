@@ -15,7 +15,7 @@
 package mysqlxorm
 
 import (
-	"github.com/xormplus/xorm"
+	"xorm.io/xorm"
 )
 
 type (

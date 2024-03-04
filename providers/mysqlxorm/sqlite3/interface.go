@@ -18,7 +18,7 @@ import (
 	"errors"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/xormplus/xorm"
+	"xorm.io/xorm"
 
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
@@ -50,7 +50,7 @@ func NewSqlite3(dbSourceName string) (*Sqlite3, error) {
 		return nil, errors.New("empty dbSourceName")
 	}
 
-	engine, err := xorm.NewSqlite3(dbSourceName)
+	engine, err := xorm.NewEngine("sqlite3", dbSourceName)
 	if err != nil {
 		return nil, err
 	}

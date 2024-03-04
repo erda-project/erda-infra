@@ -18,7 +18,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/xormplus/xorm"
+	"xorm.io/xorm"
+	"xorm.io/xorm/names"
 
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
@@ -39,10 +40,12 @@ var _ servicehub.ProviderInitializer = (*provider)(nil)
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	engine, err := xorm.NewSqlite3(p.Cfg.DbSourceName)
+	engine, err := xorm.NewEngine("sqlite3", p.Cfg.DbSourceName)
 	if err != nil {
 		return fmt.Errorf("failed to connect to sqlite3 engine,err : %s", err)
 	}
+
+	engine.SetMapper(names.GonicMapper{})
 
 	p.Sqlite3 = &Sqlite3{db: engine}
 

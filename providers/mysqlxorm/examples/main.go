@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/xormplus/xorm"
+	"xorm.io/xorm"
 
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
