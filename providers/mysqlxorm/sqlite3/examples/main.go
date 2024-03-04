@@ -31,6 +31,14 @@ type provider struct {
 func (p *provider) Init(ctx servicehub.Context) error {
 	fmt.Println(p.Sqlite3)
 
+	// get journal_mode
+	results, _ := p.Sqlite3.DB().Query("PRAGMA journal_mode;")
+	for _, row := range results {
+		for key, value := range row {
+			fmt.Printf("Key: %s\t, Value:%s\n", key, string(value))
+		}
+	}
+
 	return nil
 }
 
