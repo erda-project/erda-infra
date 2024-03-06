@@ -160,3 +160,32 @@ func TestNewSqlite3(t *testing.T) {
 		})
 	}
 }
+
+func TestJournalMode(t *testing.T) {
+	dbname := filepath.Join(os.TempDir(), dbSourceName)
+
+	want := []JournalMode{
+		MEMORY,
+		DELETE,
+		PERSIST,
+		OFF,
+		WAL,
+		TRUNCATE,
+	}
+	defer func() {
+		os.Remove(dbname)
+	}()
+
+	for _, w := range want {
+		engine, err := NewSqlite3(dbname, WithJournalMode(w))
+		if err != nil {
+			t.Fatalf("new sqlite3 err : %s", err)
+		}
+
+		// get journal in sqlite3
+		results, _ := engine.DB().Query("PRAGMA journal_mode;")
+		assert.Equal(t, string(w), string(results[0]["journal_mode"]))
+		os.Remove(dbname)
+	}
+
+}

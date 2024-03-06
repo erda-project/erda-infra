@@ -16,6 +16,7 @@ package sqlite3
 
 import (
 	"errors"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
@@ -65,7 +66,7 @@ func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 	// set journal_mode in sqlite3
 	// the default journal_mode in sqlite is `delete`
 	if o.JournalMode != "" {
-		_, err = engine.Exec("PRAGMA journal_mode = ?", o.JournalMode)
+		_, err = engine.Exec(fmt.Sprintf("PRAGMA journal_mode = %s", o.JournalMode))
 		if err != nil {
 			return nil, err
 		}
