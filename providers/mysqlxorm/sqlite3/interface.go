@@ -16,9 +16,11 @@ package sqlite3
 
 import (
 	"errors"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
+	"xorm.io/xorm/names"
 
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
@@ -45,15 +47,32 @@ func (s *Sqlite3) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session 
 }
 
 // NewSqlite3 Use for unit-test
-func NewSqlite3(dbSourceName string) (*Sqlite3, error) {
+func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 	if dbSourceName == "" {
 		return nil, errors.New("empty dbSourceName")
+	}
+
+	o := &Options{}
+
+	for _, opt := range opts {
+		opt(o)
 	}
 
 	engine, err := xorm.NewEngine("sqlite3", dbSourceName)
 	if err != nil {
 		return nil, err
 	}
+
+	// set journal_mode in sqlite3
+	// the default journal_mode in sqlite is `delete`
+	if o.JournalMode != "" {
+		_, err = engine.Exec(fmt.Sprintf("PRAGMA journal_mode = %s", o.JournalMode))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	engine.SetMapper(names.GonicMapper{})
 
 	sqlite3Engine := &Sqlite3{db: engine}
 

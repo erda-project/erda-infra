@@ -1,4 +1,5 @@
 sqlite3-xorm:
-  dbSourceName: "${DB_SOURCE_NAME:test.sqlite3}"
+  dbSourceName: "${SQLITE3_DB_SOURCE_NAME:test.sqlite3}"
+  journalMode: "${SQLITE3_JOURNAL_MODE:memory}"
 
 example:

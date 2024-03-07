@@ -27,7 +27,8 @@ import (
 )
 
 type config struct {
-	DbSourceName string `file:"dbSourceName" env:"DB_SOURCE_NAME" default:"test.sqlite3"`
+	DbSourceName string `file:"dbSourceName" env:"SQLITE3_DB_SOURCE_NAME" default:"test.sqlite3"`
+	JournalMode  string `file:"journalMode" env:"SQLITE3_JOURNAL_MODE" default:""`
 }
 
 type provider struct {
@@ -46,6 +47,13 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	}
 
 	engine.SetMapper(names.GonicMapper{})
+
+	if p.Cfg.JournalMode != "" {
+		_, err = engine.Exec(fmt.Sprintf("PRAGMA journal_mode = %s", p.Cfg.JournalMode))
+		if err != nil {
+			return err
+		}
+	}
 
 	p.Sqlite3 = &Sqlite3{db: engine}
 
