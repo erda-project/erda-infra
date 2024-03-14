@@ -16,6 +16,7 @@ package sqlite3
 
 type Options struct {
 	JournalMode JournalMode
+	RandomName  bool
 }
 
 type OptionFunc func(options *Options)
@@ -34,5 +35,13 @@ const (
 func WithJournalMode(mode JournalMode) OptionFunc {
 	return func(o *Options) {
 		o.JournalMode = mode
+	}
+}
+
+// WithRandomName use to set the uuid in the given filename
+// such as `test.db => test-550e8400e29b41d4a716446655440000.db`
+func WithRandomName(isRandomName bool) OptionFunc {
+	return func(o *Options) {
+		o.RandomName = isRandomName
 	}
 }

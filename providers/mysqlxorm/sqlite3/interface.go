@@ -17,7 +17,12 @@ package sqlite3
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync/atomic"
 
+	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
 	"xorm.io/xorm/names"
@@ -26,11 +31,20 @@ import (
 )
 
 type Sqlite3 struct {
-	db *xorm.Engine
+	db         *xorm.Engine
+	closeState int32
 }
 
 func (s *Sqlite3) DB() *xorm.Engine {
 	return s.db
+}
+
+func (s *Sqlite3) DataSourceName() string {
+	return s.DB().DataSourceName()
+}
+
+func (s *Sqlite3) GetCloseState() bool {
+	return atomic.LoadInt32(&s.closeState) == 1
 }
 
 func (s *Sqlite3) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session {
@@ -58,6 +72,10 @@ func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 		opt(o)
 	}
 
+	if o.RandomName {
+		dbSourceName = randomName(dbSourceName)
+	}
+
 	engine, err := xorm.NewEngine("sqlite3", dbSourceName)
 	if err != nil {
 		return nil, err
@@ -74,7 +92,29 @@ func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 
 	engine.SetMapper(names.GonicMapper{})
 
-	sqlite3Engine := &Sqlite3{db: engine}
+	sqlite3Engine := &Sqlite3{
+		db: engine,
+	}
 
 	return sqlite3Engine, nil
+}
+
+func (s *Sqlite3) Close() error {
+	if atomic.CompareAndSwapInt32(&s.closeState, 0, 1) {
+		err := s.DB().Close()
+		if err != nil {
+			return err
+		}
+
+		err = os.Remove(s.DataSourceName())
+		return err
+	}
+	return nil
+}
+
+func randomName(path string) string {
+	dir, file := filepath.Split(path)
+	name := strings.TrimSuffix(file, filepath.Ext(file))
+	random := fmt.Sprintf("%s-%s%s", name, strings.ReplaceAll(uuid.New().String(), "-", ""), filepath.Ext(file))
+	return filepath.Join(dir, random)
 }

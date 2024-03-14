@@ -1,5 +1,6 @@
 sqlite3-xorm:
   dbSourceName: "${SQLITE3_DB_SOURCE_NAME:test.sqlite3}"
   journalMode: "${SQLITE3_JOURNAL_MODE:memory}"
+  randomName: "true"
 
 example:

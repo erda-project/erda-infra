@@ -29,6 +29,7 @@ import (
 type config struct {
 	DbSourceName string `file:"dbSourceName" env:"SQLITE3_DB_SOURCE_NAME" default:"test.sqlite3"`
 	JournalMode  string `file:"journalMode" env:"SQLITE3_JOURNAL_MODE" default:""`
+	RandomName   bool   `file:"randomName" env:"SQLITE3_RANDOM_NAME" default:"false"`
 }
 
 type provider struct {
@@ -41,7 +42,12 @@ var _ servicehub.ProviderInitializer = (*provider)(nil)
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	engine, err := xorm.NewEngine("sqlite3", p.Cfg.DbSourceName)
+	var path = p.Cfg.DbSourceName
+	if p.Cfg.RandomName {
+		path = randomName(p.Cfg.DbSourceName)
+	}
+
+	engine, err := xorm.NewEngine("sqlite3", path)
 	if err != nil {
 		return fmt.Errorf("failed to connect to sqlite3 engine,err : %s", err)
 	}
