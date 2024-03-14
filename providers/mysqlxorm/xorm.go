@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"sync/atomic"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql" // mysql client driver package
@@ -36,7 +35,6 @@ type Interface interface {
 	DB() *xorm.Engine
 	NewSession(ops ...SessionOption) *Session
 	Close() error
-	GetCloseState() bool
 	DataSourceName() string
 }
 
@@ -81,10 +79,9 @@ func (c *config) url() string {
 
 // provider .
 type provider struct {
-	Cfg        *config
-	Log        logs.Logger
-	db         *xorm.Engine
-	closeState int32
+	Cfg *config
+	Log logs.Logger
+	db  *xorm.Engine
 }
 
 // Init .
@@ -138,14 +135,7 @@ func (p *provider) DataSourceName() string {
 }
 
 func (p *provider) Close() error {
-	if atomic.CompareAndSwapInt32(&p.closeState, 0, 1) {
-		return p.db.Close()
-	}
-	return nil
-}
-
-func (p *provider) GetCloseState() bool {
-	return atomic.LoadInt32(&p.closeState) == 1
+	return p.DB().Close()
 }
 
 func init() {

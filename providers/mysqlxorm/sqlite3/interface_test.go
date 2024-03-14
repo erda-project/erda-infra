@@ -27,7 +27,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
 
-const dbSourceName = "test1.db"
+const dbSourceName = "test1-*.db"
 
 type Server struct {
 	mysql mysqlxorm.Interface
@@ -181,7 +181,6 @@ func TestJournalMode(t *testing.T) {
 		if err != nil {
 			t.Fatalf("new sqlite3 err : %s", err)
 		}
-		defer engine.Close()
 
 		// get journal in sqlite3
 		results, _ := engine.DB().Query("PRAGMA journal_mode;")
@@ -192,11 +191,17 @@ func TestJournalMode(t *testing.T) {
 }
 
 func TestRandomName(t *testing.T) {
-	path := "/test/dir/sample.txt"
-	name1 := randomName(path)
-	name2 := randomName(path)
+	path := filepath.Join(os.TempDir(), "sample-*.txt")
+	name1, err := randomName(path)
+	if err != nil {
+		t.Error(err)
+	}
+	name2, err := randomName(path)
+	if err != nil {
+		t.Error(err)
+	}
 
-	assert.True(t, strings.HasPrefix(name1, "/test/dir/sample-"), "Random name does not start with original name")
+	assert.True(t, strings.HasPrefix(name1, filepath.Join(os.TempDir(), "sample-")), "Random name does not start with original name")
 
 	assert.Equal(t, filepath.Ext(name1), ".txt", "Random name does not have original extension")
 
@@ -206,10 +211,15 @@ func TestRandomName(t *testing.T) {
 func TestWithRandomName(t *testing.T) {
 	dbname := filepath.Join(os.TempDir(), dbSourceName)
 	engine, err := NewSqlite3(dbname, WithRandomName(false))
+	defer func() {
+		if engine != nil {
+			defer engine.Close()
+		}
+	}()
 	if err != nil {
 		panic(err)
 	}
-	defer engine.Close()
+
 	assert.Nil(t, err)
 	assert.Equal(t, dbname, engine.DataSourceName())
 	engine.Close()
@@ -219,4 +229,18 @@ func TestWithRandomName(t *testing.T) {
 	assert.NotEqual(t, dbname, engineRandom, "Random name is not take effect")
 	assert.Equal(t, filepath.Ext(engineRandom.DataSourceName()), filepath.Ext(dbname), "Random names does not have original extension")
 	defer engineRandom.Close()
+}
+
+func TestClose(t *testing.T) {
+	// close file
+	dbname := filepath.Join(os.TempDir(), dbSourceName)
+	engine, err := NewSqlite3(dbname, WithRandomName(true))
+	if err != nil {
+		panic(err)
+	}
+	err = engine.Close()
+	assert.Nil(t, err)
+	// check if the file exists
+	_, err = os.Stat(engine.DataSourceName())
+	assert.True(t, os.IsNotExist(err))
 }

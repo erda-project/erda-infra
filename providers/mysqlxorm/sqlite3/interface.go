@@ -19,10 +19,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
-	"sync/atomic"
 
-	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
 	"xorm.io/xorm/names"
@@ -31,8 +28,7 @@ import (
 )
 
 type Sqlite3 struct {
-	db         *xorm.Engine
-	closeState int32
+	db *xorm.Engine
 }
 
 func (s *Sqlite3) DB() *xorm.Engine {
@@ -41,10 +37,6 @@ func (s *Sqlite3) DB() *xorm.Engine {
 
 func (s *Sqlite3) DataSourceName() string {
 	return s.DB().DataSourceName()
-}
-
-func (s *Sqlite3) GetCloseState() bool {
-	return atomic.LoadInt32(&s.closeState) == 1
 }
 
 func (s *Sqlite3) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session {
@@ -67,13 +59,17 @@ func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 	}
 
 	o := &Options{}
+	var err error
 
 	for _, opt := range opts {
 		opt(o)
 	}
 
 	if o.RandomName {
-		dbSourceName = randomName(dbSourceName)
+		dbSourceName, err = randomName(dbSourceName)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	engine, err := xorm.NewEngine("sqlite3", dbSourceName)
@@ -100,21 +96,20 @@ func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 }
 
 func (s *Sqlite3) Close() error {
-	if atomic.CompareAndSwapInt32(&s.closeState, 0, 1) {
-		err := s.DB().Close()
-		if err != nil {
-			return err
-		}
-
-		err = os.Remove(s.DataSourceName())
+	err := s.DB().Close()
+	if err != nil {
 		return err
 	}
-	return nil
+	return os.Remove(s.DataSourceName())
 }
 
-func randomName(path string) string {
+// randomName accepts a path with pattern and returns a random name
+// such as `/var/user/test-*.db => /var/user/test-3125863660.db`
+func randomName(path string) (string, error) {
 	dir, file := filepath.Split(path)
-	name := strings.TrimSuffix(file, filepath.Ext(file))
-	random := fmt.Sprintf("%s-%s%s", name, strings.ReplaceAll(uuid.New().String(), "-", ""), filepath.Ext(file))
-	return filepath.Join(dir, random)
+	temp, err := os.CreateTemp(dir, file)
+	if err != nil {
+		return "", err
+	}
+	return temp.Name(), nil
 }

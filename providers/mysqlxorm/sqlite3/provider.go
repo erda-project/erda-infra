@@ -42,12 +42,16 @@ var _ servicehub.ProviderInitializer = (*provider)(nil)
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
-	var path = p.Cfg.DbSourceName
+	var dbSourceName = p.Cfg.DbSourceName
+	var err error
 	if p.Cfg.RandomName {
-		path = randomName(p.Cfg.DbSourceName)
+		dbSourceName, err = randomName(p.Cfg.DbSourceName)
+		if err != nil {
+			return err
+		}
 	}
 
-	engine, err := xorm.NewEngine("sqlite3", path)
+	engine, err := xorm.NewEngine("sqlite3", dbSourceName)
 	if err != nil {
 		return fmt.Errorf("failed to connect to sqlite3 engine,err : %s", err)
 	}
