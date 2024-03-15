@@ -18,6 +18,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ import (
 	"github.com/erda-project/erda-infra/providers/mysqlxorm"
 )
 
-const dbSourceName = "test1.sqlite3"
+const dbSourceName = "test1-*.db"
 
 type Server struct {
 	mysql mysqlxorm.Interface
@@ -67,13 +68,12 @@ func (s *Server) TestTx(err error, ops ...mysqlxorm.SessionOption) error {
 
 func TestNewSqlite3(t *testing.T) {
 	dbname := filepath.Join(os.TempDir(), dbSourceName)
-	defer func() {
-		os.Remove(dbname)
-	}()
 	engine, err := NewSqlite3(dbname)
 	if err != nil {
 		t.Fatalf("new sqlite3 err : %s", err)
 	}
+
+	defer engine.Close()
 
 	server := Server{
 		mysql: engine,
@@ -185,7 +185,62 @@ func TestJournalMode(t *testing.T) {
 		// get journal in sqlite3
 		results, _ := engine.DB().Query("PRAGMA journal_mode;")
 		assert.Equal(t, string(w), string(results[0]["journal_mode"]))
-		os.Remove(dbname)
+		engine.Close()
 	}
 
+}
+
+func TestRandomName(t *testing.T) {
+	path := filepath.Join(os.TempDir(), "sample-*.txt")
+	name1, err := randomName(path)
+	if err != nil {
+		t.Error(err)
+	}
+	name2, err := randomName(path)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.True(t, strings.HasPrefix(name1, filepath.Join(os.TempDir(), "sample-")), "Random name does not start with original name")
+
+	assert.Equal(t, filepath.Ext(name1), ".txt", "Random name does not have original extension")
+
+	assert.NotEqual(t, name1, name2, "Random name generator produced the same result twice")
+}
+
+func TestWithRandomName(t *testing.T) {
+	dbname := filepath.Join(os.TempDir(), dbSourceName)
+	engine, err := NewSqlite3(dbname, WithRandomName(false))
+	defer func() {
+		if engine != nil {
+			defer engine.Close()
+		}
+	}()
+	if err != nil {
+		panic(err)
+	}
+
+	assert.Nil(t, err)
+	assert.Equal(t, dbname, engine.DataSourceName())
+	engine.Close()
+
+	engineRandom, err := NewSqlite3(dbname, WithRandomName(true))
+	assert.Nil(t, err)
+	assert.NotEqual(t, dbname, engineRandom, "Random name is not take effect")
+	assert.Equal(t, filepath.Ext(engineRandom.DataSourceName()), filepath.Ext(dbname), "Random names does not have original extension")
+	defer engineRandom.Close()
+}
+
+func TestClose(t *testing.T) {
+	// close file
+	dbname := filepath.Join(os.TempDir(), dbSourceName)
+	engine, err := NewSqlite3(dbname, WithRandomName(true))
+	if err != nil {
+		panic(err)
+	}
+	err = engine.Close()
+	assert.Nil(t, err)
+	// check if the file exists
+	_, err = os.Stat(engine.DataSourceName())
+	assert.True(t, os.IsNotExist(err))
 }

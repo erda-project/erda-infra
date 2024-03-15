@@ -17,6 +17,8 @@ package sqlite3
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
@@ -31,6 +33,10 @@ type Sqlite3 struct {
 
 func (s *Sqlite3) DB() *xorm.Engine {
 	return s.db
+}
+
+func (s *Sqlite3) DataSourceName() string {
+	return s.DB().DataSourceName()
 }
 
 func (s *Sqlite3) NewSession(ops ...mysqlxorm.SessionOption) *mysqlxorm.Session {
@@ -53,9 +59,17 @@ func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 	}
 
 	o := &Options{}
+	var err error
 
 	for _, opt := range opts {
 		opt(o)
+	}
+
+	if o.RandomName {
+		dbSourceName, err = randomName(dbSourceName)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	engine, err := xorm.NewEngine("sqlite3", dbSourceName)
@@ -74,7 +88,28 @@ func NewSqlite3(dbSourceName string, opts ...OptionFunc) (*Sqlite3, error) {
 
 	engine.SetMapper(names.GonicMapper{})
 
-	sqlite3Engine := &Sqlite3{db: engine}
+	sqlite3Engine := &Sqlite3{
+		db: engine,
+	}
 
 	return sqlite3Engine, nil
+}
+
+func (s *Sqlite3) Close() error {
+	err := s.DB().Close()
+	if err != nil {
+		return err
+	}
+	return os.Remove(s.DataSourceName())
+}
+
+// randomName accepts a path with pattern and returns a random name
+// such as `/var/user/test-*.db => /var/user/test-3125863660.db`
+func randomName(path string) (string, error) {
+	dir, file := filepath.Split(path)
+	temp, err := os.CreateTemp(dir, file)
+	if err != nil {
+		return "", err
+	}
+	return temp.Name(), nil
 }

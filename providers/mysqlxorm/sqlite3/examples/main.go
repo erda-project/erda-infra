@@ -30,6 +30,7 @@ type provider struct {
 
 func (p *provider) Init(ctx servicehub.Context) error {
 	fmt.Println(p.Sqlite3)
+	fmt.Println(p.Sqlite3.DB().DataSourceName())
 
 	// get journal_mode
 	results, _ := p.Sqlite3.DB().Query("PRAGMA journal_mode;")
@@ -48,6 +49,8 @@ func (p *provider) Run(ctx context.Context) error {
 		fmt.Printf("connect sqlite3 error : %s \n", err)
 		return err
 	}
+
+	p.Sqlite3.Close()
 	return nil
 }
 

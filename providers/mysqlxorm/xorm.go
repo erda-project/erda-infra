@@ -34,6 +34,8 @@ import (
 type Interface interface {
 	DB() *xorm.Engine
 	NewSession(ops ...SessionOption) *Session
+	Close() error
+	DataSourceName() string
 }
 
 var (
@@ -126,6 +128,14 @@ func (p *provider) Provide(ctx servicehub.DependencyContext, args ...interface{}
 		return p.db
 	}
 	return p
+}
+
+func (p *provider) DataSourceName() string {
+	return p.DB().DataSourceName()
+}
+
+func (p *provider) Close() error {
+	return p.DB().Close()
 }
 
 func init() {
