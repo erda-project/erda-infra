@@ -19,7 +19,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/go-eden/routine"
+	"github.com/timandy/routine"
 	"go.opentelemetry.io/otel/trace"
 )
 
