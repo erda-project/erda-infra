@@ -9,7 +9,6 @@ require (
 	github.com/brahma-adshonor/gohook v1.1.9
 	github.com/confluentinc/confluent-kafka-go v1.5.2
 	github.com/coreos/etcd v3.3.25+incompatible
-	github.com/go-eden/routine v1.0.1
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.7.0
@@ -41,6 +40,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
+	github.com/timandy/routine v1.1.2
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.27.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.45.0
 	go.opentelemetry.io/otel v1.24.0
