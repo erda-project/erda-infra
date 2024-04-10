@@ -45,7 +45,7 @@ type Tran struct {
 // NewInternalTranslator .
 func NewInternalTranslator() *Tran {
 	// make embed content as a temp file
-	f, _ := os.TempFile(os.TempDir(), "*.yaml")
+	f, _ := os.CreateTemp(os.TempDir(), "*.yaml")
 	defer func() {
 		if err := f.Close(); err != nil {
 			logrus.Errorf("failed to close i18n config file, err: %v", err)
