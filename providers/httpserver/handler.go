@@ -419,7 +419,7 @@ func requestDataBind(typ reflect.Type, validate bool) func(server.Context) (inte
 func requestValuesGetter(typ reflect.Type) func(ctx server.Context) (interface{}, error) {
 	return func(ctx server.Context) (interface{}, error) {
 		out := reflect.New(typ)
-		byts, err := os.ReadAll(ctx.Request().Body)
+		byts, err := io.ReadAll(ctx.Request().Body)
 		if err != nil {
 			return nil, fmt.Errorf("fail to read body: %s", err)
 		}
@@ -432,7 +432,7 @@ func requestValuesGetter(typ reflect.Type) func(ctx server.Context) (interface{}
 	}
 }
 func requestBodyBytesGetter(ctx server.Context) (interface{}, error) {
-	byts, err := os.ReadAll(ctx.Request().Body)
+	byts, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return nil, fmt.Errorf("fail to read body: %s", err)
 	}
@@ -441,7 +441,7 @@ func requestBodyBytesGetter(ctx server.Context) (interface{}, error) {
 }
 
 func requestBodyStirngGetter(ctx server.Context) (interface{}, error) {
-	byts, err := os.ReadAll(ctx.Request().Body)
+	byts, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return "", fmt.Errorf("fail to read body: %s", err)
 	}

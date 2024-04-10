@@ -21,6 +21,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -39,7 +40,7 @@ func (b *dataBinder) Bind(i interface{}, c echo.Context) (err error) {
 		if len(ctype) <= 0 {
 			ctype = echo.MIMEApplicationJSON
 		}
-		body, err := os.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			return fmt.Errorf("fail to read body: %s", err)
 		}
