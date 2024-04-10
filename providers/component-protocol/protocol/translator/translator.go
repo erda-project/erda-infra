@@ -20,7 +20,6 @@ import (
 	"bytes"
 	_ "embed" // embed
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -46,7 +45,7 @@ type Tran struct {
 // NewInternalTranslator .
 func NewInternalTranslator() *Tran {
 	// make embed content as a temp file
-	f, _ := ioutil.TempFile(os.TempDir(), "*.yaml")
+	f, _ := os.TempFile(os.TempDir(), "*.yaml")
 	defer func() {
 		if err := f.Close(); err != nil {
 			logrus.Errorf("failed to close i18n config file, err: %v", err)

@@ -21,7 +21,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -40,11 +39,11 @@ func (b *dataBinder) Bind(i interface{}, c echo.Context) (err error) {
 		if len(ctype) <= 0 {
 			ctype = echo.MIMEApplicationJSON
 		}
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := os.ReadAll(req.Body)
 		if err != nil {
 			return fmt.Errorf("fail to read body: %s", err)
 		}
-		req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		req.Body = io.NopCloser(bytes.NewBuffer(body))
 		switch {
 		case strings.HasPrefix(ctype, echo.MIMEApplicationJSON):
 			if err = json.Unmarshal(body, i); err != nil {

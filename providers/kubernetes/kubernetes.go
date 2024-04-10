@@ -17,7 +17,6 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -98,7 +97,7 @@ func (p *provider) createRestConfig() (*rest.Config, error) {
 				return nil, fmt.Errorf("expected to load root CA config from %s, but got err: %v", p.Cfg.RootCAFile, err)
 			}
 			tlscfg.CAFile = p.Cfg.RootCAFile
-			token, err := ioutil.ReadFile(p.Cfg.TokenFile)
+			token, err := os.ReadFile(p.Cfg.TokenFile)
 			if err != nil {
 				return nil, err
 			}

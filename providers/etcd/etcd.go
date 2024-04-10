@@ -17,7 +17,6 @@ package etcd
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
@@ -110,7 +109,7 @@ func readTLSConfig(certFile, certKeyFile, caFile string) (*tls.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	caData, err := ioutil.ReadFile(caFile)
+	caData, err := os.ReadFile(caFile)
 	if err != nil {
 		return nil, err
 	}

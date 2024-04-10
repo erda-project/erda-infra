@@ -18,7 +18,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -30,7 +29,7 @@ func OpenTLS(tlsName, mysqlCaCertPath, mysqlClientCertPath, mysqlClientKeyPath s
 	}
 
 	rootCertPool := x509.NewCertPool()
-	pem, err := ioutil.ReadFile(mysqlCaCertPath)
+	pem, err := os.ReadFile(mysqlCaCertPath)
 	if err != nil {
 		return err
 	}

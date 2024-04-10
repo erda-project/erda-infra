@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Reference: https://google.golang.org/protobuf/blob/v1.5.2/protoc-gen-go/generator/generator.go
+// Reference: https://github.com/golang/protobuf/blob/v1.5.2/protoc-gen-go/generator/generator.go
 
 package protocutils
 

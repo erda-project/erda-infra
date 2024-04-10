@@ -19,16 +19,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strconv"
 
-	"github.com/erda-project/erda-infra/providers/httpserver/server"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/recallsong/go-utils/errorx"
 	"github.com/recallsong/go-utils/reflectx"
+
+	"github.com/erda-project/erda-infra/providers/httpserver/server"
 )
 
 type (
@@ -419,11 +419,11 @@ func requestDataBind(typ reflect.Type, validate bool) func(server.Context) (inte
 func requestValuesGetter(typ reflect.Type) func(ctx server.Context) (interface{}, error) {
 	return func(ctx server.Context) (interface{}, error) {
 		out := reflect.New(typ)
-		byts, err := ioutil.ReadAll(ctx.Request().Body)
+		byts, err := os.ReadAll(ctx.Request().Body)
 		if err != nil {
 			return nil, fmt.Errorf("fail to read body: %s", err)
 		}
-		ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(byts))
+		ctx.Request().Body = io.NopCloser(bytes.NewBuffer(byts))
 		err = json.Unmarshal(byts, out.Interface())
 		if err != nil {
 			return nil, fmt.Errorf("fail to Unmarshal body: %s", err)
@@ -432,16 +432,16 @@ func requestValuesGetter(typ reflect.Type) func(ctx server.Context) (interface{}
 	}
 }
 func requestBodyBytesGetter(ctx server.Context) (interface{}, error) {
-	byts, err := ioutil.ReadAll(ctx.Request().Body)
+	byts, err := os.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return nil, fmt.Errorf("fail to read body: %s", err)
 	}
-	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(byts))
+	ctx.Request().Body = io.NopCloser(bytes.NewBuffer(byts))
 	return byts, nil
 }
 
 func requestBodyStirngGetter(ctx server.Context) (interface{}, error) {
-	byts, err := ioutil.ReadAll(ctx.Request().Body)
+	byts, err := os.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return "", fmt.Errorf("fail to read body: %s", err)
 	}

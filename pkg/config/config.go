@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -285,7 +284,7 @@ func ConvertData(input, output interface{}, tag string) error {
 
 // LoadFile .
 func LoadFile(path string) ([]byte, error) {
-	byts, err := ioutil.ReadFile(path)
+	byts, err := os.ReadFile(path)
 	return byts, err
 }
 
@@ -304,7 +303,7 @@ func LoadToMap(path string, c map[string]interface{}) error {
 
 // LoadEnvFileWithPath .
 func LoadEnvFileWithPath(path string, override bool) {
-	byts, err := ioutil.ReadFile(path)
+	byts, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return
