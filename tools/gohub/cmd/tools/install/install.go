@@ -99,7 +99,7 @@ func Download(override, verbose bool) {
 	}{
 		{
 			Name: "protoc-gen-go",
-			URL:  "https://github.com/golang/protobuf",
+			URL:  "https://google.golang.org/protobuf",
 			Path: "protoc-gen-go",
 		},
 		{
