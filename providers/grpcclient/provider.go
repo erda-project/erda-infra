@@ -42,15 +42,15 @@ var (
 )
 
 type config struct {
-	Addr string `file:"addr" default:":7070" desc:"the server address in the format of host:port"`
+	Addr string `file:"addr" env:"GRPC_CLIENT_ADDR" default:":7070" desc:"the server address in the format of host:port"`
 	TLS  struct {
-		ServerNameOverride string `file:"cert_file" desc:"the server name used to verify the hostname returned by the TLS handshake"`
-		CAFile             string `file:"ca_file" desc:"the file containing the CA root cert file"`
-		InsecureSkipVerify bool   `file:"insecure_skip_verify" desc:"skip verify"`
+		ServerNameOverride string `file:"cert_file" env:"GRPC_CLIENT_CERT_FILE" desc:"the server name used to verify the hostname returned by the TLS handshake"`
+		CAFile             string `file:"ca_file" env:"GRPC_CLIENT_CA_FILE" desc:"the file containing the CA root cert file"`
+		InsecureSkipVerify bool   `file:"insecure_skip_verify" env:"GRPC_CLIENT_INSECURE_SKIP_VERIFY" desc:"skip verify"`
 	} `file:"tls"`
-	Singleton   bool `file:"singleton" default:"true" desc:"one client instance"`
-	Block       bool `file:"block" default:"true" desc:"block until the connection is up"`
-	TraceEnable bool `file:"trace_enable" default:"true"`
+	Singleton   bool `file:"singleton" env:"GRPC_CLIENT_SINGLETON" default:"true" desc:"one client instance"`
+	Block       bool `file:"block" env:"GRPC_CLIENT_BLOCK" default:"true" desc:"block until the connection is up"`
+	TraceEnable bool `file:"trace_enable" env:"GRPC_CLIENT_TRACE_ENABLE" default:"true"`
 }
 
 type provider struct {
