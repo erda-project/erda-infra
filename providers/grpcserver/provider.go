@@ -33,12 +33,12 @@ type Interface interface {
 
 // config .
 type config struct {
-	Addr string `file:"addr" default:":7070" desc:"grpc address to listen"`
+	Addr string `file:"addr" default:":7070" env:"GRPC_SERVER_ADDR" desc:"grpc address to listen"`
 	TLS  struct {
-		CertFile string `file:"cert_file" desc:"the TLS cert file"`
-		KeyFile  string `file:"key_file" desc:"the TLS key file"`
+		CertFile string `file:"cert_file" env:"GRPC_SERVER_CERT_FILE" desc:"the TLS cert file"`
+		KeyFile  string `file:"key_file" env:"GRPC_SERVER_KEY_FILE" desc:"the TLS key file"`
 	} `file:"tls"`
-	TraceEnable bool `file:"trace_enable" default:"true"`
+	TraceEnable bool `file:"trace_enable" env:"GRPC_SERVER_TRACE_ENABLE" default:"true"`
 }
 
 type provider struct {
