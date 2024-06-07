@@ -26,23 +26,28 @@ import (
 	"github.com/erda-project/erda-infra/base/logs/logrusx"
 )
 
+// waitTime defines the duration to wait for leader election processes.
 var waitTime = 300 * time.Millisecond
 
+// setupCluster initializes a new etcd cluster for testing and returns the cluster and client.
+func setupCluster(t *testing.T) (*integration.ClusterV3, *clientv3.Client) {
+	integration.BeforeTest(t)
+	cluster := integration.NewClusterV3(t, &integration.ClusterConfig{Size: 1})
+	return cluster, cluster.RandClient()
+}
+
+// TestElection tests the basic leader election process.
 func TestElection(t *testing.T) {
-	cfg := integration.ClusterConfig{Size: 1}
-	clus := integration.NewClusterV3(t, &cfg)
-	defer clus.Terminate(t)
-	endpoints := []string{clus.Client(0).Endpoints()[0]}
-	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
-	if err != nil {
-		t.FailNow()
-	}
+	cluster, cli := setupCluster(t)
+	defer cluster.Terminate(t)
 
 	primary := &provider{Cfg: &config{Prefix: "/election"}, Log: logrusx.New(), Client: cli}
 	secondary := &provider{Cfg: &config{Prefix: "/election"}, Log: logrusx.New(), Client: cli}
 
 	leaderSet := int32(0)
-	primary.Init(nil)
+	if err := primary.Init(nil); err != nil {
+		t.Fatal(err)
+	}
 	primary.OnLeader(func(ctx context.Context) {
 		atomic.AddInt32(&leaderSet, 1)
 	})
@@ -50,47 +55,45 @@ func TestElection(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go primary.Run(ctx)
 	time.Sleep(waitTime)
+
+	// Verify primary is elected as leader
 	if !primary.IsLeader() || atomic.LoadInt32(&leaderSet) == 0 {
-		t.Fatalf("no leader is selected")
+		t.Fatal("no leader is selected")
 	}
 
 	leader, err := primary.Leader()
 	if leader == nil || err != nil {
-		t.Fatalf("leader function failed")
+		t.Fatalf("leader function failed: %v", err)
 	}
 
+	// Initialize secondary and verify it is not elected as leader
 	secondary.Init(nil)
 	secondaryCtx, secondaryCancel := context.WithCancel(context.Background())
 	defer secondaryCancel()
 	go secondary.Run(secondaryCtx)
 	time.Sleep(waitTime)
+
 	if secondary.IsLeader() {
-		t.Fatalf("secondary should not be elected")
+		t.Fatal("secondary should not be elected")
 	}
 
 	leader, err = secondary.Leader()
 	if leader == nil || err != nil {
-		t.Fatalf("leader function failed")
+		t.Fatalf("leader function failed: %v", err)
 	}
 
-	// primary exit
+	// Simulate primary exit and verify secondary becomes leader
 	cancel()
-
 	time.Sleep(waitTime)
 	if !secondary.IsLeader() {
-		t.Fatalf("secondary should be elected")
+		t.Fatal("secondary should be elected")
 	}
 }
 
+// TestElectionOnClusterReboot tests leader election after cluster reboot.
 func TestElectionOnClusterReboot(t *testing.T) {
-	cfg := integration.ClusterConfig{Size: 1}
-	clus := integration.NewClusterV3(t, &cfg)
-	defer clus.Terminate(t)
-	endpoints := []string{clus.Client(0).Endpoints()[0]}
-	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
-	if err != nil {
-		t.FailNow()
-	}
+	cluster, cli := setupCluster(t)
+	defer cluster.Terminate(t)
 
 	primary := &provider{Cfg: &config{Prefix: "/election", NodeID: "primary"}, Log: logrusx.New(), Client: cli}
 	secondary := &provider{Cfg: &config{Prefix: "/election", NodeID: "secondary"}, Log: logrusx.New(), Client: cli}
@@ -99,8 +102,9 @@ func TestElectionOnClusterReboot(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go primary.Run(ctx)
+	time.Sleep(waitTime)
 
-	time.Sleep(150 * time.Millisecond)
+	// Verify primary is elected as leader
 	if !primary.IsLeader() {
 		t.Fatalf("no leader is selected")
 	}
@@ -111,13 +115,13 @@ func TestElectionOnClusterReboot(t *testing.T) {
 	go secondary.Run(secondaryCtx)
 	time.Sleep(waitTime)
 
-	// simulate secondary losing connection
+	// Simulate secondary losing connection
 	secondary.lock.Lock()
 	secondary.session.Close()
 	secondary.lock.Unlock()
-	// primary quit
-	cancel()
 
+	// Simulate primary exit and verify secondary becomes leader
+	cancel()
 	time.Sleep(waitTime)
 	if !secondary.IsLeader() {
 		t.Fatalf("secondary should be leader now")
