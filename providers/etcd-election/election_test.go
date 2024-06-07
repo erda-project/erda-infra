@@ -32,7 +32,10 @@ var waitTime = 300 * time.Millisecond
 // setupCluster initializes a new etcd cluster for testing and returns the cluster and client.
 func setupCluster(t *testing.T) (*integration.ClusterV3, *clientv3.Client) {
 	integration.BeforeTest(t)
-	cluster := integration.NewClusterV3(t, &integration.ClusterConfig{Size: 1})
+	cluster := integration.NewClusterV3(t, &integration.ClusterConfig{
+		Size:      3,
+		UseBridge: true,
+	})
 	return cluster, cluster.RandClient()
 }
 
