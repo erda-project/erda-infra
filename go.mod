@@ -156,7 +156,6 @@ require (
 )
 
 replace (
-	google.golang.org/grpc => github.com/grpc/grpc-go v1.63.2
 	k8s.io/api => github.com/kubernetes/api v0.18.3
 	k8s.io/apiextensions-apiserver => github.com/kubernetes/apiextensions-apiserver v0.18.3
 	k8s.io/apimachinery => github.com/kubernetes/apimachinery v0.18.3
