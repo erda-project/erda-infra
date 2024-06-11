@@ -4,10 +4,6 @@ ENV PROJ_ROOT="/go/src/github.com/erda-project/erda-infra"
 COPY . "${PROJ_ROOT}"
 WORKDIR "${PROJ_ROOT}"
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends unzip && \
-    rm -fr /var/lib/apt/lists/*
-
 ARG GOPROXY=https://goproxy.cn,direct
 RUN go env -w GO111MODULE=on && go env -w GOPROXY="${GOPROXY}"
 RUN go install golang.org/x/tools/cmd/goimports@latest
