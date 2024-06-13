@@ -20,6 +20,7 @@ import (
 
 	"github.com/XSAM/otelsql"
 	_ "github.com/go-sql-driver/mysql" //nolint
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
 	"github.com/erda-project/erda-infra/pkg/trace/inject/hook"
 )
@@ -50,7 +51,9 @@ func tracedOpen(driverName, dataSourceName string) (*sql.DB, error) {
 			return nil, err
 		}
 		dname = "otelsql-" + driverName
-		sql.Register(dname, wrapDriver(otelsql.WrapDriver(d, driverName)))
+		sql.Register(dname, wrapDriver(otelsql.WrapDriver(d, otelsql.WithAttributes(
+			semconv.DBSystemKey.String(driverName),
+		))))
 		drivers[driverName] = dname
 		driverName = dname
 	} else {

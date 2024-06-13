@@ -17,7 +17,7 @@ package protocol
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -62,7 +62,7 @@ func RegisterDefaultProtocolsFromBasePath(basePath string) {
 			panic(err)
 		}
 	}()
-	rd, err := ioutil.ReadDir(basePath)
+	rd, err := os.ReadDir(basePath)
 	if err != nil {
 		return
 	}
@@ -75,7 +75,7 @@ func RegisterDefaultProtocolsFromBasePath(basePath string) {
 				continue
 			}
 			fullName := basePath + "/" + fi.Name()
-			yamlFile, er := ioutil.ReadFile(fullName)
+			yamlFile, er := os.ReadFile(fullName)
 			if er != nil {
 				err = er
 				return

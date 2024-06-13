@@ -8,7 +8,7 @@ set -o errexit -o pipefail
 cd $(git rev-parse --show-toplevel)
 
 # setup base image
-DOCKER_IMAGE=gohub:1.0.8
+DOCKER_IMAGE=gohub:1.0.9
 
 if [ -n "${DOCKER_REGISTRY}" ]; then
     DOCKER_IMAGE=${DOCKER_REGISTRY}/${DOCKER_IMAGE}
@@ -35,7 +35,7 @@ build_image_by_buildx() {
     push=$1
     args="docker buildx build"
     args+=" -t ${DOCKER_IMAGE}"
-    args+=" --label build-time='$(date '+%Y-%m-%d %T%z')' --label debian=11 --label golang=1.17"
+    args+=" --label build-time='$(date '+%Y-%m-%d %T%z')' --label debian=11 --label golang=1.22"
     args+=" --platform linux/amd64,linux/arm64"
 #    args+=" --progress plain"
     args+=" -f ./tools/dockerfile/Dockerfile ."

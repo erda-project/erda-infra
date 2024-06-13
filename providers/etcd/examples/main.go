@@ -18,7 +18,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coreos/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/providers/etcd"
 )

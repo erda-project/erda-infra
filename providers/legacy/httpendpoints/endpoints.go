@@ -19,16 +19,16 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"strings"
 	"time"
 
-	"github.com/erda-project/erda-infra/providers/legacy/httpendpoints/i18n"
-	"github.com/erda-project/erda-infra/providers/legacy/httpendpoints/ierror"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
+
+	"github.com/erda-project/erda-infra/providers/legacy/httpendpoints/i18n"
+	"github.com/erda-project/erda-infra/providers/legacy/httpendpoints/ierror"
 )
 
 const (
@@ -183,7 +183,7 @@ func (p *provider) internalReverseHandler(handler func(context.Context, *http.Re
 func handleRequest(r *http.Request) {
 	// base64 decode request body if declared in header
 	if strings.EqualFold(r.Header.Get(Base64EncodedRequestBody), "true") {
-		r.Body = ioutil.NopCloser(base64.NewDecoder(base64.StdEncoding, r.Body))
+		r.Body = io.NopCloser(base64.NewDecoder(base64.StdEncoding, r.Body))
 	}
 }
 

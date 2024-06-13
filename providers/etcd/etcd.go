@@ -17,16 +17,16 @@ package etcd
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
+
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
-	"google.golang.org/grpc"
 )
 
 // Interface .
@@ -109,7 +109,7 @@ func readTLSConfig(certFile, certKeyFile, caFile string) (*tls.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	caData, err := ioutil.ReadFile(caFile)
+	caData, err := os.ReadFile(caFile)
 	if err != nil {
 		return nil, err
 	}

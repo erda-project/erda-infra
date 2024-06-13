@@ -18,7 +18,6 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -48,7 +47,7 @@ func IncludeDirs() []string {
 func getVersion() string {
 	home := homeDir()
 	file := filepath.Join(home, "."+cmd.Name, ".version")
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := os.ReadFile(file)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return ""
@@ -61,7 +60,7 @@ func getVersion() string {
 func updateVersion() {
 	home := homeDir()
 	file := filepath.Join(home, "."+cmd.Name, ".version")
-	err := ioutil.WriteFile(file, []byte(version.Version), os.ModePerm)
+	err := os.WriteFile(file, []byte(version.Version), os.ModePerm)
 	cmd.CheckError(err)
 }
 

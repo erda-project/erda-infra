@@ -17,15 +17,16 @@ package encoding
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/erda-project/erda-infra/pkg/urlenc"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/erda-project/erda-infra/pkg/urlenc"
 )
 
 type notSupportMediaTypeErr struct {
@@ -41,7 +42,7 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 		return nil
 	}
 	if bytesPtr, ok := out.(*[]byte); ok {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			return err
 		}
@@ -62,7 +63,7 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 			return nil
 		}
 		if msg, ok := out.(proto.Message); ok {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				return err
 			}
@@ -85,13 +86,13 @@ func DecodeRequest(r *http.Request, out interface{}) error {
 		}
 		if mtype == "application/json" || (strings.HasPrefix(mtype, "application/vnd.") && strings.HasSuffix(mtype, "+json")) {
 			if um, ok := out.(json.Unmarshaler); ok {
-				body, err := ioutil.ReadAll(r.Body)
+				body, err := io.ReadAll(r.Body)
 				if err != nil {
 					return err
 				}
 				return um.UnmarshalJSON(body)
 			} else if msg, ok := out.(proto.Message); ok {
-				body, err := ioutil.ReadAll(r.Body)
+				body, err := io.ReadAll(r.Body)
 				if err != nil {
 					return err
 				}
