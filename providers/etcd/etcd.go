@@ -37,9 +37,16 @@ type Interface interface {
 }
 
 type config struct {
-	Endpoints string        `file:"endpoints" env:"ETCD_ENDPOINTS"`
-	Timeout   time.Duration `file:"timeout" default:"5s"`
-	TLS       struct {
+	Endpoints             string        `file:"endpoints" env:"ETCD_ENDPOINTS"`
+	Timeout               time.Duration `file:"timeout" default:"5s"`
+	AutoSyncInterval      time.Duration `file:"auto_sync_interval" env:"ETCD_AUTO_SYNC_INTERVAL"`
+	MaxCallSendMsgSize    int           `file:"max_call_send_msg_size" env:"ETCD_MAX_CALL_SEND_MSG_SIZE"`
+	MaxCallRecvMsgSize    int           `file:"max_call_recv_msg_size" env:"ETCD_MAX_CALL_RECV_MSG_SIZE"`
+	RejectOldCluster      bool          `file:"reject_old_cluster" env:"ETCD_REJECT_OLD_CLUSTER"`
+	PermitWithoutStream   bool          `file:"permit_without_stream" env:"ETCD_PERMIT_WITHOUT_STREAM"`
+	BackoffWaitBetween    time.Duration `file:"backoff_wait_between" env:"ETCD_BACKOFF_WAIT_BETWEEN"`
+	BackoffJitterFraction float64       `file:"backoff_jitter_fraction" env:"ETCD_BACKOFF_JITTER_FRACTION"`
+	TLS                   struct {
 		CertFile    string `file:"cert_file"`
 		CertKeyFile string `file:"cert_key_file"`
 		CaFile      string `file:"ca_file"`
@@ -81,6 +88,27 @@ func (p *provider) Connect() (*clientv3.Client, error) {
 	}
 	if p.Cfg.SyncConnect {
 		config.DialOptions = append(config.DialOptions, grpc.WithBlock())
+	}
+	if p.Cfg.AutoSyncInterval > 0 {
+		config.AutoSyncInterval = p.Cfg.AutoSyncInterval
+	}
+	if p.Cfg.MaxCallSendMsgSize > 0 {
+		config.MaxCallSendMsgSize = p.Cfg.MaxCallSendMsgSize
+	}
+	if p.Cfg.MaxCallRecvMsgSize > 0 {
+		config.MaxCallRecvMsgSize = p.Cfg.MaxCallRecvMsgSize
+	}
+	if p.Cfg.RejectOldCluster {
+		config.RejectOldCluster = p.Cfg.RejectOldCluster
+	}
+	if p.Cfg.PermitWithoutStream {
+		config.PermitWithoutStream = p.Cfg.PermitWithoutStream
+	}
+	if p.Cfg.BackoffWaitBetween > 0 {
+		config.BackoffWaitBetween = p.Cfg.BackoffWaitBetween
+	}
+	if p.Cfg.BackoffJitterFraction > 0 {
+		config.BackoffJitterFraction = p.Cfg.BackoffJitterFraction
 	}
 	return clientv3.New(config)
 }
