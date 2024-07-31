@@ -23,7 +23,13 @@ jobs:
         run: |
           echo $GOARCH
           go test -cpu=2 -timeout 10s -race -coverprofile=coverage.txt -covermode=atomic ./...
-          bash <(curl -s https://codecov.io/bash)
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: .
+          fail_ci_if_error: true
+          flags: by-github-actions
   CODE-CHECK:
     runs-on: ubuntu-latest
     container:
