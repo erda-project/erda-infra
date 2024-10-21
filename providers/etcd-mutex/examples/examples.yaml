@@ -1,5 +1,5 @@
 etcd:
-    endpoints: "https://127.0.0.1:2379"
+    endpoints: "http://127.0.0.1:2379"
     # tls:
     #     cert_file: "etcd-client.pem"
     #     cert_key_file: "etcd-client-key.pem"

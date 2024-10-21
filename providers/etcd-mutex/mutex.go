@@ -59,6 +59,7 @@ type provider struct {
 	etcd        etcd.Interface
 	instances   map[string]Mutex
 	inProcMutex *inProcMutex
+	lock        *sync.Mutex
 }
 
 // Init .
@@ -76,7 +77,7 @@ func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration
 	if seconds > 0 {
 		opts = append(opts, concurrency.WithTTL(seconds))
 	}
-	return &etcdMutex{
+	mutex := &etcdMutex{
 		log:        p.Log,
 		key:        filepath.Clean(filepath.Join(p.Cfg.RootPath, key)),
 		client:     p.etcd.Client(),
@@ -84,11 +85,20 @@ func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration
 		inProcLock: make(chan struct{}, 1),
 		ctx:        ctx,
 		cancel:     cancel,
-	}, nil
+	}
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	p.instances[key] = mutex
+	return mutex, nil
 }
 
 // New .
 func (p *provider) New(ctx context.Context, key string) (Mutex, error) {
+	p.lock.Lock()
+	if ins, ok := p.instances[key]; ok {
+		return ins, nil
+	}
+	p.lock.Unlock()
 	return p.NewWithTTL(ctx, key, time.Duration(0))
 }
 
@@ -293,6 +303,7 @@ func init() {
 			return &provider{
 				instances:   make(map[string]Mutex),
 				inProcMutex: &inProcMutex{lock: make(chan struct{}, 1)},
+				lock:        &sync.Mutex{},
 			}
 		},
 	})
