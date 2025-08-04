@@ -21,6 +21,7 @@ import (
 // Logger .
 type Logger interface {
 	Sub(name string) Logger
+	Set(k, v string) Logger
 	Debug(args ...interface{})
 	Info(args ...interface{})
 	Warn(args ...interface{})
