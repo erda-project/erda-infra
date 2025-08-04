@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/erda-project/erda-infra/pkg/numutil"
 	"github.com/erda-project/erda-infra/pkg/strutil"
 	"github.com/erda-project/erda-infra/providers/component-protocol/protobuf/proto-go/cp/pb"
 	"github.com/erda-project/erda-infra/providers/i18n"
@@ -116,7 +117,7 @@ func (p InParams) Int64(key string) int64 {
 
 // Uint64 .
 func (p InParams) Uint64(key string) uint64 {
-	return uint64(p.Int64(key))
+	return numutil.MustUint64(p.Int64(key))
 }
 
 // RegisterOperation .

@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+
+	"github.com/erda-project/erda-infra/pkg/numutil"
 )
 
 // ConsumerConfig .
@@ -54,7 +56,7 @@ func (s *service) NewConsumer(cfg *ConsumerConfig, handler ConsumerFunc, options
 
 func (s *service) NewConsumerWitchCreator(cfg *ConsumerConfig, creator func(i int) (ConsumerFunc, error), opts ...ConsumerOption) error {
 	options := mergeMap(s.p.Cfg.Comsumer.Options, cfg.Options)
-	parallelism := int(cfg.Parallelism)
+	parallelism := numutil.MustInt(cfg.Parallelism)
 	var consumerListener func(i int, c *kafka.Consumer)
 	for _, opt := range opts {
 		switch v := opt.(type) {

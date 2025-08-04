@@ -5,9 +5,6 @@ run:
   # include test files or not, default is true
   tests: false
   allow-parallel-runners: true
-  skip-dirs:
-    - tools
-    - examples
   skip-files:
 
 linters-settings:
@@ -23,6 +20,9 @@ linters:
     - gofmt
 
 issues:
+  exclude-dirs:
+    - tools
+    - examples
   exclude-rules:
     - linters:
         - gosec

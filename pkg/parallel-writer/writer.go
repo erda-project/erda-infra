@@ -18,6 +18,8 @@ import (
 	"time"
 
 	"github.com/recallsong/go-utils/errorx"
+
+	"github.com/erda-project/erda-infra/pkg/numutil"
 )
 
 // Writer .
@@ -90,7 +92,7 @@ func ParallelBatch(
 	}
 	for i := uint64(0); i < parallelism; i++ {
 		go func(w Writer, in *channelWriter) {
-			buf := NewBuffer(w, int(size))
+			buf := NewBuffer(w, numutil.MustInt(size))
 			tick := time.NewTicker(timeout)
 			var err error
 			defer func() {
