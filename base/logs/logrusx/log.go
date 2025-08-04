@@ -51,6 +51,12 @@ func (l *Logger) Sub(name string) logs.Logger {
 	return &Logger{name, l.Entry.WithField("module", name)}
 }
 
+// Set .
+func (l *Logger) Set(k, v string) logs.Logger {
+	l.Entry = l.Entry.WithField(k, v)
+	return l
+}
+
 // SetLevel .
 func (l *Logger) SetLevel(lvl string) error {
 	level, err := logrus.ParseLevel(lvl)
