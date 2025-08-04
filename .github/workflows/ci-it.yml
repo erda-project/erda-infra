@@ -23,13 +23,20 @@ jobs:
         run: |
           echo $GOARCH
           go test -cpu=2 -timeout 10s -race -coverprofile=coverage.txt -covermode=atomic ./...
+      - name: Check coverage file
+        run: |
+          ls -la coverage.txt || echo "coverage.txt not found"
+          head -10 coverage.txt || echo "coverage.txt empty or not readable"
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: .
+          file: ./coverage.txt
           fail_ci_if_error: true
-          flags: by-github-actions
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
+          slug: erda-project/erda-infra
   CODE-CHECK:
     runs-on: ubuntu-latest
     container:

@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/erda-project/erda-infra/pkg/numutil"
 )
 
 // Trim trim `s`'s prefix and suffix. If `cutset` not specified, `cutset` = space.
@@ -453,7 +455,7 @@ func RandStr(size int) string {
 	for i := 0; i < size; i++ {
 		ikind := rand.Intn(3)
 		scope, base := fontKinds[ikind][0], fontKinds[ikind][1]
-		result[i] = uint8(base + rand.Intn(scope))
+		result[i] = numutil.MustUint8(base + rand.Intn(scope))
 	}
 	return string(result)
 }

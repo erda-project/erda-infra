@@ -28,6 +28,7 @@ import (
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/pkg/mysqldriver"
+	"github.com/erda-project/erda-infra/pkg/numutil"
 )
 
 // Interface .
@@ -103,14 +104,14 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	}
 
 	// connection pool
-	db.SetMaxIdleConns(int(p.Cfg.MySQLMaxIdleConns))
-	db.SetMaxOpenConns(int(p.Cfg.MySQLMaxOpenConns))
+	db.SetMaxIdleConns(numutil.MustInt(p.Cfg.MySQLMaxIdleConns))
+	db.SetMaxOpenConns(numutil.MustInt(p.Cfg.MySQLMaxOpenConns))
 	db.SetConnMaxLifetime(p.Cfg.MySQLMaxLifeTime)
 	db.SetDisableGlobalCache(true)
 
 	// ping when init
 	if p.Cfg.MySQLPingWhenInit {
-		ctxForPing, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(p.Cfg.MySQLPingTimeoutSec))
+		ctxForPing, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(numutil.MustInt64(p.Cfg.MySQLPingTimeoutSec)))
 		defer cancel()
 		if err := db.PingContext(ctxForPing); err != nil {
 			return err

@@ -25,6 +25,7 @@ import (
 	"github.com/erda-project/erda-infra/base/logs"
 	"github.com/erda-project/erda-infra/base/servicehub"
 	"github.com/erda-project/erda-infra/pkg/mysqldriver"
+	"github.com/erda-project/erda-infra/pkg/numutil"
 )
 
 // Interface .
@@ -88,8 +89,8 @@ func (p *provider) Init(ctx servicehub.Context) error {
 	}
 
 	// connection pool
-	db.DB().SetMaxIdleConns(int(p.Cfg.MySQLMaxIdleConns))
-	db.DB().SetMaxOpenConns(int(p.Cfg.MySQLMaxOpenConns))
+	db.DB().SetMaxIdleConns(numutil.MustInt(p.Cfg.MySQLMaxIdleConns))
+	db.DB().SetMaxOpenConns(numutil.MustInt(p.Cfg.MySQLMaxOpenConns))
 	db.DB().SetConnMaxLifetime(p.Cfg.MySQLMaxLifeTime)
 	p.db = db
 	if p.Cfg.MySQLDebug {
