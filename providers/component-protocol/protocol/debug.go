@@ -17,6 +17,7 @@ package protocol
 import (
 	"context"
 	"errors"
+
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
 
