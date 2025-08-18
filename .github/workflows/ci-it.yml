@@ -40,7 +40,7 @@ jobs:
   CODE-CHECK:
     runs-on: ubuntu-latest
     container:
-      image: registry.erda.cloud/erda/erda-base:20240410
+      image: registry.erda.cloud/erda/erda-base:20250812
     steps:
       - uses: actions/checkout@v2
       - name: Run go mod tidy

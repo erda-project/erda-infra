@@ -16,6 +16,7 @@ package protocol
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"runtime/debug"
@@ -42,7 +43,7 @@ func (F FRAMEWORK) Render(ctx context.Context, c *cptype.Component, scenario cpt
 			msg := fmt.Sprintf("component %s render panic: %v", c.Name, r)
 			logrus.Error(msg)
 			debug.PrintStack()
-			err = fmt.Errorf(msg)
+			err = errors.New(msg)
 		}
 	}()
 	originSDK := cputil.SDK(ctx)
