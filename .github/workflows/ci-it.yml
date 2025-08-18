@@ -47,7 +47,7 @@ jobs:
         run: make tidy
       - name: Run Go Lint
         run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.49.0
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.4.0
           golangci-lint run --timeout=15m ./...
       # - name: Run Go Vet
       #   run: go vet ./...
