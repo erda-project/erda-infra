@@ -1,5 +1,5 @@
-ARG GO_VERSION=1.22
-ARG BASE_IMAGE="golang:${GO_VERSION}-bullseye"
+ARG GO_VERSION=1.24
+ARG BASE_IMAGE="m.daocloud.io/docker.io/golang:${GO_VERSION}-bullseye"
 
 FROM --platform=$TARGETPLATFORM ${BASE_IMAGE} as build
 
