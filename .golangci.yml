@@ -1,53 +1,63 @@
+version: "2"
 run:
   concurrency: 4
-  timeout: 2m
   modules-download-mode: mod
-  # include test files or not, default is true
   tests: false
   allow-parallel-runners: true
-  skip-files:
-
-linters-settings:
-  goimports:
-#    local-prefixes: github.com/erda-project/erda-infra
-
 linters:
-  disable-all: true
-  # 修复完 issues 后再增加新的 linter
+  default: none
   enable:
-    - goimports
     - gosec
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - gosec
+        text: 'G101:'
+      - linters:
+          - gosec
+        text: 'G108:'
+      - linters:
+          - gosec
+        text: 'G109:'
+      - linters:
+          - gosec
+        text: 'G110:'
+      - linters:
+          - gosec
+        text: 'G204:'
+      - linters:
+          - gosec
+        text: 'G306:'
+      - linters:
+          - gosec
+        text: 'G402:'
+      - linters:
+          - gosec
+        text: 'G404:'
+      - linters:
+          - gosec
+        text: 'G601:'
+    paths:
+      - tools
+      - examples
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
     - gofmt
-
-issues:
-  exclude-dirs:
-    - tools
-    - examples
-  exclude-rules:
-    - linters:
-        - gosec
-      text: "G101:" # G101: Potential hardcoded credentials (gosec)
-    - linters:
-        - gosec
-      text: "G108:" # G108: Profiling endpoint is automatically exposed on /debug/pprof (gosec)
-    - linters:
-        - gosec
-      text: "G109:" # G109: Potential Integer overflow made by strconv.Atoi result conversion to int16/32 (gosec)
-    - linters:
-        - gosec
-      text: "G110:" # G110: Potential DoS vulnerability via decompression bomb (gosec)
-    - linters:
-        - gosec
-      text: "G204:" # G204: Subprocess launched with function call as argument or cmd arguments (gosec)
-    - linters:
-        - gosec
-      text: "G306:" # G306: Expect WriteFile permissions to be 0600 or less
-    - linters:
-        - gosec
-      text: "G402:" # G402: TLS InsecureSkipVerify may be true. (gosec)
-    - linters:
-        - gosec
-      text: "G404:" # G404: Use of weak random number generator (math/rand instead of crypto/rand) (gosec)
-    - linters:
-        - gosec
-      text: "G601:" # G601: Implicit memory aliasing in for loop. (gosec)
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - tools
+      - examples
+      - third_party$
+      - builtin$
+      - examples$

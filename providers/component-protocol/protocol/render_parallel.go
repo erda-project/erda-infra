@@ -17,6 +17,7 @@ package protocol
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -260,7 +261,7 @@ func (n *Node) renderNextNodes(ctx context.Context, req *cptype.ComponentProtoco
 	}
 	wg.Wait()
 	if len(errorMsgs) > 0 {
-		return fmt.Errorf(strings.Join(errorMsgs, ", "))
+		return errors.New(strings.Join(errorMsgs, ", "))
 	}
 	return nil
 }

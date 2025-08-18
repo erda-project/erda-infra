@@ -16,7 +16,7 @@ package protocol
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/erda-project/erda-infra/providers/component-protocol/cptype"
 )
@@ -27,7 +27,7 @@ func checkDebugOptions(ctx context.Context, debugOptions *cptype.ComponentProtoc
 		return nil
 	}
 	if debugOptions.ComponentKey == "" {
-		return fmt.Errorf(i18n(ctx, "debugoptions.missing.componentkey"))
+		return errors.New(i18n(ctx, "debugoptions.missing.componentkey"))
 	}
 	return nil
 }

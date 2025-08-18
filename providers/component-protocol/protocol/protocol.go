@@ -16,6 +16,7 @@ package protocol
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -98,7 +99,7 @@ func getDefaultProtocol(ctx context.Context, scenario string) (cptype.ComponentP
 		// protocol not have cp placeholder
 		p, ok := defaultProtocols[scenario]
 		if !ok {
-			return cptype.ComponentProtocol{}, fmt.Errorf(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
+			return cptype.ComponentProtocol{}, errors.New(i18n(ctx, "${default.protocol.not.exist}, ${scenario}: %s", scenario))
 		}
 		return p, nil
 	}

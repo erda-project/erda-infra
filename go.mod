@@ -1,6 +1,6 @@
 module github.com/erda-project/erda-infra
 
-go 1.22
+go 1.24
 
 require (
 	bou.ke/monkey v1.0.2
@@ -38,8 +38,8 @@ require (
 	github.com/segmentio/kafka-go v0.4.31
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.9.0
-	github.com/timandy/routine v1.1.2
+	github.com/stretchr/testify v1.10.0
+	github.com/timandy/routine v1.1.6
 	go.etcd.io/etcd/api/v3 v3.5.14
 	go.etcd.io/etcd/client/v3 v3.5.14
 	go.etcd.io/etcd/tests/v3 v3.5.13

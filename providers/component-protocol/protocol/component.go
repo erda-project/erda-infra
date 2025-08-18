@@ -16,6 +16,7 @@ package protocol
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -108,20 +109,20 @@ var emptyRenderFunc = func() CompRender { return &emptyComp{} }
 // getCompRender .
 func getCompRender(ctx context.Context, r ScenarioRender, compName, typ string) (*CompRenderSpec, error) {
 	if len(r) == 0 {
-		return nil, fmt.Errorf(i18n(ctx, "scenario.render.is.empty"))
+		return nil, errors.New(i18n(ctx, "scenario.render.is.empty"))
 	}
 	if compName == "" {
-		return nil, fmt.Errorf(i18n(ctx, "component.name.is.empty"))
+		return nil, errors.New(i18n(ctx, "component.name.is.empty"))
 	}
 	compName, _ = getCompNameAndInstanceName(compName)
 	var c *CompRenderSpec
 	if _, ok := r[compName]; !ok {
 		// component not exist
-		return nil, fmt.Errorf(i18n(ctx, "${component %s missing renderCreator}", compName))
+		return nil, errors.New(i18n(ctx, "${component %s missing renderCreator}", compName))
 	}
 	c = r[compName]
 	if c == nil {
-		return nil, fmt.Errorf(i18n(ctx, "component.render.is.empty"))
+		return nil, errors.New(i18n(ctx, "component.render.is.empty"))
 	}
 	return c, nil
 }
@@ -129,7 +130,7 @@ func getCompRender(ctx context.Context, r ScenarioRender, compName, typ string) 
 // protoCompStateRending .
 func protoCompStateRending(ctx context.Context, p *cptype.ComponentProtocol, r cptype.RendingItem) error {
 	if p == nil {
-		return fmt.Errorf(i18n(ctx, "protocol.empty"))
+		return errors.New(i18n(ctx, "protocol.empty"))
 	}
 	pc, err := getProtoComp(ctx, p, r.Name)
 	if err != nil {
