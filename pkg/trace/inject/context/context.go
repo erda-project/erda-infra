@@ -55,7 +55,7 @@ func GetContext() context.Context {
 	idx := goid % bucketsSize
 	bucket := goroutineContext.buckets[idx]
 	bucket.lock.RLock()
-	ctx := bucket.data[goid]
+	ctx := bucket.data[int64(goid)]
 	bucket.lock.RUnlock()
 	return ctx
 }
@@ -70,7 +70,7 @@ func SetContext(ctx context.Context) {
 	bucket := goroutineContext.buckets[idx]
 	bucket.lock.Lock()
 	defer bucket.lock.Unlock()
-	bucket.data[goid] = ctx
+	bucket.data[int64(goid)] = ctx
 }
 
 // ClearContext .
@@ -83,7 +83,7 @@ func ClearContext() {
 	bucket := goroutineContext.buckets[idx]
 	bucket.lock.Lock()
 	defer bucket.lock.Unlock()
-	delete(bucket.data, goid)
+	delete(bucket.data, int64(goid))
 }
 
 // RunWithContext .
