@@ -16,12 +16,13 @@ package hook
 
 import (
 	"context"
-	"github.com/erda-project/erda-infra/pkg/numutil"
 	"runtime"
 	"sync"
 
 	"github.com/timandy/routine"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/erda-project/erda-infra/pkg/numutil"
 )
 
 const bucketsSize = 128
