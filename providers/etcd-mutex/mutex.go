@@ -17,6 +17,7 @@ package mutex
 import (
 	"context"
 	"errors"
+	"github.com/bluele/gcache"
 	"path/filepath"
 	"reflect"
 	"sync"
@@ -57,14 +58,16 @@ type provider struct {
 	Cfg         *config
 	Log         logs.Logger
 	etcd        etcd.Interface
-	instances   map[string]Mutex
+	instances   gcache.Cache
 	inProcMutex *inProcMutex
+	lock        *sync.Mutex
 }
 
 // Init .
 func (p *provider) Init(ctx servicehub.Context) error {
 	p.etcd = ctx.Service("etcd").(etcd.Interface)
 	p.Cfg.RootPath = filepath.Clean("/" + p.Cfg.RootPath)
+	p.instances = gcache.New(30).LRU().Build()
 	return nil
 }
 
@@ -76,7 +79,7 @@ func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration
 	if seconds > 0 {
 		opts = append(opts, concurrency.WithTTL(seconds))
 	}
-	return &etcdMutex{
+	mutex := &etcdMutex{
 		log:        p.Log,
 		key:        filepath.Clean(filepath.Join(p.Cfg.RootPath, key)),
 		client:     p.etcd.Client(),
@@ -84,12 +87,24 @@ func (p *provider) NewWithTTL(ctx context.Context, key string, ttl time.Duration
 		inProcLock: make(chan struct{}, 1),
 		ctx:        ctx,
 		cancel:     cancel,
-	}, nil
+	}
+	return mutex, p.instances.SetWithExpire(key, mutex, time.Second*3)
 }
 
 // New .
 func (p *provider) New(ctx context.Context, key string) (Mutex, error) {
-	return p.NewWithTTL(ctx, key, time.Duration(0))
+	ins, err := p.instances.Get(key)
+	if err != nil {
+		if errors.Is(err, gcache.KeyNotFoundError) {
+			return p.NewWithTTL(ctx, key, time.Duration(0))
+		}
+		return nil, err
+	}
+	if mutex, ok := ins.(Mutex); ok {
+		return mutex, nil
+	} else {
+		return nil, errors.New("can't convert to mutex")
+	}
 }
 
 // Provide .
@@ -291,8 +306,8 @@ func init() {
 		ConfigFunc:   func() interface{} { return &config{} },
 		Creator: func() servicehub.Provider {
 			return &provider{
-				instances:   make(map[string]Mutex),
 				inProcMutex: &inProcMutex{lock: make(chan struct{}, 1)},
+				lock:        &sync.Mutex{},
 			}
 		},
 	})

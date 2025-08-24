@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -31,8 +32,9 @@ type provider struct {
 }
 
 func (p *provider) Run(ctx context.Context) error {
+	fmt.Println("running ...")
 	go func() {
-		time.Sleep(10 * time.Second)
+		time.Sleep(10000 * time.Second)
 		err := p.Lock.Close()
 		if err != nil {
 			fmt.Println("Close err: ", err)
@@ -44,47 +46,46 @@ func (p *provider) Run(ctx context.Context) error {
 			return
 		}
 	}()
-	lock := p.Lock
-	sleep := func(d time.Duration) bool {
-		select {
-		case <-time.After(d):
-		case <-ctx.Done():
-			return false
-		}
-		return true
-	}
-	doTaskInLock := func(prefix string) bool {
-		err := lock.Lock(ctx)
-		if err != nil {
-			fmt.Println("Lock err: ", err)
-			return false
-		}
-		defer func() {
-			err := lock.Unlock(context.TODO())
-			if err != nil {
-				fmt.Println("Unlock err: ", err)
-			}
-		}()
-		fmt.Println(prefix+" {", time.Now())
-		if !sleep(1 * time.Second) {
-			return false
-		}
-		fmt.Println(prefix+"    ", time.Now())
-		if !sleep(1 * time.Second) {
-			return false
-		}
-		fmt.Println(prefix+" }", time.Now())
-		return true
+	//ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+	mu, err := p.Mutex.New(ctx, "keyAAAA")
+	if err != nil {
+		return err
 	}
 	var wg sync.WaitGroup
-	for _, elem := range []string{"A", "B", "C"} {
-		wg.Add(1)
-		go func(prefix string) {
-			defer wg.Done()
-			for doTaskInLock(prefix) {
-			}
-		}(elem)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := mu.Lock(ctx)
+		if err != nil {
+			return
+		}
+		defer mu.Unlock(ctx)
+		for i := 0; i < 10; i++ {
+			fmt.Printf("A wait %vs\n", i+1)
+			time.Sleep(1 * time.Second)
+		}
+		fmt.Println("AAA===>")
+	}()
+	time.Sleep(1 * time.Second)
+	ctx, cancelFunc = context.WithCancel(context.Background())
+	defer cancelFunc()
+	mu, err = p.Mutex.New(ctx, "keyAAAA")
+	if err != nil {
+		return err
 	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := mu.Lock(ctx)
+		if err != nil {
+			return
+		}
+		defer mu.Unlock(ctx)
+		time.Sleep(5 * time.Second)
+		fmt.Println("BBB===>")
+	}()
 	wg.Wait()
 	return nil
 }
@@ -101,8 +102,9 @@ func init() {
 }
 
 func main() {
+	dir, _ := os.Getwd()
 	hub := servicehub.New()
-	hub.Run("examples", "", os.Args...)
+	hub.Run("examples", filepath.Join(dir, "providers", "etcd-mutex", "examples", "examples.yaml"), os.Args...)
 }
 
 // OUTPUT:
